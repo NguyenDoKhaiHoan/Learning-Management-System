@@ -1,0 +1,15 @@
+**
+!backend/
+!backend/Dockerfile
+!backend/requirements.runtime.lock.txt
+!backend/alembic.ini
+!backend/src/
+!backend/src/**
+!database/
+!database/migrations/
+!database/migrations/**
+**/__pycache__/
+**/*.pyc
+**/.env
+**/.env.*
+**/.gitkeep

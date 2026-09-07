@@ -1,0 +1,47 @@
+name: lms-platform
+
+x-backend: &backend
+  image: lms-backend:local
+  build:
+    context: .
+    dockerfile: backend/Dockerfile
+  env_file:
+    - path: ./backend/.env
+      format: raw
+  environment:
+    DB_HOST_OVERRIDE: host.docker.internal
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  init: true
+  read_only: true
+  tmpfs:
+    - /tmp:size=64m,mode=1777
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+
+services:
+  # Run explicitly before starting the API: docker compose run --rm migrate
+  migrate:
+    <<: *backend
+    profiles: [tools]
+    command: ["python", "-m", "alembic", "upgrade", "head"]
+    restart: "no"
+
+  api:
+    <<: *backend
+    ports:
+      - "127.0.0.1:${LMS_API_PORT:-8001}:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=7)"]
+      interval: 15s
+      timeout: 10s
+      start_period: 15s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

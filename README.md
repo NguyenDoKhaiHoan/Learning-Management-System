@@ -121,4 +121,4 @@ lms-platform/
 
 ## 7. Trạng thái hiện tại
 
-Repository hiện mới chứa cấu trúc thư mục nghiệp vụ và các file `.gitkeep` để Git theo dõi thư mục rỗng. Mã nguồn, cấu hình triển khai và kiểm thử sẽ được bổ sung theo từng module.
+Đã triển khai Tuần 1 — Phần 1 & Phần 2: cấu hình FastAPI, SQLAlchemy async/MySQL, 15 bảng P0 và migration Alembic đầu tiên. Xem [hướng dẫn backend](lms-platform/backend/README.md) để biết cấu trúc, quyết định thiết kế và lệnh chạy. Tên module Python sử dụng dấu gạch dưới `_` để import hợp lệ. Auth/RBAC, error contract và healthcheck thuộc phần tiếp theo.

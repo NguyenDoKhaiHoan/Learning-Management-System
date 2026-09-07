@@ -1,0 +1,24 @@
+# Development only. Production credentials must come from a secret manager.
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: lms
+      MYSQL_USER: lms
+      MYSQL_PASSWORD: lms_local_password
+      MYSQL_ROOT_PASSWORD: lms_local_root_password
+    ports:
+      - "127.0.0.1:3306:3306"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+00:00
+    volumes:
+      - lms_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysql -u$$MYSQL_USER -D $$MYSQL_DATABASE -e 'SELECT 1'"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+volumes:
+  lms_mysql:
