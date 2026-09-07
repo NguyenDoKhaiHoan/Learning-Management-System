@@ -1,16 +1,29 @@
 """Alembic async MySQL environment, with offline SQL generation support."""
 
 import asyncio
+from typing import Any
 
 from alembic import context
+from alembic.util import CommandError
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from src.config.config import get_settings
-from src.core.database.models.registry import Base
 
-target_metadata = Base.metadata
+# SQL-only schema: never infer schema from ORM models or an empty MetaData.
+target_metadata = None
+
+
+def reject_autogenerate(
+    migration_context: Any,
+    revision: Any,
+    directives: Any,
+) -> None:
+    raise CommandError(
+        "SQL-only project: use 'alembic revision -m ...' and write op.execute(SQL). "
+        "Autogenerate/alembic check require model metadata and are not supported."
+    )
 
 
 def run_migrations_offline() -> None:
@@ -27,7 +40,11 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
+    context.configure(
+        connection=connection,
+        target_metadata=None,
+        process_revision_directives=reject_autogenerate,
+    )
     with context.begin_transaction():
         context.run_migrations()
 

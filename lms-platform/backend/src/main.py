@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from src.config.config import Settings, get_settings
-from src.core.database.database import build_engine, build_session_factory
+from src.core.database.database import build_engine
 from src.core.database.health import router as health_router
 
 
@@ -16,7 +16,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         engine = build_engine(settings)
-        app.state.session_factory = build_session_factory(engine)
+        app.state.db_engine = engine
         try:
             yield
         finally:

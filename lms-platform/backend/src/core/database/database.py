@@ -1,13 +1,12 @@
-"""Async engine lifecycle and one session per request; services own commits."""
+"""SQL-only MySQL connections. Use cases own commits; repositories never commit."""
 
 from collections.abc import AsyncIterator
 from typing import Annotated
 
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import (
+    AsyncConnection,
     AsyncEngine,
-    AsyncSession,
-    async_sessionmaker,
     create_async_engine,
 )
 
@@ -35,17 +34,17 @@ def build_engine(settings: Settings) -> AsyncEngine:
     )
 
 
-def build_session_factory(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
-    # MySQL server defaults are fetched by the Base mapper's eager_defaults option.
-    return async_sessionmaker(engine, expire_on_commit=False, autoflush=False)
+async def get_connection(request: Request) -> AsyncIterator[AsyncConnection]:
+    """One connection per request; close rolls back any uncommitted SQL.
+
+    Start `async with connection.begin()` before the first query in a write use case.
+    If an earlier dependency already queried this connection, use explicit
+    commit/rollback for that existing transaction instead of nesting begin().
+    Never share a connection between concurrently running tasks.
+    """
+    engine: AsyncEngine = request.app.state.db_engine
+    async with engine.connect() as connection:
+        yield connection
 
 
-async def get_session(request: Request) -> AsyncIterator[AsyncSession]:
-    factory: async_sessionmaker[AsyncSession] = request.app.state.session_factory
-    async with factory() as session:
-        # Uncommitted transactions are rolled back by close(), including on exceptions.
-        # Write use cases should use `async with session.begin(): ...` explicitly.
-        yield session
-
-
-SessionDependency = Annotated[AsyncSession, Depends(get_session)]
+ConnectionDependency = Annotated[AsyncConnection, Depends(get_connection)]

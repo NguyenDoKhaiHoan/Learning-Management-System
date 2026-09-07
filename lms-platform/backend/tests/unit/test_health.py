@@ -14,13 +14,14 @@ def test_readiness_and_liveness(available: bool) -> None:
         _env_file=None, database_url="mysql+aiomysql://u:p@localhost/lms", jwt_secret="x" * 48
     )
     with TestClient(create_app(settings)) as client:
-        session = AsyncMock()
+        connection = AsyncMock()
         if not available:
-            session.execute.side_effect = OperationalError("SELECT 1", {}, Exception("private"))
+            connection.execute.side_effect = OperationalError("SELECT 1", {}, Exception("private"))
         context = MagicMock()
-        context.__aenter__ = AsyncMock(return_value=session)
+        context.__aenter__ = AsyncMock(return_value=connection)
         context.__aexit__ = AsyncMock(return_value=False)
-        client.app.state.session_factory = MagicMock(return_value=context)
+        client.app.state.db_engine = MagicMock()
+        client.app.state.db_engine.connect.return_value = context
         assert client.get("/livez").status_code == 200
         response = client.get("/healthz")
         assert response.status_code == (200 if available else 503)

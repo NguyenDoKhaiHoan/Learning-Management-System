@@ -12,6 +12,10 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from src.config.config import Settings
+from src.core.database.database import build_engine
+from tests.integration.sql_repository_checks import assert_sql_repositories
+
 pytestmark = pytest.mark.integration
 BACKEND = Path(__file__).resolve().parents[2]
 
@@ -25,7 +29,14 @@ async def test_mysql_migration_constraints_and_round_trip() -> None:
     assert url.drivername == "mysql+aiomysql"
     database = "lms_test_" + uuid4().hex
     admin = create_async_engine(url._replace(database=None), isolation_level="AUTOCOMMIT")
-    engine = create_async_engine(url.set(database=database))
+    engine = build_engine(
+        Settings(
+            _env_file=None,
+            database_url=url.set(database=database).render_as_string(hide_password=False),
+            jwt_secret="integration-test-secret-" + uuid4().hex,
+            db_host_override=None,
+        )
+    )
     env = {
         **os.environ,
         "DATABASE_URL": url.set(database=database).render_as_string(hide_password=False),
@@ -49,7 +60,7 @@ async def test_mysql_migration_constraints_and_round_trip() -> None:
         )
     try:
         alembic("upgrade", "head")
-        alembic("check")
+        alembic("current")
         async with engine.begin() as connection:
             await connection.execute(
                 text(
@@ -80,10 +91,28 @@ async def test_mysql_migration_constraints_and_round_trip() -> None:
             assert error.value.orig.args[0] == expected_code
         async with engine.connect() as connection:
             assert await connection.scalar(text("SELECT title FROM courses")) == "Khóa học 🎓"
+        async with engine.connect() as connection:
+            tables = (
+                (
+                    await connection.execute(
+                        text(
+                            """SELECT TABLE_NAME, ENGINE, TABLE_COLLATION
+                   FROM information_schema.TABLES
+                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME <> 'alembic_version'"""
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+            assert len(tables) == 14
+            assert all(row["ENGINE"] == "InnoDB" for row in tables)
+            assert all(row["TABLE_COLLATION"] == "utf8mb4_unicode_ci" for row in tables)
+        await assert_sql_repositories(engine)
         await engine.dispose()
         alembic("downgrade", "base")
         alembic("upgrade", "head")
-        alembic("check")
+        alembic("current")
     finally:
         await engine.dispose()
         async with admin.connect() as connection:

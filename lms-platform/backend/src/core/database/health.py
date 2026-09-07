@@ -19,8 +19,8 @@ async def livez() -> dict[str, str]:
 async def healthz(request: Request) -> JSONResponse:
     try:
         async with asyncio.timeout(5):
-            async with request.app.state.session_factory() as session:
-                await session.execute(text("SELECT 1"))
+            async with request.app.state.db_engine.connect() as connection:
+                await connection.execute(text("SELECT 1"))
     except (SQLAlchemyError, TimeoutError, OSError):
         # Never disclose credentials, host names or driver exceptions in HTTP output.
         return JSONResponse({"status": "unavailable", "database": "unavailable"}, status_code=503)

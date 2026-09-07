@@ -1,33 +1,29 @@
+"""Verify frozen migrations and enforce the SQL-only runtime boundary."""
+
+import ast
 from io import StringIO
 from pathlib import Path
 
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import UniqueConstraint
-from sqlalchemy.dialects import mysql
-from sqlalchemy.schema import CreateTable
-
-from src.core.database.models.registry import Base
 
 BACKEND = Path(__file__).resolve().parents[2]
-
-
-def test_mysql_ddl_and_foreign_key_indexes() -> None:
-    assert len(Base.metadata.tables) == 14
-    for table in Base.metadata.sorted_tables:
-        ddl = str(CreateTable(table).compile(dialect=mysql.dialect()))
-        assert "ENGINE=InnoDB" in ddl
-        assert "CHARSET=utf8mb4" in ddl
-        assert "COLLATE utf8mb4_unicode_ci" in ddl
-        assert {"id", "created_at", "updated_at"} <= set(table.c.keys())
-        assert "ON UPDATE CURRENT_TIMESTAMP(6)" in ddl
-        indexes = [list(index.columns.keys()) for index in table.indexes]
-        indexes += [
-            list(c.columns.keys()) for c in table.constraints if isinstance(c, UniqueConstraint)
-        ]
-        for foreign_key in table.foreign_keys:
-            assert foreign_key.ondelete == "RESTRICT"
-            assert any(columns[0] == foreign_key.parent.name for columns in indexes)
+TABLES = {
+    "users",
+    "roles",
+    "permissions",
+    "user_roles",
+    "role_permissions",
+    "refresh_tokens",
+    "courses",
+    "modules",
+    "lessons",
+    "lesson_resources",
+    "enrollments",
+    "course_staff",
+    "audit_logs",
+    "security_events",
+}
 
 
 def test_offline_upgrade_and_downgrade() -> None:
@@ -35,9 +31,27 @@ def test_offline_upgrade_and_downgrade() -> None:
     config = Config(str(BACKEND / "alembic.ini"), output_buffer=output)
     command.upgrade(config, "head", sql=True)
     sql = output.getvalue()
-    for name in Base.metadata.tables:
+    for name in TABLES:
         assert f"CREATE TABLE {name} (" in sql
+    assert sql.count("ENGINE=InnoDB") == 14
+    assert sql.count("ON UPDATE CURRENT_TIMESTAMP(6)") == 14
+    assert sql.count("CHARSET=utf8mb4") == 14
     output.truncate(0)
     output.seek(0)
     command.downgrade(config, "0001_p0:base", sql=True)
-    assert output.getvalue().count("DROP TABLE") == 14  # Alembic retains its empty version table
+    assert output.getvalue().count("DROP TABLE") == 14
+
+
+def test_runtime_has_no_orm_imports() -> None:
+    for path in (BACKEND / "src").rglob("*.py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom):
+                assert not (node.module or "").startswith("sqlalchemy.orm"), path
+                assert not any(
+                    alias.name in {"AsyncSession", "async_sessionmaker"} for alias in node.names
+                ), path
+            if isinstance(node, ast.Import):
+                assert not any(alias.name.startswith("sqlalchemy.orm") for alias in node.names), (
+                    path
+                )
