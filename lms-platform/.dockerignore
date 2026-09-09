@@ -13,3 +13,5 @@
 **/.env
 **/.env.*
 **/.gitkeep
+!backend/.wheels/
+!backend/.wheels/**

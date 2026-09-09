@@ -1,0 +1,6 @@
+{
+  "spreadsheet_url": "https://docs.google.com/spreadsheets/d/1N0K2xaqyo5kMORzkLRmb0ZwOC78l-w183cCPvSiObT8/edit?usp=sharing",
+  "sheet_name": "Plan",
+  "credentials_file": ".secrets/google-service-account.json",
+  "first_task_row": 3
+}

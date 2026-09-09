@@ -1,0 +1,60 @@
+{
+  "$defs": {
+    "CurrentUser": {
+      "properties": {
+        "email": {
+          "title": "Email",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Roles",
+          "type": "array"
+        },
+        "username": {
+          "title": "Username",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "username",
+        "roles"
+      ],
+      "title": "CurrentUser",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "code": {
+      "default": "OK",
+      "title": "Code",
+      "type": "string"
+    },
+    "data": {
+      "$ref": "#/$defs/CurrentUser"
+    },
+    "message": {
+      "default": "Success",
+      "title": "Message",
+      "type": "string"
+    },
+    "trace_id": {
+      "title": "Trace Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "data",
+    "trace_id"
+  ],
+  "title": "SuccessResponse[CurrentUser]",
+  "type": "object"
+}

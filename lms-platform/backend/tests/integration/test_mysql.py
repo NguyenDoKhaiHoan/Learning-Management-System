@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from src.config.config import Settings
 from src.core.database.database import build_engine
+from tests.integration.auth_checks import assert_http_auth
 from tests.integration.sql_repository_checks import assert_sql_repositories
 
 pytestmark = pytest.mark.integration
@@ -109,6 +110,7 @@ async def test_mysql_migration_constraints_and_round_trip() -> None:
             assert all(row["ENGINE"] == "InnoDB" for row in tables)
             assert all(row["TABLE_COLLATION"] == "utf8mb4_unicode_ci" for row in tables)
         await assert_sql_repositories(engine)
+        await assert_http_auth(engine)
         await engine.dispose()
         alembic("downgrade", "base")
         alembic("upgrade", "head")

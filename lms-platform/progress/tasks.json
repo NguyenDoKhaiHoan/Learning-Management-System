@@ -1,0 +1,173 @@
+{
+  "description": "Tuần 1 đã hoàn thiện theo baseline ngày 09/09/2026; 37 test backend và 5 test sync đạt. CI đã cấu hình/kiểm chứng local, chưa có remote run. Tuần 2 trở đi không nằm trong checkpoint này.",
+  "tasks": [
+    {
+      "wbs": "1.1",
+      "title": "Tài liệu kế hoạch LMS",
+      "sheet_titles": [
+        "Tài liệu kế hoạch, kiến trúc và business rules LMS"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "ke_hoach_build_lms.docx bản 1.0; không đồng nghĩa scope đã được duyệt.",
+      "verified_at": "2026-09-07"
+    },
+    {
+      "wbs": "1.2",
+      "title": "Chốt scope MVP",
+      "sheet_titles": [
+        "Chốt scope MVP và ưu tiên backlog P0/P1"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Scope MVP/backlog P0/P1/P2 và checklist tuần 1 đã chốt thành baseline triển khai tại docs/architecture/week-1-scope.md theo yêu cầu hoàn thiện tuần 1; không coi đây là biên bản UAT.",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "wbs": "1.3",
+      "title": "Khung Modular Monolith / DDD",
+      "sheet_titles": [
+        "Khung Modular Monolith; bốn tầng DDD mỗi module"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "backend/src/modules có application, domain, infrastructure, presentation.",
+      "verified_at": "2026-09-07"
+    },
+    {
+      "wbs": "1.4",
+      "title": "FastAPI, config và lifespan",
+      "sheet_titles": [
+        "FastAPI app factory, lifespan, config/env và JWT secret"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "src/main.py và src/config/config.py; đã kiểm thử config/lifespan.",
+      "verified_at": "2026-09-07"
+    },
+    {
+      "wbs": "1.5",
+      "title": "MySQL connection và transaction SQL thuần",
+      "sheet_titles": [
+        "Kết nối MySQL lms; AsyncEngine, session và transaction",
+        "Kết nối MySQL lms; AsyncConnection và transaction"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "database.py dùng AsyncConnection; MySQL lms kết nối từ Docker; transaction rollback có integration test.",
+      "verified_at": "2026-09-07"
+    },
+    {
+      "wbs": "1.6",
+      "title": "Schema 14 bảng P0 và repository SQL thuần",
+      "sheet_titles": [
+        "Tạo 14 bảng P0; enum, FK, UNIQUE, index và tracking",
+        "ORM 14 bảng P0; enum, FK, UNIQUE, index và tracking",
+        "Schema 14 bảng P0; SQL thuần, FK, UNIQUE, index và tracking"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Đã bỏ ORM; repository.py viết SQL tham số; migration 0001_p0 và DDL 14 bảng giữ nguyên.",
+      "verified_at": "2026-09-07"
+    },
+    {
+      "wbs": "1.7",
+      "title": "Migration Alembic P0",
+      "sheet_titles": [
+        "Alembic 0001_p0: upgrade, downgrade và kiểm tra drift"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Upgrade/downgrade trên DB test đạt; lms ở 0001_p0. Drift từng được kiểm tra trước khi bỏ ORM; không còn dùng alembic check khi không có metadata.",
+      "verified_at": "2026-09-07"
+    },
+    {
+      "wbs": "1.8",
+      "title": "Healthcheck và OpenAPI",
+      "sheet_titles": [
+        "Healthcheck /livez, /healthz và kiểm tra OpenAPI"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Health/live/OpenAPI đã kiểm tra lại; success/error envelope có trace_id, 503 khi database lỗi; Docker healthy tại localhost:8001.",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "wbs": "1.9",
+      "title": "Đóng gói Docker local",
+      "sheet_titles": [
+        "Dockerfile/Compose; chạy API với MySQL Windows"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Docker đã build lại bản tuần 1, container healthy và kết nối lms; không cần thay schema 0001_p0.",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "wbs": "1.10",
+      "title": "Test và lint nền tảng",
+      "sheet_titles": [
+        "Unit/integration test nền tảng và lint"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "37 test backend đạt, gồm HTTP JWT/RBAC trên MySQL thật, revoke role cùng token, account locked/deleted, lỗi 401/403/404/409/422/500, SQL/rollback; Ruff và contract drift check đạt.",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "wbs": "1.11",
+      "title": "README vận hành",
+      "sheet_titles": [
+        "README: cấu hình, migrate, test và chạy Docker"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "backend/README.md, shared/contracts/README.md và scope tuần 1 cập nhật error contract, trace, JWT/RBAC, CI và hướng dẫn vận hành.",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "wbs": "1.12",
+      "title": "Response contract và exception handlers",
+      "sheet_titles": [
+        "Success/error contract; handler 401/403/404/409/422/500"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "core/contracts.py và errors/handlers.py đã triển khai success/error schema, 401/403/404/409/422/500, SQL conflict 409; tests xác nhận không lộ input/SQL/exception trong HTTP response.",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "wbs": "1.13",
+      "title": "Logging và trace_id",
+      "sheet_titles": [
+        "Logging và trace_id xuyên request"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "TraceMiddleware có context mỗi request, X-Trace-ID/header-body nhất quán; JSON log method/route/status/duration; bỏ query/body/token khỏi log; kiểm thử trace và sanitization đạt.",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "wbs": "1.14",
+      "title": "JWT/RBAC skeleton",
+      "sheet_titles": [
+        "Auth skeleton JWT, get_current_user và require_roles"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "JWT HS256 bắt buộc signature/iss/aud/exp/iat/nbf/sub/jti/access type; get_current_user đọc SQL, require_roles lấy role DB; /api/v1/auth/me đã có. HTTP integration kiểm chứng đổi role và khóa/xóa user. Login/refresh là tuần 2.",
+      "verified_at": "2026-09-09"
+    },
+    {
+      "wbs": "1.15",
+      "title": "Shared contracts, CI và PR template",
+      "sheet_titles": [
+        "Shared contracts, CI cơ bản và PR template"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Shared TypeScript/JSON Schema/OpenAPI, exporter --check, GitHub Actions MySQL/lint/test/contract và PR template đã có; các bước tương ứng chạy local đạt. Chưa push/chạy GitHub Actions từ xa.",
+      "verified_at": "2026-09-09"
+    }
+  ]
+}

@@ -65,6 +65,8 @@ pydantic-settings==2.15.0
     # via lms-backend (lms-platform/backend/pyproject.toml)
 pygments==2.21.0
     # via pytest
+pyjwt==2.13.0
+    # via lms-backend (lms-platform/backend/pyproject.toml)
 pymysql==1.2.0
     # via aiomysql
 pytest==9.1.1

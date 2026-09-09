@@ -42,6 +42,8 @@ pydantic-core==2.46.5
     # via pydantic
 pydantic-settings==2.15.0
     # via lms-backend (lms-platform/backend/pyproject.toml)
+pyjwt==2.13.0
+    # via lms-backend (lms-platform/backend/pyproject.toml)
 pymysql==1.2.0
     # via aiomysql
 python-dotenv==1.2.3

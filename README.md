@@ -121,4 +121,4 @@ lms-platform/
 
 ## 7. Trạng thái hiện tại
 
-Đã triển khai Tuần 1 — Phần 1 & Phần 2: cấu hình FastAPI, SQLAlchemy async/MySQL, 15 bảng P0 và migration Alembic đầu tiên. Xem [hướng dẫn backend](lms-platform/backend/README.md) để biết cấu trúc, quyết định thiết kế và lệnh chạy. Tên module Python sử dụng dấu gạch dưới `_` để import hợp lệ. Auth/RBAC, error contract và healthcheck thuộc phần tiếp theo.
+Backend dùng FastAPI và MySQL SQL thuần, không ORM. Tuần 1 đã có schema 14 bảng, migration Alembic, healthcheck/Docker, JWT/RBAC skeleton, error contract, JSON logging/trace ID, shared contracts và cấu hình CI/PR template. Xem [hướng dẫn backend](lms-platform/backend/README.md) và [scope MVP](lms-platform/docs/architecture/week-1-scope.md). Login/refresh và CRUD nghiệp vụ thuộc tuần 2 trở đi.

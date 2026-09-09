@@ -1,0 +1,37 @@
+name: Backend checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci_mysql_password
+          MYSQL_ROOT_HOST: '%'
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci_mysql_password"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      MYSQL_TEST_ADMIN_URL: mysql+aiomysql://root:ci_mysql_password@127.0.0.1:3306/mysql?charset=utf8mb4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: lms-platform/backend/requirements.lock.txt
+      - run: python -m pip install -r lms-platform/backend/requirements.lock.txt
+      - run: python -m pip install --no-deps -e lms-platform/backend
+      - run: ruff check lms-platform/backend/src lms-platform/backend/tests lms-platform/database/migrations
+      - run: pytest -q
+        working-directory: lms-platform/backend
+      - run: python lms-platform/backend/scripts/export_contracts.py --check
+      - run: python -m unittest discover -s lms-platform/progress/tests -v

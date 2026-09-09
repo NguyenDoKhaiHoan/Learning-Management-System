@@ -7,15 +7,18 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
-router = APIRouter(tags=["Health"])
+from src.core.contracts import ERROR_RESPONSES, SuccessResponse
+from src.core.errors.handlers import error_response
+
+router = APIRouter(tags=["Health"], responses=ERROR_RESPONSES)
 
 
-@router.get("/livez")
-async def livez() -> dict[str, str]:
-    return {"status": "ok"}
+@router.get("/livez", response_model=SuccessResponse[dict[str, str]])
+async def livez(request: Request) -> SuccessResponse[dict[str, str]]:
+    return SuccessResponse(data={"status": "ok"}, trace_id=request.state.trace_id)
 
 
-@router.get("/healthz")
+@router.get("/healthz", response_model=SuccessResponse[dict[str, str]])
 async def healthz(request: Request) -> JSONResponse:
     try:
         async with asyncio.timeout(5):
@@ -23,5 +26,9 @@ async def healthz(request: Request) -> JSONResponse:
                 await connection.execute(text("SELECT 1"))
     except (SQLAlchemyError, TimeoutError, OSError):
         # Never disclose credentials, host names or driver exceptions in HTTP output.
-        return JSONResponse({"status": "unavailable", "database": "unavailable"}, status_code=503)
-    return JSONResponse({"status": "ok", "database": "ok"})
+        return error_response(request, 503)
+    return JSONResponse(
+        SuccessResponse(
+            data={"status": "ok", "database": "ok"}, trace_id=request.state.trace_id
+        ).model_dump()
+    )
