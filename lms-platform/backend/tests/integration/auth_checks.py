@@ -11,6 +11,7 @@ from src.config.config import Settings
 from src.core.security.dependencies import require_roles
 from src.core.security.jwt import create_access_token
 from src.main import create_app
+from src.modules.identity_access.application.passwords import hash_password
 from src.modules.identity_access.domain.enums import UserStatus
 from src.modules.identity_access.infrastructure.repository import IdentityRepository
 from src.modules.user_role.infrastructure.repository import RoleRepository
@@ -28,7 +29,7 @@ async def assert_http_auth(engine: AsyncEngine) -> None:
         user = await IdentityRepository(connection).create_user(
             email="auth@example.com",
             username="auth",
-            hashed_password="test-only-hash",
+            hashed_password=hash_password("integration-password"),
             status=UserStatus.ACTIVE,
         )
         role = await RoleRepository(connection).create_role("ADMIN", "Administrator")
@@ -41,6 +42,12 @@ async def assert_http_auth(engine: AsyncEngine) -> None:
 
     async with app.router.lifespan_context(app):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            login = await client.post(
+                "/api/v1/auth/login",
+                json={"login": "auth@example.com", "password": "integration-password"},
+            )
+            assert login.status_code == 200
+            assert login.json()["data"]["token_type"] == "bearer"
             token = create_access_token(user, config)
             headers = {"Authorization": f"Bearer {token}"}
             assert (await client.get("/api/v1/auth/me")).status_code == 401

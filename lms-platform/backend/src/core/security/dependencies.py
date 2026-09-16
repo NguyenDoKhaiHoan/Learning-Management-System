@@ -57,3 +57,20 @@ def require_roles(allowed_roles: Sequence[str]) -> Callable[..., CurrentUser]:
         return user
 
     return check
+
+
+def require_permissions(required_permissions: Sequence[str]) -> Callable[..., CurrentUser]:
+    """Require every permission using current database grants, never JWT claims."""
+    required = frozenset(required_permissions)
+    if not required or isinstance(required_permissions, str):
+        raise ValueError("Provide a non-empty list of permission codes")
+
+    async def check(
+        user: CurrentUserDependency, connection: ConnectionDependency
+    ) -> CurrentUser:
+        granted = frozenset(await RoleRepository(connection).get_permission_codes(int(user.id)))
+        if not required.issubset(granted):
+            raise HTTPException(403)
+        return user
+
+    return check

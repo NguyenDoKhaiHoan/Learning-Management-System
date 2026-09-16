@@ -42,6 +42,15 @@ class IdentityRepository(SqlRepository):
             {"email": email},
         )
 
+    async def get_credentials_by_login(self, login: str) -> SqlRow | None:
+        """Resolve normalized email or exact username for the login use case."""
+        return await self.fetch_one(
+            """SELECT id, email, username, hashed_password, status
+               FROM users
+               WHERE (email = :login OR username = :login) AND deleted_at IS NULL""",
+            {"login": login},
+        )
+
     async def set_status(self, user_id: int, status: UserStatus) -> bool:
         return bool(
             await self.execute(

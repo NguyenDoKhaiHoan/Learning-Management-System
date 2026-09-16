@@ -63,7 +63,13 @@ dựa trên checklist đã kiểm tra, không suy từ số file hoặc số dò
 15 task tuần 1 đã được đối chiếu và hoàn thành tại checkpoint 09/09/2026, gồm 37 test
 backend và 5 test sync đạt; CI có cấu hình và kiểm chứng local, chưa có remote run.
 Task schema đã được mô tả lại là SQL thuần;
-tên ORM cũ được nhận diện để vẫn khớp sheet cũ. Các tuần 2–8 không bị thay đổi.
+tên ORM cũ được nhận diện để vẫn khớp sheet cũ.
+
+Checkpoint 16/09/2026 bổ sung 8 WBS tuần 2 theo đúng tab Plan: 2.1 đạt 60%,
+2.2 đạt 50%, 2.3–2.8 ở 0%; tuần 2 đạt 14% theo trọng số có sẵn trên Sheet.
+Xem [week-2-review.md](week-2-review.md) để biết checklist và đính chính báo cáo 50%
+trước đó. Giữ nguyên WBS, tên task và công thức trên Sheet; chỉ đồng bộ F/G.
+Các tuần 3–8 không nằm trong phạm vi đồng bộ.
 
 Công cụ **chỉ ghi F/G của task theo dõi**, giữ nguyên công thức dòng tổng hợp,
 timeline, owner, deadline và định dạng. Màu trạng thái tiếp tục do conditional formatting

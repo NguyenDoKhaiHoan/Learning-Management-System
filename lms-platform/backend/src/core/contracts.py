@@ -36,6 +36,12 @@ class CurrentUser(BaseModel):
     roles: tuple[str, ...]
 
 
+class AccessToken(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+
+
 ERROR_RESPONSES = {
     status: {"model": ErrorResponse} for status in (401, 403, 404, 409, 422, 500, 503)
 }

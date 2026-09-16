@@ -11,6 +11,7 @@ from src.core.database.health import router as health_router
 from src.core.errors.handlers import register_handlers
 from src.core.middleware.trace import TraceMiddleware, configure_logging
 from src.modules.identity_access.presentation.router import router as identity_router
+from src.modules.user_role.presentation.router import router as role_router
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -38,4 +39,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     register_handlers(app)
     app.include_router(health_router)
     app.include_router(identity_router)
+    app.include_router(role_router)
     return app

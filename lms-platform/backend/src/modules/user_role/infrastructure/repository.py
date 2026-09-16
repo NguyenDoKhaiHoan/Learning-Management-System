@@ -4,6 +4,11 @@ from src.core.database.sql import SqlRepository
 
 
 class RoleRepository(SqlRepository):
+    async def get_role(self, code: str):
+        return await self.fetch_one(
+            "SELECT id, code, name, description FROM roles WHERE code = :code", {"code": code}
+        )
+
     async def create_role(self, code: str, name: str) -> int:
         return await self.insert(
             "INSERT INTO roles (code, name) VALUES (:code, :name)", {"code": code, "name": name}
@@ -19,6 +24,14 @@ class RoleRepository(SqlRepository):
         return await self.insert(
             "INSERT INTO user_roles (user_id, role_id) VALUES (:user_id, :role_id)",
             {"user_id": user_id, "role_id": role_id},
+        )
+
+    async def revoke_role(self, user_id: int, role_id: int) -> bool:
+        return bool(
+            await self.execute(
+                "DELETE FROM user_roles WHERE user_id = :user_id AND role_id = :role_id",
+                {"user_id": user_id, "role_id": role_id},
+            )
         )
 
     async def grant_permission(self, role_id: int, permission_id: int) -> int:

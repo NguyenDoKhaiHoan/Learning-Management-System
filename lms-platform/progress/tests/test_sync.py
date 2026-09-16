@@ -41,7 +41,8 @@ class SyncTests(unittest.TestCase):
     def test_real_task_file(self):
         tasks = sync.read_json(path.parent / "tasks.json")["tasks"]
         sync.validate_tasks(tasks)
-        self.assertEqual(len(tasks),15)
+        # Additional weeks may be tracked without removing the week-one baseline.
+        self.assertTrue({f"1.{i}" for i in range(1, 16)} <= {t["wbs"] for t in tasks})
 
 
 if __name__ == "__main__":

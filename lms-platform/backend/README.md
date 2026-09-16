@@ -8,6 +8,18 @@ SQLAlchemy Core chỉ giữ nhiệm vụ connection pool, async connection, bind
 và transaction trên driver aiomysql; không xây truy vấn bằng biểu thức ORM/Core.
 Alembic tiếp tục quản lý lịch sử schema.
 
+## Checkpoint tuần 2 — 16/09/2026
+
+Đã có `POST /api/v1/auth/login`, PBKDF2-SHA256 có salt, kiểm tra account status,
+Admin đổi trạng thái tài khoản và gán/thu hồi role, cùng backend role guard đọc SQL.
+Permission guard mới có helper và unit test, chưa gắn API nghiệp vụ.
+
+Đối chiếu WBS gốc trên Google Sheet: task 2.1 đạt 60%, task 2.2 đạt 50%, task
+2.3–2.8 ở 0%; công thức trọng số của Sheet cho tuần 2 là 14%. Báo cáo 4/8 hoàn thành
+trước đó dựa trên cách chia task không đúng với Sheet và đã được sửa. Refresh/logout
+vẫn thuộc task 2.1 tuần 2; course/content/publish/enrollment, frontend, seed và demo
+chưa hoàn thiện. Checklist và bằng chứng tại [week-2-review.md](../progress/week-2-review.md).
+
 ## Checkpoint tuần 1 — 09/09/2026
 
 Đã bổ sung response/error contract, JSON logging/trace ID, JWT/RBAC skeleton,
@@ -35,8 +47,8 @@ router = APIRouter(dependencies=[Depends(require_roles(["ADMIN", "INSTRUCTOR"]))
 
 Scope sở hữu course/file/enrollment vẫn phải kiểm tra ở application. Token không chứa
 quyền đáng tin; role/account status đọc từ SQL mỗi request. User bị khóa/xóa mềm bị
-401; token hợp lệ thiếu role nhận 403. Login/refresh/reset-password là tuần 2, chưa
-có endpoint công khai phát token. `create_access_token` chỉ gọi sau xác minh mật khẩu.
+401; token hợp lệ thiếu role nhận 403. Login đã được bổ sung ở checkpoint tuần 2;
+refresh/logout/reset-password chưa có. `create_access_token` chỉ gọi sau xác minh mật khẩu.
 
 Health response hiện dùng envelope, ví dụ:
 
