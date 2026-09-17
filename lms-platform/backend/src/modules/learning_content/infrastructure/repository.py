@@ -59,14 +59,15 @@ class ContentRepository(SqlRepository):
             },
         )
 
-    async def get_lesson(self, lesson_id: int) -> SqlRow | None:
+    async def get_lesson(self, lesson_id: int, *, for_update: bool = False) -> SqlRow | None:
         return await self.fetch_one(
             """SELECT l.id, l.module_id, m.course_id, l.title, l.position,
                       l.lesson_type, l.is_preview, l.content
                FROM lessons l JOIN modules m ON m.id = l.module_id
                JOIN courses c ON c.id = m.course_id
                WHERE l.id = :id AND l.deleted_at IS NULL
-                 AND m.deleted_at IS NULL AND c.deleted_at IS NULL""",
+                 AND m.deleted_at IS NULL AND c.deleted_at IS NULL"""
+            + (" FOR UPDATE" if for_update else ""),
             {"id": lesson_id},
         )
 

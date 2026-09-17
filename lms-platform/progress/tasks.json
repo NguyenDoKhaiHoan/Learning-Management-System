@@ -1,5 +1,5 @@
 {
-  "description": "Đối chiếu WBS gốc trên tab Plan ngày 16/09/2026: tuần 1 giữ baseline 09/09; tuần 2 đang thực hiện, 2.1 đạt 3/5 tiêu chí (60%), 2.2 đạt 2/4 tiêu chí (50%), 2.3–2.8 chưa hoàn thành tiêu chí đầu ra (0%). Công thức trọng số hiện có trên Sheet cho tuần 2 là 14%, không phải 50% như báo cáo trước. 45 test backend đạt; 1 integration test skip do thiếu MYSQL_TEST_ADMIN_URL. Xem week-2-review.md để biết checklist và phần còn thiếu.",
+  "description": "Checkpoint 17/09/2026: hoàn thành 100% bốn task đầu tuần 2 (WBS 2.1–2.4), có API, kiểm tra quyền/phạm vi, audit và kiểm thử MySQL thật. 55 test backend đạt, không skip; Ruff, shared-contract drift check và 5 test sync đạt. Task 2.5–2.8 giữ 0%. Đã đồng bộ và đọc lại xác nhận WBS 2.1–2.4 trên tab Plan, vùng F20:G23; công thức tổng hợp tuần 2 trả 55%. Nhật ký tại last-sync.json. Tuần 1 giữ baseline 09/09. Xem week-2-review.md và docs/api/week-2.md.",
   "tasks": [
     {
       "wbs": "1.1",
@@ -172,43 +172,53 @@
     {
       "wbs": "2.1",
       "title": "Login, password hashing, refresh/logout và account status",
-      "sheet_titles": ["Login, password hashing, refresh/logout và account status"],
-      "status": "Đang thực hiện",
-      "progress": 0.6,
-      "evidence": "3/5 tiêu chí đã có code và unit test: login cấp access JWT, password hashing PBKDF2-SHA256 có salt, account status ACTIVE/INACTIVE/LOCKED và Admin đổi status. Chưa có refresh rotation và logout/revoke flow. Integration login đã bổ sung nhưng chưa chạy trên MySQL trong checkpoint này; chưa kiểm chứng status 404 qua test API riêng. Chi tiết: week-2-review.md.",
-      "verified_at": "2026-09-16"
+      "sheet_titles": [
+        "Login, password hashing, refresh/logout và account status"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Hoàn thành 5/5 đầu ra: login/hash/account status, refresh rotation với SHA-256 token hash, expiry/reuse detection thu hồi family, logout và thu hồi session khi khóa account. application/sessions.py; HTTP MySQL tests kiểm tra rotation/reuse/logout/expiry, inactive/locked/deleted, status 404 và refresh đồng thời. 55 test backend đạt, không skip ngày 17/09/2026; chi tiết week-2-review.md.",
+      "verified_at": "2026-09-17"
     },
     {
       "wbs": "2.2",
       "title": "Role/permission API và resource authorization",
-      "sheet_titles": ["Role/permission API và resource authorization"],
-      "status": "Đang thực hiện",
-      "progress": 0.5,
-      "evidence": "2/4 tiêu chí đã có code và unit test: API Admin gán/thu hồi role có sẵn; backend role guard đọc role/account hiện tại từ SQL. Chưa có permission API tích hợp trên route nghiệp vụ và chưa có resource authorization. require_permissions mới được kiểm thử qua route test; audit đổi quyền chưa triển khai. Chi tiết: week-2-review.md.",
-      "verified_at": "2026-09-16"
+      "sheet_titles": [
+        "Role/permission API và resource authorization"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Hoàn thành 4/4 đầu ra: API đọc/gán/thu hồi role, permission catalog và grant/revoke theo role; guard SQL trên course/content/publish; scope Admin, Instructor owner/course_staff và người học có enrollment ACTIVE trong course PUBLISHED. Audit thay đổi quyền cùng transaction. tests/integration/test_week2_mysql.py kiểm chứng thu hồi quyền cùng access token, 401/403/404/409/422 và chống truy cập khác parent/course.",
+      "verified_at": "2026-09-17"
     },
     {
       "wbs": "2.3",
       "title": "CRUD Course cho Admin/Instructor",
-      "sheet_titles": ["CRUD Course cho Admin/Instructor"],
-      "status": "Chưa thực hiện",
-      "progress": 0,
-      "evidence": "Repository primitive có sẵn nhưng chưa có API CRUD course và kiểm tra phạm vi Admin/Instructor. WBS này là CRUD course trên Sheet gốc, không phải role/permission như bản local trước.",
-      "verified_at": "2026-09-16"
+      "sheet_titles": [
+        "CRUD Course cho Admin/Instructor"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "course/presentation/router.py và application/service.py triển khai tạo/list/detail/update/soft-delete khóa học; validation, code unique, pagination/status filter, ID chuỗi, owner từ user hiện tại và scope Admin/Instructor. HTTP MySQL kiểm chứng CRUD, duplicate 409, invalid 422, missing/deleted 404, cross-course 403, staff scope và rollback business write khi audit thất bại.",
+      "verified_at": "2026-09-17"
     },
     {
       "wbs": "2.4",
       "title": "API module/lesson metadata, ordering và publish course",
-      "sheet_titles": ["API module/lesson metadata, ordering và publish course"],
-      "status": "Chưa thực hiện",
-      "progress": 0,
-      "evidence": "Schema/repository primitive có sẵn; chưa có API metadata/ordering, publish policy, audit và test transition course. WBS này là nội dung/publish trên Sheet gốc, không phải route guard như bản local trước.",
-      "verified_at": "2026-09-16"
+      "sheet_titles": [
+        "API module/lesson metadata, ordering và publish course"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "learning_content API tạo/đọc/sửa/xóa module/lesson metadata, order đầy đủ sibling trong transaction; xử lý swap và soft-delete không vi phạm UNIQUE. Course transition DRAFT/PUBLISHED/ARCHIVED có guard, publish yêu cầu module/lesson/content đầy đủ, chỉ sửa nội dung ở DRAFT và audit cùng transaction. MySQL tests kiểm tra CRUD/order/parent boundary, transition hợp lệ/lỗi, publish đồng thời và nội dung vừa thay đổi trong lúc chờ khóa course. OpenAPI đã export và drift check đạt.",
+      "verified_at": "2026-09-17"
     },
     {
       "wbs": "2.5",
       "title": "Enrollment API và course_staff; Active/Suspended",
-      "sheet_titles": ["Enrollment API và course_staff; Active/Suspended"],
+      "sheet_titles": [
+        "Enrollment API và course_staff; Active/Suspended"
+      ],
       "status": "Chưa thực hiện",
       "progress": 0,
       "evidence": "Schema/repository primitive có sẵn; chưa có API enrollment/course_staff, kiểm tra scope và test Active/Suspended qua API.",
@@ -217,7 +227,9 @@
     {
       "wbs": "2.6",
       "title": "Route guard và API client nền tảng frontend",
-      "sheet_titles": ["Route guard và API client nền tảng frontend"],
+      "sheet_titles": [
+        "Route guard và API client nền tảng frontend"
+      ],
       "status": "Chưa thực hiện",
       "progress": 0,
       "evidence": "Frontend mới có khung thư mục, chưa có route guard/API client chạy được. Backend require_roles/require_permissions không chứng minh hoàn thành task frontend.",
@@ -226,7 +238,9 @@
     {
       "wbs": "2.7",
       "title": "Seed ba role, user mẫu, course và enrollment",
-      "sheet_titles": ["Seed ba role, user mẫu, course và enrollment"],
+      "sheet_titles": [
+        "Seed ba role, user mẫu, course và enrollment"
+      ],
       "status": "Chưa thực hiện",
       "progress": 0,
       "evidence": "seed_auth_test.py chỉ tạo một Student token-only, không có password login; chưa có bộ seed ba role/user/course/enrollment để demo tuần 2.",
@@ -235,7 +249,9 @@
     {
       "wbs": "2.8",
       "title": "Test auth → publish → enrollment và demo tuần 2",
-      "sheet_titles": ["Test auth → publish → enrollment và demo tuần 2"],
+      "sheet_titles": [
+        "Test auth → publish → enrollment và demo tuần 2"
+      ],
       "status": "Chưa thực hiện",
       "progress": 0,
       "evidence": "45 test backend đạt, gồm auth/RBAC unit tests; 1 integration test skip vì thiếu MYSQL_TEST_ADMIN_URL. Chưa có test xuyên luồng auth → publish → enrollment và demo tuần 2; test auth riêng chưa đủ để tính hoàn thành task này.",

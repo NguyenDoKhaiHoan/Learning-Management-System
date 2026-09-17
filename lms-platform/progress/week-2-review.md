@@ -1,4 +1,83 @@
-# Đối chiếu tuần 2 — 16/09/2026
+# Đối chiếu tuần 2 — 17/09/2026
+
+Hoàn thành 100% bốn task đầu theo WBS gốc: **2.1–2.4**. Task 2.5–2.8 giữ 0%.
+Đã đồng bộ F20:G23 trên tab Plan và đọc lại xác nhận bốn task 100%, tổng tuần 2 là 55%.
+Nhật ký tại last-sync.json. Danh mục/trọng số dựa trên
+tab Plan đã đọc ngày 16/09/2026. Không đổi WBS, tên task, owner, deadline hoặc công thức.
+
+## Checkpoint hoàn thành 2.1–2.4
+
+### 2.1 — Login, password hashing, refresh/logout và account status: 100%
+
+- [x] Login cấp access JWT sau khi xác minh mật khẩu/account status.
+- [x] PBKDF2-SHA256 có salt, kiểm đúng/sai/hash lỗi.
+- [x] Chặn inactive/locked/deleted; Admin đổi status, 404 nếu không tồn tại;
+  khóa/inactive thu hồi mọi refresh token hiện có.
+- [x] Refresh rotation, lưu hash, kiểm expiry, phát hiện reuse và revoke family.
+- [x] Logout thu hồi family; kiểm thử logout lặp lại và token đã thu hồi.
+
+Bằng chứng: identity_access/presentation/router.py, application/passwords.py,
+application/sessions.py, tests/unit/test_week2_identity.py và integration/test_week2_mysql.py.
+HTTP MySQL còn kiểm refresh đồng thời: một request thành công, một reuse 401,
+token con cũng bị thu hồi. Logout thu hồi refresh session; access JWT còn hiệu lực
+đến hết TTL và vẫn kiểm role/account từ SQL mỗi request.
+
+### 2.2 — Role/permission API và resource authorization: 100%
+
+- [x] Admin đọc/gán/thu hồi role có sẵn; thiếu resource 404, trùng assignment 409.
+- [x] Role guard lấy role/account hiện tại từ SQL; role bị thu hồi chặn cùng access token.
+- [x] Permission catalog và API đọc/cấp/thu hồi permission theo role; guard trên
+  course read/write/publish và content routes. Thu hồi có hiệu lực với token đã phát.
+- [x] Scope Admin toàn hệ thống, Instructor owner hoặc course_staff INSTRUCTOR;
+  người học chỉ đọc course PUBLISHED có enrollment ACTIVE của chính mình.
+
+Audit role/permission/account cùng transaction với thay đổi. HTTP MySQL kiểm
+401/403/404/409/422, cross-course/parent, enrollment PENDING/SUSPENDED.
+API quản lý enrollment/course_staff còn ở 2.5; scope hiện tại đọc dữ liệu đã có trong DB.
+Catalog khóa học gồm course.read/write/publish; Admin bootstrap grant qua permission API.
+
+### 2.3 — CRUD Course cho Admin/Instructor: 100%
+
+- [x] POST, GET list/detail, PUT và DELETE soft-delete.
+- [x] Validation code/title/description, unique code, pagination và filter status.
+- [x] Owner lấy từ tài khoản hiện tại; guard role/permission và scope course.
+- [x] Audit tạo/sửa/xóa cùng transaction; lỗi audit rollback business write.
+- [x] HTTP MySQL kiểm CRUD, 403 khác scope, 404 missing/deleted, 409 duplicate, 422 input.
+
+Bằng chứng: course/application/service.py, course/presentation/router.py và
+test_course_crud_scope_validation_and_soft_delete,
+test_audit_failure_rolls_back_business_write trong integration/test_week2_mysql.py.
+
+### 2.4 — API module/lesson metadata, ordering và publish course: 100%
+
+- [x] Tạo/đọc/sửa/xóa metadata module/lesson; kiểm parent và soft-delete ancestors.
+- [x] Order toàn bộ sibling, không lặp/thiếu/khác parent; transaction hỗ trợ swap,
+  kể cả khi có hàng đã soft-delete, không xung đột UNIQUE.
+- [x] DRAFT → PUBLISHED; PUBLISHED → DRAFT/ARCHIVED; ARCHIVED → DRAFT.
+- [x] Publish cần module, mỗi module có lesson và mọi lesson có content không rỗng;
+  chỉ sửa metadata/ordering hoặc xóa ở DRAFT.
+- [x] Guard/audit và MySQL tests cho CRUD, order, invalid transitions, publish đồng thời,
+  và publish đọc nội dung mới nhất sau khi chờ khóa course.
+
+Bằng chứng: learning_content/application/service.py, presentation/router.py,
+course/application/service.py và integration/test_week2_mysql.py.
+Endpoint/chính sách: [docs/api/week-2.md](../docs/api/week-2.md).
+Schema 14 bảng/migration 0001_p0 vẫn đáp ứng; không thêm migration.
+
+### Kiểm chứng ngày 17/09
+
+- Backend: **55 passed, không skip**, chạy với MySQL thực trong database ngẫu nhiên
+  lms_test_*; gồm migration upgrade/downgrade, SQL constraints và 9 scenario HTTP mới.
+- Ruff: src, tests và database/migrations đạt.
+- Shared OpenAPI: export và drift check đạt; cập nhật TypeScript transport types.
+- Progress: 5 test sync đạt và sync.py --local xác nhận trạng thái hợp lệ.
+- Không sửa dữ liệu database lms; chưa chạy remote CI hoặc demo toàn tuần.
+
+Trọng số đã ghi nhận: 0.75, 0.5, 0.75, 0.75, 0.75, 0.5, 0.5, 0.5; tổng 5.
+Tỷ lệ tuần 2 = (0.75 + 0.5 + 0.75 + 0.75) / 5 = **55%**.
+Bốn task yêu cầu đều 100%; 55% là tỷ lệ cả tuần, không phải test coverage hoặc UAT.
+
+## Lịch sử checkpoint 16/09/2026 (đã được thay thế bởi checkpoint trên)
 
 Nguồn WBS là tab `Plan` tại URL trong `google-sheet.json`, đọc ngày 16/09/2026.
 Các WBS `2.1`–`2.8` do phiên triển khai trước tự chia trong local chưa khớp nội dung

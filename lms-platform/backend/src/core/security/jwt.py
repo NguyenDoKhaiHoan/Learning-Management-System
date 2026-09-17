@@ -1,4 +1,4 @@
-"""Access token primitives. No public token issuer until login is built in week 2."""
+"""Access token primitives used after login verification and refresh rotation."""
 
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4

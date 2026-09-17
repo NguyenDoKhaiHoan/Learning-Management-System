@@ -47,7 +47,7 @@ class IdentityRepository(SqlRepository):
         return await self.fetch_one(
             """SELECT id, email, username, hashed_password, status
                FROM users
-               WHERE (email = :login OR username = :login) AND deleted_at IS NULL""",
+               WHERE (email = :login OR username = :login) AND deleted_at IS NULL FOR UPDATE""",
             {"login": login},
         )
 

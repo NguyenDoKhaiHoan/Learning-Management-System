@@ -121,4 +121,8 @@ lms-platform/
 
 ## 7. Trạng thái hiện tại
 
-Backend dùng FastAPI và MySQL SQL thuần, không ORM. Tuần 1 đã có schema 14 bảng, migration Alembic, healthcheck/Docker, JWT/RBAC skeleton, error contract, JSON logging/trace ID, shared contracts và cấu hình CI/PR template. Xem [hướng dẫn backend](lms-platform/backend/README.md) và [scope MVP](lms-platform/docs/architecture/week-1-scope.md). Login/refresh và CRUD nghiệp vụ thuộc tuần 2 trở đi.
+Backend dùng FastAPI và MySQL SQL thuần, không ORM. Tuần 1 đã có schema 14 bảng, migration Alembic, healthcheck/Docker, JWT/RBAC skeleton, error contract, JSON logging/trace ID, shared contracts và cấu hình CI/PR template. Xem [hướng dẫn backend](lms-platform/backend/README.md) và [scope MVP](lms-platform/docs/architecture/week-1-scope.md).
+
+Bốn task đầu tuần 2 đã có login/refresh/logout, role/permission và resource authorization,
+CRUD khóa học, metadata/ordering và publish policy; 55 test backend đạt, gồm MySQL thật.
+Xem [API tuần 2](lms-platform/docs/api/week-2.md) và [tiến độ](lms-platform/progress/week-2-review.md).

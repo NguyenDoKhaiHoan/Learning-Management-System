@@ -38,6 +38,8 @@ class CurrentUser(BaseModel):
 
 class AccessToken(BaseModel):
     access_token: str
+    refresh_token: str
+    refresh_expires_in: int
     token_type: str = "bearer"
     expires_in: int
 

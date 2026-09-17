@@ -8,17 +8,17 @@ SQLAlchemy Core chỉ giữ nhiệm vụ connection pool, async connection, bind
 và transaction trên driver aiomysql; không xây truy vấn bằng biểu thức ORM/Core.
 Alembic tiếp tục quản lý lịch sử schema.
 
-## Checkpoint tuần 2 — 16/09/2026
+## Checkpoint tuần 2 — 17/09/2026
 
-Đã có `POST /api/v1/auth/login`, PBKDF2-SHA256 có salt, kiểm tra account status,
-Admin đổi trạng thái tài khoản và gán/thu hồi role, cùng backend role guard đọc SQL.
-Permission guard mới có helper và unit test, chưa gắn API nghiệp vụ.
+Hoàn thành bốn task đầu WBS 2.1–2.4: login/refresh rotation/logout/account status;
+role/permission API và resource authorization; CRUD khóa học; module/lesson metadata,
+ordering và publish policy. Audit cùng transaction, quyền lấy từ SQL mỗi request.
+55 test backend đạt, gồm MySQL thật, không skip. Ruff và contract drift check đạt.
 
-Đối chiếu WBS gốc trên Google Sheet: task 2.1 đạt 60%, task 2.2 đạt 50%, task
-2.3–2.8 ở 0%; công thức trọng số của Sheet cho tuần 2 là 14%. Báo cáo 4/8 hoàn thành
-trước đó dựa trên cách chia task không đúng với Sheet và đã được sửa. Refresh/logout
-vẫn thuộc task 2.1 tuần 2; course/content/publish/enrollment, frontend, seed và demo
-chưa hoàn thiện. Checklist và bằng chứng tại [week-2-review.md](../progress/week-2-review.md).
+Chi tiết endpoint, bootstrap permission và chính sách tại [API tuần 2](../docs/api/week-2.md).
+Bằng chứng theo task tại [week-2-review.md](../progress/week-2-review.md).
+Task 2.5–2.8 (enrollment/staff API, frontend, seed, demo toàn tuần) giữ 0%.
+Đã đồng bộ bốn task lên Google Sheet; đọc lại công thức tổng tuần 2 xác nhận 55%.
 
 ## Checkpoint tuần 1 — 09/09/2026
 
@@ -48,7 +48,8 @@ router = APIRouter(dependencies=[Depends(require_roles(["ADMIN", "INSTRUCTOR"]))
 Scope sở hữu course/file/enrollment vẫn phải kiểm tra ở application. Token không chứa
 quyền đáng tin; role/account status đọc từ SQL mỗi request. User bị khóa/xóa mềm bị
 401; token hợp lệ thiếu role nhận 403. Login đã được bổ sung ở checkpoint tuần 2;
-refresh/logout/reset-password chưa có. `create_access_token` chỉ gọi sau xác minh mật khẩu.
+refresh/logout đã có; reset-password chưa triển khai. Access token được cấp sau xác minh
+mật khẩu hoặc refresh session hợp lệ.
 
 Health response hiện dùng envelope, ví dụ:
 
@@ -189,14 +190,14 @@ application quyết định transition nào được phép. FK/UNIQUE/CHECK vẫ
 | EnrollmentRepository | enrollments: tạo pending, đọc, đổi status; course_staff: phân công |
 | AuditRepository | audit_logs, security_events: append bằng INSERT, JSON serialize rõ ràng |
 
-Đây là các **primitive truy cập dữ liệu**, chưa phải API nghiệp vụ hoàn chỉnh.
-JWT/RBAC skeleton và error contract đã có. Login/logout flow, validation nghiệp vụ,
-course publish policy và enrollment eligibility là phần tiếp theo. Không đưa thẳng
-repository ra route công khai mà thiếu kiểm tra quyền và business rule.
+Đây là các **primitive truy cập dữ liệu**. Application/presentation tuần 2 đã bổ sung
+login/refresh/logout, role/permission, course CRUD, metadata/ordering và publish policy.
+API tạo/sửa enrollment/course_staff còn thuộc task 2.5. Mọi route nghiệp vụ khóa học
+kiểm tra permission và phạm vi trước khi gọi thao tác ghi.
 
 Các query nội dung đã lọc `deleted_at IS NULL` cho lesson, module và course.
 Role/permission lookup chỉ trả quyền cho user ACTIVE, chưa soft delete.
-Quyền học vẫn cần kiểm tra `course=PUBLISHED` và `enrollment=ACTIVE` tại application.
+CourseService kiểm tra quyền học bằng `course=PUBLISHED` và `enrollment=ACTIVE` của user hiện tại.
 
 ## 5. Schema và migration
 
