@@ -52,6 +52,41 @@
         "title": "AccountStatusRequest",
         "type": "object"
       },
+      "CatalogCourse": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "title",
+          "description"
+        ],
+        "title": "CatalogCourse",
+        "type": "object"
+      },
       "CourseInput": {
         "additionalProperties": false,
         "properties": {
@@ -150,6 +185,14 @@
         "title": "CourseOutput",
         "type": "object"
       },
+      "CourseStaffRole": {
+        "enum": [
+          "INSTRUCTOR",
+          "ASSISTANT"
+        ],
+        "title": "CourseStaffRole",
+        "type": "string"
+      },
       "CourseStatus": {
         "enum": [
           "DRAFT",
@@ -188,6 +231,94 @@
           "roles"
         ],
         "title": "CurrentUser",
+        "type": "object"
+      },
+      "EnrollmentInput": {
+        "additionalProperties": false,
+        "properties": {
+          "student_id": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 1.8446744073709552e+19,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Id"
+          }
+        },
+        "title": "EnrollmentInput",
+        "type": "object"
+      },
+      "EnrollmentOutput": {
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "course_id": {
+            "title": "Course Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EnrollmentStatus"
+          },
+          "student_id": {
+            "title": "Student Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "student_id",
+          "course_id",
+          "status",
+          "completed_at"
+        ],
+        "title": "EnrollmentOutput",
+        "type": "object"
+      },
+      "EnrollmentStatus": {
+        "enum": [
+          "PENDING",
+          "ACTIVE",
+          "SUSPENDED",
+          "COMPLETED"
+        ],
+        "title": "EnrollmentStatus",
+        "type": "string"
+      },
+      "EnrollmentStatusInput": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "enum": [
+              "ACTIVE",
+              "SUSPENDED"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "EnrollmentStatusInput",
         "type": "object"
       },
       "ErrorDetail": {
@@ -416,6 +547,56 @@
         "title": "ModuleOutput",
         "type": "object"
       },
+      "MyEnrollment": {
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "course_id": {
+            "title": "Course Id",
+            "type": "string"
+          },
+          "course_status": {
+            "title": "Course Status",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EnrollmentStatus"
+          },
+          "student_id": {
+            "title": "Student Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "student_id",
+          "course_id",
+          "status",
+          "completed_at",
+          "title",
+          "course_status"
+        ],
+        "title": "MyEnrollment",
+        "type": "object"
+      },
       "OrderInput": {
         "properties": {
           "ids": {
@@ -448,6 +629,41 @@
           "refresh_token"
         ],
         "title": "RefreshRequest",
+        "type": "object"
+      },
+      "StaffInput": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/CourseStaffRole"
+          }
+        },
+        "required": [
+          "role"
+        ],
+        "title": "StaffInput",
+        "type": "object"
+      },
+      "StaffOutput": {
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/CourseStaffRole"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "username",
+          "role"
+        ],
+        "title": "StaffOutput",
         "type": "object"
       },
       "SuccessResponse_AccessToken_": {
@@ -529,6 +745,33 @@
           "trace_id"
         ],
         "title": "SuccessResponse[CurrentUser]",
+        "type": "object"
+      },
+      "SuccessResponse_EnrollmentOutput_": {
+        "properties": {
+          "code": {
+            "default": "OK",
+            "title": "Code",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/EnrollmentOutput"
+          },
+          "message": {
+            "default": "Success",
+            "title": "Message",
+            "type": "string"
+          },
+          "trace_id": {
+            "title": "Trace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "trace_id"
+        ],
+        "title": "SuccessResponse[EnrollmentOutput]",
         "type": "object"
       },
       "SuccessResponse_LessonOutput_": {
@@ -620,6 +863,37 @@
         "title": "SuccessResponse[dict[str, str]]",
         "type": "object"
       },
+      "SuccessResponse_list_CatalogCourse__": {
+        "properties": {
+          "code": {
+            "default": "OK",
+            "title": "Code",
+            "type": "string"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogCourse"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "message": {
+            "default": "Success",
+            "title": "Message",
+            "type": "string"
+          },
+          "trace_id": {
+            "title": "Trace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "trace_id"
+        ],
+        "title": "SuccessResponse[list[CatalogCourse]]",
+        "type": "object"
+      },
       "SuccessResponse_list_CourseOutput__": {
         "properties": {
           "code": {
@@ -651,6 +925,37 @@
         "title": "SuccessResponse[list[CourseOutput]]",
         "type": "object"
       },
+      "SuccessResponse_list_EnrollmentOutput__": {
+        "properties": {
+          "code": {
+            "default": "OK",
+            "title": "Code",
+            "type": "string"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/EnrollmentOutput"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "message": {
+            "default": "Success",
+            "title": "Message",
+            "type": "string"
+          },
+          "trace_id": {
+            "title": "Trace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "trace_id"
+        ],
+        "title": "SuccessResponse[list[EnrollmentOutput]]",
+        "type": "object"
+      },
       "SuccessResponse_list_ModuleOutput__": {
         "properties": {
           "code": {
@@ -680,6 +985,68 @@
           "trace_id"
         ],
         "title": "SuccessResponse[list[ModuleOutput]]",
+        "type": "object"
+      },
+      "SuccessResponse_list_MyEnrollment__": {
+        "properties": {
+          "code": {
+            "default": "OK",
+            "title": "Code",
+            "type": "string"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/MyEnrollment"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "message": {
+            "default": "Success",
+            "title": "Message",
+            "type": "string"
+          },
+          "trace_id": {
+            "title": "Trace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "trace_id"
+        ],
+        "title": "SuccessResponse[list[MyEnrollment]]",
+        "type": "object"
+      },
+      "SuccessResponse_list_StaffOutput__": {
+        "properties": {
+          "code": {
+            "default": "OK",
+            "title": "Code",
+            "type": "string"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/StaffOutput"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "message": {
+            "default": "Success",
+            "title": "Message",
+            "type": "string"
+          },
+          "trace_id": {
+            "title": "Trace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "trace_id"
+        ],
+        "title": "SuccessResponse[list[StaffOutput]]",
         "type": "object"
       },
       "SuccessResponse_list_dict_str__str___": {
@@ -1290,6 +1657,127 @@
         ]
       }
     },
+    "/api/v1/catalog/courses": {
+      "get": {
+        "operationId": "catalog_api_v1_catalog_courses_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_CatalogCourse__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Catalog",
+        "tags": [
+          "Enrollments"
+        ]
+      }
+    },
     "/api/v1/courses": {
       "get": {
         "operationId": "list_courses_api_v1_courses_get",
@@ -1861,6 +2349,385 @@
         "summary": "Update Course",
         "tags": [
           "Courses"
+        ]
+      }
+    },
+    "/api/v1/courses/{course_id}/enrollments": {
+      "get": {
+        "operationId": "list_enrollments_api_v1_courses__course_id__enrollments_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_EnrollmentOutput__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Enrollments",
+        "tags": [
+          "Enrollments"
+        ]
+      },
+      "post": {
+        "operationId": "enroll_api_v1_courses__course_id__enrollments_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnrollmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_EnrollmentOutput_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Enroll",
+        "tags": [
+          "Enrollments"
+        ]
+      }
+    },
+    "/api/v1/courses/{course_id}/enrollments/{student_id}": {
+      "patch": {
+        "operationId": "enrollment_status_api_v1_courses__course_id__enrollments__student_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "student_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Student Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnrollmentStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_EnrollmentOutput_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Enrollment Status",
+        "tags": [
+          "Enrollments"
         ]
       }
     },
@@ -3116,6 +3983,363 @@
         ]
       }
     },
+    "/api/v1/courses/{course_id}/staff": {
+      "get": {
+        "operationId": "list_staff_api_v1_courses__course_id__staff_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_StaffOutput__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Staff",
+        "tags": [
+          "Enrollments"
+        ]
+      }
+    },
+    "/api/v1/courses/{course_id}/staff/{user_id}": {
+      "delete": {
+        "operationId": "remove_staff_api_v1_courses__course_id__staff__user_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "User Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_dict_str__str__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Staff",
+        "tags": [
+          "Enrollments"
+        ]
+      },
+      "put": {
+        "operationId": "assign_staff_api_v1_courses__course_id__staff__user_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "User Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StaffInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_dict_str__str__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Assign Staff",
+        "tags": [
+          "Enrollments"
+        ]
+      }
+    },
     "/api/v1/courses/{course_id}/status": {
       "post": {
         "operationId": "transition_course_api_v1_courses__course_id__status_post",
@@ -3232,6 +4456,127 @@
         "summary": "Transition Course",
         "tags": [
           "Courses"
+        ]
+      }
+    },
+    "/api/v1/enrollments/me": {
+      "get": {
+        "operationId": "my_enrollments_api_v1_enrollments_me_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_MyEnrollment__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Enrollments",
+        "tags": [
+          "Enrollments"
         ]
       }
     },

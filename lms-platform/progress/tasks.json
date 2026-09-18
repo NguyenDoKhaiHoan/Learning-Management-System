@@ -1,5 +1,5 @@
 {
-  "description": "Checkpoint 17/09/2026: hoàn thành 100% bốn task đầu tuần 2 (WBS 2.1–2.4), có API, kiểm tra quyền/phạm vi, audit và kiểm thử MySQL thật. 55 test backend đạt, không skip; Ruff, shared-contract drift check và 5 test sync đạt. Task 2.5–2.8 giữ 0%. Đã đồng bộ và đọc lại xác nhận WBS 2.1–2.4 trên tab Plan, vùng F20:G23; công thức tổng hợp tuần 2 trả 55%. Nhật ký tại last-sync.json. Tuần 1 giữ baseline 09/09. Xem week-2-review.md và docs/api/week-2.md.",
+  "description": "Checkpoint 18/09/2026: hoàn thành 100% cả 8 task tuần 2, gồm enrollment/course_staff, frontend guard/API client, seed ba role và demo auth → publish → enrollment. Kiểm chứng: 63 test backend với MySQL thật, 11 frontend unit tests, 3 browser E2E tests, build TypeScript/Vite, Ruff, contract drift và 5 test sync. Tiến độ tuần 2 local là 100%; lần đồng bộ Sheet trước xác nhận 55% ngày 17/09, chưa đồng bộ checkpoint 18/09. Tuần 1 giữ baseline 09/09. Xem week-2-review.md và docs/api/week-2-demo.md.",
   "tasks": [
     {
       "wbs": "1.1",
@@ -219,10 +219,10 @@
       "sheet_titles": [
         "Enrollment API và course_staff; Active/Suspended"
       ],
-      "status": "Chưa thực hiện",
-      "progress": 0,
-      "evidence": "Schema/repository primitive có sẵn; chưa có API enrollment/course_staff, kiểm tra scope và test Active/Suspended qua API.",
-      "verified_at": "2026-09-16"
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Enrollment API: catalog published, yêu cầu ghi danh PENDING, list self/manager, chuyển ACTIVE/SUSPENDED; kiểm account/role/course scope, unique và trạng thái course. Staff API Admin gán/đổi/gỡ INSTRUCTOR/ASSISTANT, audit cùng transaction. MySQL HTTP tests trong test_week2_remaining.py kiểm full journey, cross-user/course, duplicate/concurrent request, audit rollback và thu hồi staff trong lúc mutation chờ khóa; ACTIVE đọc được, SUSPENDED bị 403 với cùng token.",
+      "verified_at": "2026-09-18"
     },
     {
       "wbs": "2.6",
@@ -230,10 +230,10 @@
       "sheet_titles": [
         "Route guard và API client nền tảng frontend"
       ],
-      "status": "Chưa thực hiện",
-      "progress": 0,
-      "evidence": "Frontend mới có khung thư mục, chưa có route guard/API client chạy được. Backend require_roles/require_permissions không chứng minh hoàn thành task frontend.",
-      "verified_at": "2026-09-16"
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Frontend TypeScript/Vite chạy được: auth, ba route portal, course detail, route guard gọi /auth/me lấy role hiện tại. API client typed envelope/trace error, Bearer, timeout, một refresh cho request đồng thời, retry giới hạn và logout chống khôi phục phiên từ response cũ. Token chỉ trong bộ nhớ. 11 unit tests và browser tests cho direct link, wrong role, login lỗi, desktop/mobile đạt; npm run build đạt.",
+      "verified_at": "2026-09-18"
     },
     {
       "wbs": "2.7",
@@ -241,10 +241,10 @@
       "sheet_titles": [
         "Seed ba role, user mẫu, course và enrollment"
       ],
-      "status": "Chưa thực hiện",
-      "progress": 0,
-      "evidence": "seed_auth_test.py chỉ tạo một Student token-only, không có password login; chưa có bộ seed ba role/user/course/enrollment để demo tuần 2.",
-      "verified_at": "2026-09-16"
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "scripts/seed_week2.py tạo ADMIN/INSTRUCTOR/STUDENT, ba user ACTIVE có password hash/permission, course PUBLISHED, module/lesson, course_staff và enrollment ACTIVE. Seed idempotent giữ ID/trạng thái enrollment, từ chối overwrite account xung đột; chỉ cho DB lms_demo_*/lms_test_*. run_demo.py tạo/migrate/seed database riêng và serve API 8002. MySQL tests kiểm ba login, seed lặp lại, giữ SUSPENDED và từ chối DB lms; demo local đã chạy.",
+      "verified_at": "2026-09-18"
     },
     {
       "wbs": "2.8",
@@ -252,10 +252,10 @@
       "sheet_titles": [
         "Test auth → publish → enrollment và demo tuần 2"
       ],
-      "status": "Chưa thực hiện",
-      "progress": 0,
-      "evidence": "45 test backend đạt, gồm auth/RBAC unit tests; 1 integration test skip vì thiếu MYSQL_TEST_ADMIN_URL. Chưa có test xuyên luồng auth → publish → enrollment và demo tuần 2; test auth riêng chưa đủ để tính hoàn thành task này.",
-      "verified_at": "2026-09-16"
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "63 backend tests trên MySQL thật, 11 frontend unit tests và 3 Playwright E2E tests đạt. Browser thực hiện Instructor login → tạo course/module/lesson → publish → Student request enrollment → Instructor activate → Student đọc bài → suspend → Student 403; thêm portal guards, desktop/mobile và Admin/login lỗi. Seed/API/frontend demo chạy tại localhost:8002/5173, hướng dẫn docs/api/week-2-demo.md. CI bổ sung frontend/build/E2E; chưa tuyên bố remote CI hay UAT hoàn tất.",
+      "verified_at": "2026-09-18"
     }
   ]
 }

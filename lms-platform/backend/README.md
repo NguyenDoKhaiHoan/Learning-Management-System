@@ -8,17 +8,20 @@ SQLAlchemy Core chỉ giữ nhiệm vụ connection pool, async connection, bind
 và transaction trên driver aiomysql; không xây truy vấn bằng biểu thức ORM/Core.
 Alembic tiếp tục quản lý lịch sử schema.
 
-## Checkpoint tuần 2 — 17/09/2026
+## Checkpoint tuần 2 — 18/09/2026
 
-Hoàn thành bốn task đầu WBS 2.1–2.4: login/refresh rotation/logout/account status;
+Hoàn thành toàn bộ WBS 2.1–2.8: login/refresh rotation/logout/account status;
 role/permission API và resource authorization; CRUD khóa học; module/lesson metadata,
-ordering và publish policy. Audit cùng transaction, quyền lấy từ SQL mỗi request.
-55 test backend đạt, gồm MySQL thật, không skip. Ruff và contract drift check đạt.
+ordering/publish; enrollment ACTIVE/SUSPENDED và course_staff; frontend guard/client,
+seed ba role và demo xuyên suốt. Audit cùng transaction, quyền lấy từ SQL mỗi request.
+63 test backend đạt, gồm MySQL thật, không skip; 11 frontend unit tests và 3 browser E2E
+tests đạt. Ruff, contract drift và frontend build đạt.
 
 Chi tiết endpoint, bootstrap permission và chính sách tại [API tuần 2](../docs/api/week-2.md).
 Bằng chứng theo task tại [week-2-review.md](../progress/week-2-review.md).
-Task 2.5–2.8 (enrollment/staff API, frontend, seed, demo toàn tuần) giữ 0%.
-Đã đồng bộ bốn task lên Google Sheet; đọc lại công thức tổng tuần 2 xác nhận 55%.
+Chạy và thử ba role theo [hướng dẫn demo](../docs/api/week-2-demo.md),
+[frontend README](../frontend/README.md). Demo API 8002/frontend 5173 dùng DB riêng.
+Tiến độ local tuần 2 đạt 100%; lần đồng bộ Sheet ngày 17/09 vẫn ở 55%.
 
 ## Checkpoint tuần 1 — 09/09/2026
 
@@ -192,7 +195,7 @@ application quyết định transition nào được phép. FK/UNIQUE/CHECK vẫ
 
 Đây là các **primitive truy cập dữ liệu**. Application/presentation tuần 2 đã bổ sung
 login/refresh/logout, role/permission, course CRUD, metadata/ordering và publish policy.
-API tạo/sửa enrollment/course_staff còn thuộc task 2.5. Mọi route nghiệp vụ khóa học
+API ghi danh, duyệt/tạm ngưng và quản lý course_staff đã có ở task 2.5. Mọi route nghiệp vụ khóa học
 kiểm tra permission và phạm vi trước khi gọi thao tác ghi.
 
 Các query nội dung đã lọc `deleted_at IS NULL` cho lesson, module và course.

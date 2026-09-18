@@ -65,10 +65,11 @@ backend và 5 test sync đạt; CI có cấu hình và kiểm chứng local, ch�
 Task schema đã được mô tả lại là SQL thuần;
 tên ORM cũ được nhận diện để vẫn khớp sheet cũ.
 
-Checkpoint 17/09/2026: WBS 2.1–2.4 đạt 100%, 2.5–2.8 giữ 0%; tuần 2 đạt 55%
-theo trọng số đã ghi nhận trên Sheet ngày 16/09. 55 test backend (gồm MySQL thật),
-5 test sync, Ruff và contract drift check đạt. Đã đồng bộ F20:G23 trên tab Plan và
-đọc lại xác nhận bốn task 100%, tổng tuần 2 là 55%; nhật ký tại last-sync.json.
+Checkpoint 18/09/2026: toàn bộ WBS 2.1–2.8 đạt 100% ở local. 63 test backend
+(MySQL thật), 11 frontend unit tests, 3 browser E2E tests, build frontend,
+5 test sync, Ruff và contract drift check đạt. Có demo ba role và luồng xuyên suốt.
+Lần đồng bộ Sheet trước ngày 17/09 xác nhận 2.1–2.4=100%, tổng tuần 2=55%; nhật ký
+tại last-sync.json. Chưa đồng bộ checkpoint 18/09 lên Sheet.
 Xem [week-2-review.md](week-2-review.md) để biết checklist và bằng chứng.
 Giữ nguyên WBS, tên task và công thức trên Sheet; chỉ đồng bộ F/G khi được yêu cầu.
 Các tuần 3–8 không nằm trong phạm vi đồng bộ.

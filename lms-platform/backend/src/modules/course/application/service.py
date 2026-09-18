@@ -28,7 +28,8 @@ class CourseService:
         if "INSTRUCTOR" in self.user.roles:
             staff = await self.repo.fetch_one(
                 """SELECT id FROM course_staff WHERE course_id=:course AND user_id=:user
-                   AND role='INSTRUCTOR'""",
+                   AND role='INSTRUCTOR'"""
+                + (" FOR UPDATE" if write else ""),
                 {"course": course_id, "user": int(self.user.id)},
             )
             manager = manager or course["created_by"] == int(self.user.id) or staff is not None
@@ -46,13 +47,14 @@ class CourseService:
             raise HTTPException(409, "Only draft courses can be edited")
         return course
 
-    async def audit(self, action, resource, resource_id):
+    async def audit(self, action, resource, resource_id, *, details=None):
         await AuditRepository(self.connection).append_log(
             actor_id=int(self.user.id),
             action=action,
             resource=resource,
             resource_id=str(resource_id),
             trace_id=self.trace_id,
+            details=details,
         )
 
     async def transition(self, course_id, target):

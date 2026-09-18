@@ -1,4 +1,63 @@
-# Đối chiếu tuần 2 — 17/09/2026
+# Đối chiếu tuần 2 — 18/09/2026
+
+**Cả 8 task tuần 2 đạt 100% ở local.** Bốn task còn lại 2.5–2.8 đã triển khai và
+kiểm chứng qua MySQL thật và trình duyệt. Chưa đồng bộ checkpoint mới lên Sheet;
+lần đồng bộ ngày 17/09 vẫn ghi nhận 55% cho cả tuần.
+
+## Checkpoint hoàn thành 2.5–2.8
+
+### 2.5 — Enrollment API và course_staff; Active/Suspended: 100%
+
+- [x] Catalog khóa PUBLISHED để Student tìm khóa trước khi ghi danh, không trả nội dung.
+- [x] Student gửi yêu cầu PENDING cho chính mình; Admin/Instructor đúng scope có thể tạo
+  yêu cầu cho Student ACTIVE. Cấm tự chọn status/giả student khác, unique student-course.
+- [x] List self và list manager; transition PENDING→ACTIVE, ACTIVE→SUSPENDED,
+  SUSPENDED→ACTIVE; activation yêu cầu course PUBLISHED và account/role phù hợp.
+- [x] Admin gán/đổi/gỡ course_staff; target ACTIVE có global role INSTRUCTOR;
+  ASSISTANT không được sửa course. Thu hồi assignment có hiệu lực với access token cũ.
+- [x] Audit cùng transaction; test lỗi audit rollback, concurrent duplicate/transition,
+  cross-scope và staff bị gỡ trong lúc request chờ khóa course.
+
+Bằng chứng: enrollment/application/service.py, presentation/router.py,
+tests/integration/test_week2_remaining.py. Enrollment ACTIVE đọc được lesson;
+SUSPENDED bị 403, khôi phục ACTIVE đọc lại được với cùng access token.
+
+### 2.6 — Route guard và API client nền tảng frontend: 100%
+
+- [x] TypeScript/Vite chạy/build được, shared types và proxy API.
+- [x] Login và guard /admin, /instructor, /student, /courses/{id}; kiểm /auth/me mỗi navigation.
+- [x] API client xử lý Bearer/envelope/trace, network/timeout, 401 refresh một lần,
+  cùng một refresh cho nhiều request, 403 giữ phiên, logout chống response cũ phục hồi token.
+- [x] Token chỉ trong bộ nhớ; không render HTML từ dữ liệu; loading/empty/error/success.
+- [x] 11 unit tests; browser kiểm direct links, sai role, login lỗi và layout mobile không tràn.
+
+Bằng chứng: frontend/src/services/api/client.ts, routes/guard.ts, app/main.ts,
+tests/unit và tests/e2e/week2.spec.ts. Giao diện nền tảng đủ cho demo; full portal của
+các tuần sau và pagination UI trên 100 mục không nằm trong đầu ra tuần 2.
+
+### 2.7 — Seed ba role, user mẫu, course và enrollment: 100%
+
+- [x] ADMIN/INSTRUCTOR/STUDENT, ba user ACTIVE với password PBKDF2 và permission cần thiết.
+- [x] Course PUBLISHED, module/lesson, course_staff Instructor và enrollment ACTIVE.
+- [x] Seed idempotent giữ ID và learning state; account xung đột không bị ghi đè.
+- [x] Chỉ database demo/test; run_demo tạo DB riêng, migrate, seed và mở API.
+- [x] MySQL tests kiểm login ba role, seed lặp, giữ enrollment SUSPENDED và chặn DB lms.
+
+Bằng chứng: backend/scripts/seed_week2.py, run_demo.py và test_demo_seed.py.
+Demo local đã khởi chạy ở API 8002, frontend 5173; không sửa database lms.
+
+### 2.8 — Test auth → publish → enrollment và demo tuần 2: 100%
+
+- [x] HTTP MySQL và browser thực: Instructor login → tạo course/module/lesson → publish →
+  Student request enrollment → Instructor activate → Student đọc bài → suspend → Student bị 403.
+- [x] 63 backend tests, 11 frontend unit tests, 3 browser E2E tests đạt; không skip MySQL.
+- [x] TypeScript/Vite build, Ruff, shared-contract drift và 5 test sync đạt.
+- [x] Kiểm tra ảnh desktop/mobile; CI thêm frontend build/unit/E2E (chưa chạy remote).
+- [x] [Hướng dẫn demo và tài khoản](../docs/api/week-2-demo.md), [frontend README](../frontend/README.md).
+
+Tổng tuần 2 local theo trọng số = 5/5 = **100%**. Không coi đây là UAT hoặc release production.
+
+## Lịch sử checkpoint 17/09/2026
 
 Hoàn thành 100% bốn task đầu theo WBS gốc: **2.1–2.4**. Task 2.5–2.8 giữ 0%.
 Đã đồng bộ F20:G23 trên tab Plan và đọc lại xác nhận bốn task 100%, tổng tuần 2 là 55%.

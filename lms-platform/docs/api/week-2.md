@@ -2,7 +2,9 @@
 
 Prefix `/api/v1`; success/error envelope và `trace_id` theo shared contracts.
 OpenAPI đầy đủ tại `shared/contracts/openapi.json`. Các ID trả về là chuỗi thập phân.
-Ngày kiểm chứng: 17/09/2026. Không cần migration mới ngoài `0001_p0`.
+Ngày kiểm chứng: 18/09/2026. Không cần migration mới ngoài `0001_p0`.
+API enrollment/course_staff, frontend và seed/demo đã hoàn thành ở task 2.5–2.8;
+xem [hướng dẫn demo và API bổ sung](week-2-demo.md).
 
 ## Đăng nhập và phiên
 
@@ -35,7 +37,7 @@ Các API quản trị sau yêu cầu role ADMIN, không cần permission khóa h
 Catalog permission: `course.read`, `course.write`, `course.publish`.
 Admin cấp các permission cần thiết cho ADMIN/INSTRUCTOR qua API trên trước khi sử dụng
 course API; không tự động coi role ADMIN là có mọi permission. STUDENT cần `course.read`
-để xem nội dung đã ghi danh. Seed/demo ba role vẫn thuộc task 2.7.
+để xem nội dung đã ghi danh. Seed/demo ba role đã có, hướng dẫn tại week-2-demo.md.
 
 Course write/publish cần đồng thời role ADMIN hoặc INSTRUCTOR và permission tương ứng.
 Admin quản lý mọi khóa học. Instructor chỉ quản lý khóa mình tạo hoặc được gán trong
@@ -43,7 +45,7 @@ Admin quản lý mọi khóa học. Instructor chỉ quản lý khóa mình tạ
 Các tài khoản khác chỉ đọc khóa PUBLISHED có enrollment ACTIVE của chính mình.
 Course list lọc theo cùng phạm vi. Thiếu quyền/sai phạm vi trả 403; tài nguyên không
 tồn tại hoặc đã xóa mềm trả 404. Đổi role/permission có hiệu lực từ request tiếp theo.
-API tạo/sửa enrollment và course_staff thuộc task 2.5; ở đây kiểm tra scope trên dữ liệu hiện có.
+API ghi danh/duyệt/tạm ngưng và quản lý course_staff đã có ở task 2.5, xem week-2-demo.md.
 
 ## Khóa học
 

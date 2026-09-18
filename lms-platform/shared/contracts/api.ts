@@ -63,3 +63,22 @@ export interface CourseModule {
 }
 // Send IDs as decimal strings to preserve BIGINT precision; API accepts them.
 export interface ContentOrder { ids: string[]; }
+
+export type EnrollmentStatus = "PENDING" | "ACTIVE" | "SUSPENDED" | "COMPLETED";
+export interface Enrollment {
+  id: string;
+  student_id: string;
+  course_id: string;
+  status: EnrollmentStatus;
+  completed_at: string | null;
+}
+export interface MyEnrollment extends Enrollment {
+  title: string;
+  course_status: CourseStatus;
+}
+export interface CourseStaff {
+  user_id: string;
+  username: string;
+  role: "INSTRUCTOR" | "ASSISTANT";
+}
+export type CatalogCourse = Pick<Course, "id" | "code" | "title" | "description">;

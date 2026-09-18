@@ -1,0 +1,21 @@
+{
+  "name": "lms-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "vitest run tests/unit",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.1",
+    "prettier": "^3.9.8",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  }
+}
