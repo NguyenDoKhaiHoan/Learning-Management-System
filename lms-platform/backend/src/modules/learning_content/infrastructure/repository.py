@@ -44,11 +44,15 @@ class ContentRepository(SqlRepository):
         location: str,
         mime_type: str | None = None,
         size_bytes: int | None = None,
+        sha256: str | None = None,
+        uploaded_by: int | None = None,
     ) -> int:
         return await self.insert(
             """INSERT INTO lesson_resources
-               (lesson_id, title, resource_type, location, mime_type, size_bytes)
-               VALUES (:lesson_id, :title, :resource_type, :location, :mime_type, :size_bytes)""",
+               (lesson_id, title, resource_type, location, mime_type, size_bytes,
+                sha256, uploaded_by)
+               VALUES (:lesson_id, :title, :resource_type, :location, :mime_type, :size_bytes,
+                       :sha256, :uploaded_by)""",
             {
                 "lesson_id": lesson_id,
                 "title": title,
@@ -56,6 +60,8 @@ class ContentRepository(SqlRepository):
                 "location": location,
                 "mime_type": mime_type,
                 "size_bytes": size_bytes,
+                "sha256": sha256,
+                "uploaded_by": uploaded_by,
             },
         )
 
@@ -73,11 +79,24 @@ class ContentRepository(SqlRepository):
 
     async def list_resources(self, lesson_id: int) -> list[SqlRow]:
         return await self.fetch_all(
-            """SELECT r.id, r.title, r.resource_type, r.location, r.mime_type, r.size_bytes
+            """SELECT r.id, r.lesson_id, r.title, r.resource_type, r.location,
+                      r.mime_type, r.size_bytes, r.sha256, r.uploaded_by, r.created_at
                FROM lesson_resources r JOIN lessons l ON l.id = r.lesson_id
                JOIN modules m ON m.id = l.module_id JOIN courses c ON c.id = m.course_id
                WHERE r.lesson_id = :id AND r.deleted_at IS NULL
                  AND l.deleted_at IS NULL AND m.deleted_at IS NULL AND c.deleted_at IS NULL
                ORDER BY r.id""",
             {"id": lesson_id},
+        )
+
+    async def get_resource(self, resource_id: int, *, for_update: bool = False) -> SqlRow | None:
+        return await self.fetch_one(
+            """SELECT r.id, r.lesson_id, r.title, r.resource_type, r.location,
+                      r.mime_type, r.size_bytes, r.sha256, r.uploaded_by, r.created_at
+               FROM lesson_resources r JOIN lessons l ON l.id = r.lesson_id
+               JOIN modules m ON m.id = l.module_id JOIN courses c ON c.id = m.course_id
+               WHERE r.id=:id AND r.deleted_at IS NULL AND l.deleted_at IS NULL
+                 AND m.deleted_at IS NULL AND c.deleted_at IS NULL"""
+            + (" FOR UPDATE" if for_update else ""),
+            {"id": resource_id},
         )

@@ -72,7 +72,11 @@ Lần đồng bộ Sheet trước ngày 17/09 xác nhận 2.1–2.4=100%, tổng
 tại last-sync.json. Chưa đồng bộ checkpoint 18/09 lên Sheet.
 Xem [week-2-review.md](week-2-review.md) để biết checklist và bằng chứng.
 Giữ nguyên WBS, tên task và công thức trên Sheet; chỉ đồng bộ F/G khi được yêu cầu.
-Các tuần 3–8 không nằm trong phạm vi đồng bộ.
+
+Checkpoint 24/09/2026: WBS 3.1–3.3 đạt 100% local: private file upload/metadata,
+lesson/resource authorization API và schema/API progress/completion. Xem
+[week-3-review.md](week-3-review.md). Ba task đã được thêm vào `tasks.json` nhưng chưa ghi
+lên Google Sheet. Các mục tuần 3 còn lại và tuần 4–8 chưa nằm trong phạm vi theo dõi local.
 
 Công cụ **chỉ ghi F/G của task theo dõi**, giữ nguyên công thức dòng tổng hợp,
 timeline, owner, deadline và định dạng. Màu trạng thái tiếp tục do conditional formatting

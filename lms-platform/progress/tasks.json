@@ -256,6 +256,39 @@
       "progress": 1,
       "evidence": "63 backend tests trên MySQL thật, 11 frontend unit tests và 3 Playwright E2E tests đạt. Browser thực hiện Instructor login → tạo course/module/lesson → publish → Student request enrollment → Instructor activate → Student đọc bài → suspend → Student 403; thêm portal guards, desktop/mobile và Admin/login lỗi. Seed/API/frontend demo chạy tại localhost:8002/5173, hướng dẫn docs/api/week-2-demo.md. CI bổ sung frontend/build/E2E; chưa tuyên bố remote CI hay UAT hoàn tất.",
       "verified_at": "2026-09-18"
+    },
+    {
+      "wbs": "3.1",
+      "title": "File metadata, upload và MIME/size validation",
+      "sheet_titles": [
+        "File metadata, upload và MIME/size validation"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Upload stream vào storage private, object key ngẫu nhiên, giới hạn size cấu hình, allowlist MIME và kiểm signature/nội dung PDF/JPEG/PNG/MP4/UTF-8 text. Metadata có SHA-256/uploader và không lộ storage key. MySQL acceptance kiểm MIME giả, quá size, tên path traversal, rollback/audit; xem progress/week-3-review.md.",
+      "verified_at": "2026-09-24"
+    },
+    {
+      "wbs": "3.2",
+      "title": "Lesson access và lesson/resource API",
+      "sheet_titles": [
+        "Lesson access và lesson/resource API"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "API list/create link/upload/download/soft-delete resource theo course-module-lesson boundary. Manager chỉ sửa Course Draft; Student chỉ đọc Course Published + Enrollment Active; download luôn qua backend authorization và storage private. Contract docs/api/week-3.md và MySQL acceptance đạt.",
+      "verified_at": "2026-09-24"
+    },
+    {
+      "wbs": "3.3",
+      "title": "Schema/API lesson_progress, course_progress, completion_rules",
+      "sheet_titles": [
+        "Schema/API lesson_progress, course_progress, completion_rules"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Migration 0002 tạo ba bảng với FK/UNIQUE/CHECK; API completion rule, lesson progress và progress/me. State/position chỉ tăng; aggregate course và audit cập nhật cùng transaction. Unit, migration round-trip và MySQL acceptance kiểm scope/completion đạt; xem progress/week-3-review.md.",
+      "verified_at": "2026-09-24"
     }
   ]
 }

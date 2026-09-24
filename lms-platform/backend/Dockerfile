@@ -23,6 +23,8 @@ RUN --mount=type=secret,id=pip_ca \
     && pip check \
     && (getent group lms || groupadd --gid 10001 lms) \
     && (id lms || useradd --uid 10001 --gid lms --no-create-home lms) \
+    && mkdir -p /var/lib/lms/private \
+    && chown -R 10001:10001 /var/lib/lms \
     && rm -rf /app/backend/src /app/database/migrations
 
 COPY backend/src ./src

@@ -28,7 +28,7 @@ PASSWORD = "week2-acceptance-password"
 
 
 @pytest.fixture
-async def api():
+async def api(tmp_path):
     raw = os.getenv("MYSQL_TEST_ADMIN_URL")
     if not raw:
         pytest.skip("Set MYSQL_TEST_ADMIN_URL for MySQL integration tests")
@@ -41,6 +41,8 @@ async def api():
         db_host_override=None,
         database_url=url.set(database=database).render_as_string(hide_password=False),
         jwt_secret="week2-test-secret-" + uuid4().hex,
+        private_storage_root=tmp_path / "private-storage",
+        max_upload_bytes=1024,
     )
     engine = build_engine(config)
     async with admin.connect() as conn:
@@ -100,8 +102,12 @@ async def api():
                 headers[name] = {"Authorization": "Bearer " + tokens[name]["access_token"]}
 
             async def call(method, path, *, actor="owner", expected=200, **kwargs):
+                request_headers = {
+                    **headers.get(actor, {}),
+                    **kwargs.pop("headers", {}),
+                }
                 response = await client.request(
-                    method, "/api/v1" + path, headers=headers.get(actor, {}), **kwargs
+                    method, "/api/v1" + path, headers=request_headers, **kwargs
                 )
                 assert response.status_code == expected, response.text
                 assert response.headers["x-trace-id"] == response.json()["trace_id"]

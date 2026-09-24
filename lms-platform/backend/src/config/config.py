@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     db_max_overflow: int = Field(default=10, ge=0, le=100)
     db_pool_recycle: int = Field(default=1800, ge=1)
     db_pool_timeout: int = Field(default=30, ge=1)
+    private_storage_root: Path = BACKEND_DIR.parent / "storage" / "private"
+    max_upload_bytes: int = Field(default=25 * 1024 * 1024, ge=1, le=1024 * 1024 * 1024)
 
     @field_validator("database_url")
     @classmethod

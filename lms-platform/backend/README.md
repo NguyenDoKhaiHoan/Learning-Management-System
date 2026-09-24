@@ -8,6 +8,17 @@ SQLAlchemy Core chỉ giữ nhiệm vụ connection pool, async connection, bind
 và transaction trên driver aiomysql; không xây truy vấn bằng biểu thức ORM/Core.
 Alembic tiếp tục quản lý lịch sử schema.
 
+## Checkpoint tuần 3 — WBS 3.1–3.3 — 24/09/2026
+
+Đã triển khai upload file lesson vào kho private với MIME/size/signature validation,
+metadata SHA-256 và authorization khi tải; API link/file resource; migration và API
+`lesson_progress`, `course_progress`, `completion_rules`. Progress không cho lùi trạng thái
+hoặc vị trí và được tổng hợp trong cùng transaction.
+Toàn bộ 65 test backend đạt trên MySQL thật, không skip; Ruff và contract drift đạt.
+
+Contract/endpoint và cấu hình storage tại [API tuần 3](../docs/api/week-3.md).
+Bằng chứng theo task tại [week-3-review.md](../progress/week-3-review.md).
+
 ## Checkpoint tuần 2 — 18/09/2026
 
 Hoàn thành toàn bộ WBS 2.1–2.8: login/refresh rotation/logout/account status;

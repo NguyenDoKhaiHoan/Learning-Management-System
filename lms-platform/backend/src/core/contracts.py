@@ -45,5 +45,5 @@ class AccessToken(BaseModel):
 
 
 ERROR_RESPONSES = {
-    status: {"model": ErrorResponse} for status in (401, 403, 404, 409, 422, 500, 503)
+    status: {"model": ErrorResponse} for status in (401, 403, 404, 409, 413, 422, 500, 503)
 }
