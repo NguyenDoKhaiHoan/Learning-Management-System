@@ -18,11 +18,18 @@ class ProgressService:
         self.repo = ProgressRepository(connection)
 
     async def learner_context(self, course_id: int, *, lock=False):
-        # Reuse the established published-course + ACTIVE-enrollment authorization.
-        await CourseService(self.connection, self.user, self.trace_id).authorize(course_id)
-        enrollment = await self.repo.active_enrollment(
-            course_id, int(self.user.id), lock=lock
-        )
+        if lock:
+            course = await self.repo.fetch_one(
+                "SELECT status FROM courses WHERE id=:id AND deleted_at IS NULL FOR UPDATE",
+                {"id": course_id},
+            )
+            if course is None:
+                raise HTTPException(404)
+            if course["status"] != "PUBLISHED":
+                raise HTTPException(403)
+        else:
+            await CourseService(self.connection, self.user, self.trace_id).authorize(course_id)
+        enrollment = await self.repo.active_enrollment(course_id, int(self.user.id), lock=lock)
         if enrollment is None:
             raise HTTPException(403)
         return enrollment
@@ -33,9 +40,7 @@ class ProgressService:
             raise HTTPException(404)
         current = await self.repo.lesson_progress(enrollment["id"], lesson_id, lock=True)
         old = (
-            LessonProgressStatus(current["status"])
-            if current
-            else LessonProgressStatus.NOT_STARTED
+            LessonProgressStatus(current["status"]) if current else LessonProgressStatus.NOT_STARTED
         )
         target = LessonProgressStatus(status)
         allowed = {
@@ -103,27 +108,53 @@ class ProgressService:
         )
         total = int(counts["total_lessons"] or 0)
         completed = int(counts["completed_lessons"] or 0)
-        percent = (
-            (Decimal(completed) * 100 / Decimal(total)).quantize(Decimal("0.01"))
-            if total
-            else Decimal("0.00")
-        )
         rule = await self.repo.completion_rule(course_id)
         required = Decimal(rule["required_lesson_percent"]) if rule else Decimal("100.00")
-        is_complete = total > 0 and percent >= required
+        needs_assignments = bool(rule["require_submitted_assignments"]) if rule else False
+        assignment_counts = await self.repo.fetch_one(
+            """SELECT COUNT(*) AS total_assignments,
+                      SUM(CASE WHEN EXISTS (
+                        SELECT 1 FROM assignment_submissions s
+                        WHERE s.assignment_id=a.id AND s.enrollment_id=:enrollment
+                      ) THEN 1 ELSE 0 END) AS completed_assignments
+               FROM assignments a WHERE a.course_id=:course AND a.deleted_at IS NULL
+                 AND a.status IN ('PUBLISHED','CLOSED')""",
+            {"course": course_id, "enrollment": enrollment_id},
+        )
+        total_assignments = int(assignment_counts["total_assignments"] or 0)
+        completed_assignments = int(assignment_counts["completed_assignments"] or 0)
+        total_items = total + (total_assignments if needs_assignments else 0)
+        completed_items = completed + (completed_assignments if needs_assignments else 0)
+        percent = (
+            (Decimal(completed_items) * 100 / Decimal(total_items)).quantize(Decimal("0.01"))
+            if total_items
+            else Decimal("0.00")
+        )
+        # The rule uses exact ratios; rounding the displayed percent must not mark
+        # a learner complete when the underlying lesson fraction is still below it.
+        lessons_done = total > 0 and Decimal(completed) * 100 >= required * total
+        assignments_done = not needs_assignments or completed_assignments == total_assignments
+        is_complete = lessons_done and assignments_done
         await self.repo.execute(
             """INSERT INTO course_progress
-               (enrollment_id, completed_lessons, total_lessons, progress_percent, completed_at)
-               VALUES (:enrollment, :completed, :total, :percent,
+               (enrollment_id, completed_lessons, total_lessons,
+                completed_assignments, total_assignments, progress_percent, completed_at)
+               VALUES (:enrollment, :completed, :total,
+                       :completed_assignments, :total_assignments, :percent,
                        CASE WHEN :complete THEN UTC_TIMESTAMP(6) END)
                ON DUPLICATE KEY UPDATE completed_lessons=VALUES(completed_lessons),
-                 total_lessons=VALUES(total_lessons), progress_percent=VALUES(progress_percent),
+                 total_lessons=VALUES(total_lessons),
+                 completed_assignments=VALUES(completed_assignments),
+                 total_assignments=VALUES(total_assignments),
+                 progress_percent=VALUES(progress_percent),
                  completed_at=CASE WHEN :complete
                    THEN COALESCE(completed_at, UTC_TIMESTAMP(6)) ELSE NULL END""",
             {
                 "enrollment": enrollment_id,
                 "completed": completed,
                 "total": total,
+                "completed_assignments": completed_assignments,
+                "total_assignments": total_assignments,
                 "percent": percent,
                 "complete": is_complete,
             },

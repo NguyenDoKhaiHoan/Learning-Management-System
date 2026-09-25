@@ -26,6 +26,9 @@ TABLES = {
     "completion_rules",
     "lesson_progress",
     "course_progress",
+    "assignments",
+    "assignment_submissions",
+    "submission_files",
 }
 
 
@@ -36,9 +39,9 @@ def test_offline_upgrade_and_downgrade() -> None:
     sql = output.getvalue()
     for name in TABLES:
         assert f"CREATE TABLE {name} (" in sql
-    assert sql.count("ENGINE=InnoDB") == 17
-    assert sql.count("ON UPDATE CURRENT_TIMESTAMP(6)") == 17
-    assert sql.count("CHARSET=utf8mb4") == 17
+    assert sql.count("ENGINE=InnoDB") == 20
+    assert sql.count("ON UPDATE CURRENT_TIMESTAMP(6)") == 18
+    assert sql.count("CHARSET=utf8mb4") == 20
     output.truncate(0)
     output.seek(0)
     command.downgrade(config, "0001_p0:base", sql=True)

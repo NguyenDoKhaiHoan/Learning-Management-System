@@ -10,6 +10,7 @@ from src.core.database.database import build_engine
 from src.core.database.health import router as health_router
 from src.core.errors.handlers import register_handlers
 from src.core.middleware.trace import TraceMiddleware, configure_logging
+from src.modules.assignment.presentation.router import router as assignment_router
 from src.modules.course.presentation.router import router as course_router
 from src.modules.enrollment.presentation.router import router as enrollment_router
 from src.modules.file_management.presentation.router import router as file_router
@@ -51,5 +52,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(content_router)
     app.include_router(file_router)
     app.include_router(progress_router)
+    app.include_router(assignment_router)
     app.include_router(enrollment_router)
+    app.include_router(assignment_router)
     return app

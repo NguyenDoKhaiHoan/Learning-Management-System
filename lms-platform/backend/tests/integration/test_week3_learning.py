@@ -168,3 +168,33 @@ async def test_progress_state_machine_completion_rule_and_scope(api):
         } <= actions
         assert await conn.scalar(text("SELECT COUNT(*) FROM lesson_progress")) == 2
         assert await conn.scalar(text("SELECT progress_percent FROM course_progress")) == 100
+
+
+async def test_completion_threshold_uses_exact_ratio_not_rounded_display(api):
+    call, engine, users, _, _ = api
+    cid, mid, first, second = await draft_with_two_lessons(call)
+    third = await call(
+        "POST",
+        f"/courses/{cid}/modules/{mid}/lessons",
+        expected=201,
+        json={"title": "Third", "lesson_type": "ARTICLE", "content": "Final"},
+    )
+    await call("PUT", f"/courses/{cid}/completion-rule", json={"required_lesson_percent": 66.67})
+    await call("POST", f"/courses/{cid}/status", json={"status": "PUBLISHED"})
+    await activate_student(engine, cid, users["student"])
+    for lesson_id in (first, second):
+        result = await call(
+            "PUT",
+            f"/courses/{cid}/lessons/{lesson_id}/progress",
+            actor="student",
+            json={"status": "COMPLETED"},
+        )
+    assert result["course"]["progress_percent"] == 66.67
+    assert result["course"]["completed_at"] is None
+    result = await call(
+        "PUT",
+        f"/courses/{cid}/lessons/{third['id']}/progress",
+        actor="student",
+        json={"status": "COMPLETED"},
+    )
+    assert result["course"]["completed_at"] is not None

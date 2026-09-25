@@ -106,7 +106,7 @@ async def test_mysql_migration_constraints_and_round_trip() -> None:
                 .mappings()
                 .all()
             )
-            assert len(tables) == 17
+            assert len(tables) == 20
             assert all(row["ENGINE"] == "InnoDB" for row in tables)
             assert all(row["TABLE_COLLATION"] == "utf8mb4_unicode_ci" for row in tables)
         await assert_sql_repositories(engine)
