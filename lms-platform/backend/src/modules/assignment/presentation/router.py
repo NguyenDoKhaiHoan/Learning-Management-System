@@ -369,7 +369,7 @@ async def my_submissions(
 
 @router.get(
     "/{assignment_id}/submissions",
-    dependencies=Write,
+    dependencies=Read,
     response_model=SuccessResponse[list[SubmissionOutput]],
 )
 async def list_submissions(

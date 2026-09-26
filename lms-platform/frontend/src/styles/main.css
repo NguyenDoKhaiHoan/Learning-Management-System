@@ -15,8 +15,56 @@ body {
   margin: 0;
 }
 button,
-input {
+input,
+textarea,
+select {
   font: inherit;
+}
+
+textarea {
+  width: 100%;
+  min-height: 110px;
+  resize: vertical;
+  padding: 12px 14px;
+  border: 1px solid #d5ddd5;
+  border-radius: 9px;
+  background: white;
+  color: #243d34;
+  margin-top: 7px;
+}
+
+textarea:focus-visible {
+  outline: 3px solid #bbce6f;
+  outline-offset: 3px;
+}
+
+.check-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.check-field input {
+  width: auto;
+  margin: 0;
+}
+
+.resource-box {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed #d5ddd5;
+}
+
+.submission-history {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid #e3e7dd;
+}
+
+.submission-history summary {
+  margin-bottom: 10px;
 }
 a {
   color: inherit;

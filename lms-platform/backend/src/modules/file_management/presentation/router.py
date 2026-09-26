@@ -41,15 +41,22 @@ class LinkInput(BaseModel):
 
 
 class ResourceOutput(BaseModel):
-    model_config = ConfigDict(coerce_numbers_to_str=True, extra="ignore")
+    model_config = ConfigDict(
+        coerce_numbers_to_str=True,
+        extra="ignore",
+    )
+
     id: str
     lesson_id: str
     title: str
     resource_type: ResourceType
+
     mime_type: str | None = None
     size_bytes: int | None = None
     sha256: str | None = None
     uploaded_by: str | None = None
+
+    url: str | None = None
 
 
 def result(request: Request, data):
@@ -75,7 +82,16 @@ async def list_resources(
     await context(course_id, module_id, lesson_id, request, connection, user)
     rows = await ContentRepository(connection).list_resources(lesson_id)
     for row in rows:
-        row.pop("location", None)
+        location = row.pop(
+        "location",
+        None,
+    )
+
+        row["url"] = (
+        location
+        if row["resource_type"] == ResourceType.LINK
+        else None
+    )
     return result(request, rows)
 
 
@@ -114,8 +130,9 @@ async def create_link(
             "title": body.title,
             "resource_type": ResourceType.LINK,
             "uploaded_by": int(user.id),
+            "url": url,
         },
-    )
+)
 
 
 @router.post(

@@ -52,6 +52,193 @@
         "title": "AccountStatusRequest",
         "type": "object"
       },
+      "AssignmentInput": {
+        "additionalProperties": false,
+        "properties": {
+          "allow_late": {
+            "default": false,
+            "title": "Allow Late",
+            "type": "boolean"
+          },
+          "allowed_mime_types": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Allowed Mime Types",
+            "type": "array"
+          },
+          "description": {
+            "maxLength": 16000,
+            "minLength": 1,
+            "title": "Description",
+            "type": "string"
+          },
+          "due_at": {
+            "format": "date-time",
+            "title": "Due At",
+            "type": "string"
+          },
+          "late_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Late Until"
+          },
+          "max_attempts": {
+            "default": 1,
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Max Attempts",
+            "type": "integer"
+          },
+          "max_file_bytes": {
+            "default": 10485760,
+            "maximum": 1073741824.0,
+            "minimum": 1.0,
+            "title": "Max File Bytes",
+            "type": "integer"
+          },
+          "max_score": {
+            "default": 100,
+            "exclusiveMinimum": 0.0,
+            "maximum": 999999.99,
+            "title": "Max Score",
+            "type": "number"
+          },
+          "opens_at": {
+            "format": "date-time",
+            "title": "Opens At",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "opens_at",
+          "due_at"
+        ],
+        "title": "AssignmentInput",
+        "type": "object"
+      },
+      "AssignmentOutput": {
+        "properties": {
+          "allow_late": {
+            "title": "Allow Late",
+            "type": "boolean"
+          },
+          "allowed_mime_types": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Mime Types",
+            "type": "array"
+          },
+          "course_id": {
+            "title": "Course Id",
+            "type": "string"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "due_at": {
+            "format": "date-time",
+            "title": "Due At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "late_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Late Until"
+          },
+          "max_attempts": {
+            "title": "Max Attempts",
+            "type": "integer"
+          },
+          "max_file_bytes": {
+            "title": "Max File Bytes",
+            "type": "integer"
+          },
+          "max_score": {
+            "title": "Max Score",
+            "type": "number"
+          },
+          "opens_at": {
+            "format": "date-time",
+            "title": "Opens At",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "course_id",
+          "title",
+          "description",
+          "status",
+          "opens_at",
+          "due_at",
+          "allow_late",
+          "late_until",
+          "max_attempts",
+          "max_file_bytes",
+          "allowed_mime_types",
+          "max_score",
+          "created_by"
+        ],
+        "title": "AssignmentOutput",
+        "type": "object"
+      },
+      "AssignmentTransition": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "pattern": "^(PUBLISHED|CLOSED|ARCHIVED)$",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "AssignmentTransition",
+        "type": "object"
+      },
       "CatalogCourse": {
         "properties": {
           "code": {
@@ -90,6 +277,11 @@
       "CompletionRuleInput": {
         "additionalProperties": false,
         "properties": {
+          "require_submitted_assignments": {
+            "default": false,
+            "title": "Require Submitted Assignments",
+            "type": "boolean"
+          },
           "required_lesson_percent": {
             "exclusiveMinimum": 0.0,
             "maximum": 100.0,
@@ -108,6 +300,11 @@
           "course_id": {
             "title": "Course Id",
             "type": "string"
+          },
+          "require_submitted_assignments": {
+            "default": false,
+            "title": "Require Submitted Assignments",
+            "type": "boolean"
           },
           "required_lesson_percent": {
             "exclusiveMinimum": 0.0,
@@ -246,6 +443,10 @@
       },
       "CourseProgressOutput": {
         "properties": {
+          "completed_assignments": {
+            "title": "Completed Assignments",
+            "type": "integer"
+          },
           "completed_at": {
             "anyOf": [
               {
@@ -270,6 +471,10 @@
             "title": "Progress Percent",
             "type": "number"
           },
+          "total_assignments": {
+            "title": "Total Assignments",
+            "type": "integer"
+          },
           "total_lessons": {
             "title": "Total Lessons",
             "type": "integer"
@@ -291,6 +496,8 @@
           "enrollment_id",
           "completed_lessons",
           "total_lessons",
+          "completed_assignments",
+          "total_assignments",
           "progress_percent"
         ],
         "title": "CourseProgressOutput",
@@ -922,6 +1129,17 @@
               }
             ],
             "title": "Uploaded By"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
           }
         },
         "required": [
@@ -976,6 +1194,111 @@
         "title": "StaffOutput",
         "type": "object"
       },
+      "SubmissionFileOutput": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "mime_type": {
+            "title": "Mime Type",
+            "type": "string"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "submission_id": {
+            "title": "Submission Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "submission_id",
+          "title",
+          "mime_type",
+          "size_bytes",
+          "sha256",
+          "created_at"
+        ],
+        "title": "SubmissionFileOutput",
+        "type": "object"
+      },
+      "SubmissionOutput": {
+        "properties": {
+          "answer_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer Text"
+          },
+          "assignment_id": {
+            "title": "Assignment Id",
+            "type": "string"
+          },
+          "enrollment_id": {
+            "title": "Enrollment Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "student_id": {
+            "title": "Student Id",
+            "type": "string"
+          },
+          "submitted_at": {
+            "format": "date-time",
+            "title": "Submitted At",
+            "type": "string"
+          },
+          "submitted_by": {
+            "title": "Submitted By",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "assignment_id",
+          "enrollment_id",
+          "version",
+          "status",
+          "answer_text",
+          "submitted_at",
+          "submitted_by",
+          "student_id"
+        ],
+        "title": "SubmissionOutput",
+        "type": "object"
+      },
       "SuccessResponse_AccessToken_": {
         "properties": {
           "code": {
@@ -1001,6 +1324,33 @@
           "trace_id"
         ],
         "title": "SuccessResponse[AccessToken]",
+        "type": "object"
+      },
+      "SuccessResponse_AssignmentOutput_": {
+        "properties": {
+          "code": {
+            "default": "OK",
+            "title": "Code",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AssignmentOutput"
+          },
+          "message": {
+            "default": "Success",
+            "title": "Message",
+            "type": "string"
+          },
+          "trace_id": {
+            "title": "Trace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "trace_id"
+        ],
+        "title": "SuccessResponse[AssignmentOutput]",
         "type": "object"
       },
       "SuccessResponse_CompletionRuleOutput_": {
@@ -1219,6 +1569,33 @@
         "title": "SuccessResponse[ResourceOutput]",
         "type": "object"
       },
+      "SuccessResponse_SubmissionOutput_": {
+        "properties": {
+          "code": {
+            "default": "OK",
+            "title": "Code",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SubmissionOutput"
+          },
+          "message": {
+            "default": "Success",
+            "title": "Message",
+            "type": "string"
+          },
+          "trace_id": {
+            "title": "Trace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "trace_id"
+        ],
+        "title": "SuccessResponse[SubmissionOutput]",
+        "type": "object"
+      },
       "SuccessResponse_dict_str__bool__": {
         "properties": {
           "code": {
@@ -1279,6 +1656,37 @@
           "trace_id"
         ],
         "title": "SuccessResponse[dict[str, str]]",
+        "type": "object"
+      },
+      "SuccessResponse_list_AssignmentOutput__": {
+        "properties": {
+          "code": {
+            "default": "OK",
+            "title": "Code",
+            "type": "string"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AssignmentOutput"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "message": {
+            "default": "Success",
+            "title": "Message",
+            "type": "string"
+          },
+          "trace_id": {
+            "title": "Trace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "trace_id"
+        ],
+        "title": "SuccessResponse[list[AssignmentOutput]]",
         "type": "object"
       },
       "SuccessResponse_list_CatalogCourse__": {
@@ -1498,6 +1906,68 @@
         "title": "SuccessResponse[list[StaffOutput]]",
         "type": "object"
       },
+      "SuccessResponse_list_SubmissionFileOutput__": {
+        "properties": {
+          "code": {
+            "default": "OK",
+            "title": "Code",
+            "type": "string"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionFileOutput"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "message": {
+            "default": "Success",
+            "title": "Message",
+            "type": "string"
+          },
+          "trace_id": {
+            "title": "Trace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "trace_id"
+        ],
+        "title": "SuccessResponse[list[SubmissionFileOutput]]",
+        "type": "object"
+      },
+      "SuccessResponse_list_SubmissionOutput__": {
+        "properties": {
+          "code": {
+            "default": "OK",
+            "title": "Code",
+            "type": "string"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionOutput"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "message": {
+            "default": "Success",
+            "title": "Message",
+            "type": "string"
+          },
+          "trace_id": {
+            "title": "Trace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "trace_id"
+        ],
+        "title": "SuccessResponse[list[SubmissionOutput]]",
+        "type": "object"
+      },
       "SuccessResponse_list_dict_str__str___": {
         "properties": {
           "code": {
@@ -1561,6 +2031,22 @@
           "trace_id"
         ],
         "title": "SuccessResponse[list[str]]",
+        "type": "object"
+      },
+      "TextSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "answer_text": {
+            "maxLength": 16000,
+            "minLength": 1,
+            "title": "Answer Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "answer_text"
+        ],
+        "title": "TextSubmission",
         "type": "object"
       },
       "TransitionInput": {
@@ -2908,6 +3394,1618 @@
         "summary": "Update Course",
         "tags": [
           "Courses"
+        ]
+      }
+    },
+    "/api/v1/courses/{course_id}/assignments": {
+      "get": {
+        "operationId": "list_assignments_api_v1_courses__course_id__assignments_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_AssignmentOutput__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Assignments",
+        "tags": [
+          "Assignments"
+        ]
+      },
+      "post": {
+        "operationId": "create_assignment_api_v1_courses__course_id__assignments_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_AssignmentOutput_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Assignment",
+        "tags": [
+          "Assignments"
+        ]
+      }
+    },
+    "/api/v1/courses/{course_id}/assignments/{assignment_id}": {
+      "delete": {
+        "operationId": "delete_assignment_api_v1_courses__course_id__assignments__assignment_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Assignment Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_dict_str__str__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Assignment",
+        "tags": [
+          "Assignments"
+        ]
+      },
+      "get": {
+        "operationId": "get_assignment_api_v1_courses__course_id__assignments__assignment_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Assignment Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_AssignmentOutput_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Assignment",
+        "tags": [
+          "Assignments"
+        ]
+      },
+      "put": {
+        "operationId": "update_assignment_api_v1_courses__course_id__assignments__assignment_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Assignment Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_AssignmentOutput_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Assignment",
+        "tags": [
+          "Assignments"
+        ]
+      }
+    },
+    "/api/v1/courses/{course_id}/assignments/{assignment_id}/status": {
+      "post": {
+        "operationId": "transition_assignment_api_v1_courses__course_id__assignments__assignment_id__status_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Assignment Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentTransition"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_AssignmentOutput_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Transition Assignment",
+        "tags": [
+          "Assignments"
+        ]
+      }
+    },
+    "/api/v1/courses/{course_id}/assignments/{assignment_id}/submissions": {
+      "get": {
+        "operationId": "list_submissions_api_v1_courses__course_id__assignments__assignment_id__submissions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Assignment Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_SubmissionOutput__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Submissions",
+        "tags": [
+          "Assignments"
+        ]
+      },
+      "post": {
+        "operationId": "submit_text_api_v1_courses__course_id__assignments__assignment_id__submissions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Assignment Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_SubmissionOutput_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Text",
+        "tags": [
+          "Assignments"
+        ]
+      }
+    },
+    "/api/v1/courses/{course_id}/assignments/{assignment_id}/submissions/file": {
+      "post": {
+        "operationId": "submit_file_api_v1_courses__course_id__assignments__assignment_id__submissions_file_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Assignment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-File-Name",
+            "required": true,
+            "schema": {
+              "maxLength": 255,
+              "minLength": 1,
+              "title": "X-File-Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_SubmissionOutput_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit File",
+        "tags": [
+          "Assignments"
+        ]
+      }
+    },
+    "/api/v1/courses/{course_id}/assignments/{assignment_id}/submissions/mine": {
+      "get": {
+        "operationId": "my_submissions_api_v1_courses__course_id__assignments__assignment_id__submissions_mine_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Assignment Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_SubmissionOutput__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Submissions",
+        "tags": [
+          "Assignments"
+        ]
+      }
+    },
+    "/api/v1/courses/{course_id}/assignments/{assignment_id}/submissions/{submission_id}/files": {
+      "get": {
+        "operationId": "list_submission_files_api_v1_courses__course_id__assignments__assignment_id__submissions__submission_id__files_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Assignment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "submission_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Submission Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_SubmissionFileOutput__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Submission Files",
+        "tags": [
+          "Assignments"
+        ]
+      }
+    },
+    "/api/v1/courses/{course_id}/assignments/{assignment_id}/submissions/{submission_id}/files/{file_id}/content": {
+      "get": {
+        "operationId": "download_submission_file_api_v1_courses__course_id__assignments__assignment_id__submissions__submission_id__files__file_id__content_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Assignment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "submission_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "Submission Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "file_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "maximum": 18446744073709551615,
+              "title": "File Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Download Submission File",
+        "tags": [
+          "Assignments"
         ]
       }
     },

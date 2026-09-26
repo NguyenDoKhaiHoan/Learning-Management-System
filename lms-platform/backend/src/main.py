@@ -54,5 +54,4 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(progress_router)
     app.include_router(assignment_router)
     app.include_router(enrollment_router)
-    app.include_router(assignment_router)
     return app

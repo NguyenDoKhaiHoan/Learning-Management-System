@@ -28,11 +28,25 @@ class AssignmentService(CourseService):
 
     async def manager_assignment(self, course_id, assignment_id, *, write=False):
         course = await self.authorize(course_id, write=write)
+
+        if not await self.is_manager(course):
+            raise HTTPException(403)
+
         if write and course["status"] == "ARCHIVED":
-            raise HTTPException(409, "Archived course cannot be edited")
-        assignment = await self.assignments.assignment(course_id, assignment_id, lock=write)
+            raise HTTPException(
+            409,
+            "Archived course cannot be edited",
+        )
+
+        assignment = await self.assignments.assignment(
+        course_id,
+        assignment_id,
+        lock=write,
+        )
+
         if assignment is None:
             raise HTTPException(404)
+
         return assignment
 
     async def student_assignment(self, course_id, assignment_id, *, write=False):

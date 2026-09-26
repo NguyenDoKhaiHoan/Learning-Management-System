@@ -62,7 +62,9 @@ export interface CourseModule {
   lessons: Lesson[];
 }
 // Send IDs as decimal strings to preserve BIGINT precision; API accepts them.
-export interface ContentOrder { ids: string[]; }
+export interface ContentOrder {
+  ids: string[];
+}
 
 export type EnrollmentStatus = "PENDING" | "ACTIVE" | "SUSPENDED" | "COMPLETED";
 export interface Enrollment {
@@ -81,4 +83,140 @@ export interface CourseStaff {
   username: string;
   role: "INSTRUCTOR" | "ASSISTANT";
 }
-export type CatalogCourse = Pick<Course, "id" | "code" | "title" | "description">;
+export type CatalogCourse = Pick<
+  Course,
+  "id" | "code" | "title" | "description"
+>;
+
+export type LessonResourceType = "LINK" | "FILE";
+
+export interface LessonResource {
+  id: string;
+  lesson_id: string;
+  title: string;
+
+  resource_type: LessonResourceType;
+
+  url?: string | null;
+
+  mime_type?: string | null;
+  size_bytes?: number | null;
+  sha256?: string | null;
+  uploaded_by?: string | null;
+}
+
+export type LessonProgressStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
+
+export interface CompletionRule {
+  course_id: string;
+
+  required_lesson_percent: number;
+
+  require_submitted_assignments: boolean;
+
+  updated_by: string | null;
+  updated_at: string | null;
+}
+
+export interface CourseProgress {
+  enrollment_id: string;
+
+  completed_lessons: number;
+  total_lessons: number;
+
+  completed_assignments: number;
+  total_assignments: number;
+
+  progress_percent: number;
+
+  completed_at: string | null;
+  updated_at: string | null;
+}
+
+export interface ProgressUpdate {
+  lesson: {
+    enrollment_id: string;
+    lesson_id: string;
+
+    status: LessonProgressStatus;
+
+    last_position_seconds: number;
+
+    started_at: string;
+
+    completed_at: string | null;
+
+    updated_at: string;
+  };
+
+  course: CourseProgress;
+}
+
+export type AssignmentStatus = "DRAFT" | "PUBLISHED" | "CLOSED" | "ARCHIVED";
+
+export interface AssignmentInput {
+  title: string;
+
+  description: string;
+
+  opens_at: string;
+  due_at: string;
+
+  allow_late: boolean;
+
+  late_until: string | null;
+
+  max_attempts: number;
+
+  max_file_bytes: number;
+
+  allowed_mime_types: string[];
+
+  max_score: number;
+}
+
+export interface Assignment extends AssignmentInput {
+  id: string;
+
+  course_id: string;
+
+  status: AssignmentStatus;
+
+  created_by: string;
+}
+
+export interface AssignmentSubmission {
+  id: string;
+
+  assignment_id: string;
+
+  enrollment_id: string;
+
+  version: number;
+
+  status: "SUBMITTED" | "LATE";
+
+  answer_text: string | null;
+
+  submitted_at: string;
+
+  submitted_by: string;
+
+  student_id: string;
+}
+
+export interface SubmissionFile {
+  id: string;
+
+  submission_id: string;
+
+  title: string;
+
+  mime_type: string;
+
+  size_bytes: number;
+
+  sha256: string;
+
+  created_at: string;
+}
