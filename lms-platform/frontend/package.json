@@ -4,6 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "seed:demo": "node scripts/seed-showcase.mjs",
+    "dev:demo": "vite --mode demo --host 127.0.0.1 --port 5175",
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",

@@ -23,6 +23,7 @@ import { guardRoute, homeFor } from "../routes/guard";
 import { button, element, field } from "../components/dom";
 
 import "../styles/main.css";
+import "../styles/workspace.css";
 
 const root = document.querySelector<HTMLDivElement>("#app")!;
 
@@ -1017,6 +1018,9 @@ function shell(title: string, subtitle: string, showNotice = true) {
 
         link.href = "#" + path;
 
+        if (location.hash === "#" + path)
+          link.setAttribute("aria-current", "page");
+
         nav.append(link);
       }
   }
@@ -1060,6 +1064,19 @@ function shell(title: string, subtitle: string, showNotice = true) {
 
   header.append(text);
 
+  const date = element(
+    "time",
+    new Intl.DateTimeFormat("vi-VN", {
+      weekday: "long",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(new Date()),
+    "header-date",
+  );
+  date.dateTime = new Date().toISOString();
+  header.append(date);
+
   const messages = element("div");
 
   messages.id = "messages";
@@ -1076,11 +1093,20 @@ function shell(title: string, subtitle: string, showNotice = true) {
 
   body.id = "page-body";
 
+  main.id = "main-content";
+  const skip = element("a", "Đến nội dung chính", "skip-link");
+  skip.href = "#main-content";
+  skip.addEventListener("click", (event) => {
+    event.preventDefault();
+    main.tabIndex = -1;
+    main.focus();
+  });
+
   main.append(header, messages, body);
 
   layout.append(aside, main);
 
-  root.append(layout);
+  root.append(skip, layout);
 
   return body;
 }
@@ -1111,6 +1137,13 @@ function loginPage() {
       "story-footer",
     ),
   );
+
+  const photo = element("img", "", "login-photo");
+  photo.src = "images/library.jpg";
+  photo.alt = "Không gian thư viện với các kệ sách và bàn đọc";
+  photo.width = 1000;
+  photo.height = 667;
+  story.append(photo);
 
   const panel = element("section", "", "login-panel");
 
@@ -1236,6 +1269,37 @@ async function dashboard(
 
   body.append(strip);
 
+  const stats = element("div", "", "dashboard-stats");
+  const counts: [string, number][] = student
+    ? [
+        ["Khóa học đang mở", courses.length],
+        ["Đã ghi danh", enrollments.length],
+        [
+          "Đang học",
+          enrollments.filter((item) => item.status === "ACTIVE").length,
+        ],
+      ]
+    : [
+        ["Tổng khóa học", courses.length],
+        [
+          "Đang mở",
+          courses.filter(
+            (item) => "status" in item && item.status === "PUBLISHED",
+          ).length,
+        ],
+        [
+          "Bản nháp",
+          courses.filter((item) => "status" in item && item.status === "DRAFT")
+            .length,
+        ],
+      ];
+  for (const [label, count] of counts) {
+    const stat = element("div", "", "stat");
+    stat.append(element("span", label), element("strong", String(count)));
+    stats.append(stat);
+  }
+  body.append(stats);
+
   if (student) {
     body.append(element("h2", "Khóa học của tôi"));
 
@@ -1306,6 +1370,29 @@ async function dashboard(
 
   const grid = element("div", "", "course-grid");
 
+  const toolbar = element("div", "", "course-toolbar");
+  const search = field("Tìm khóa học", "course-search", "search", false);
+  const searchInput = search.querySelector("input")!;
+  searchInput.placeholder = "Nhập tên hoặc mã khóa học...";
+  const filterLabel = element("label", "Trạng thái", "field");
+  const filter = element("select");
+  const statuses = student
+    ? ["ALL", "PUBLISHED"]
+    : ["ALL", "DRAFT", "PUBLISHED", "ARCHIVED"];
+  for (const status of statuses) {
+    const option = element(
+      "option",
+      status === "ALL" ? "Tất cả trạng thái" : labels[status],
+    );
+    option.value = status;
+    filter.append(option);
+  }
+  filterLabel.append(filter);
+  const resultCount = element("p", "", "result-count muted");
+  resultCount.setAttribute("aria-live", "polite");
+  toolbar.append(search, filterLabel, resultCount);
+  body.append(toolbar);
+
   if (!courses.length)
     grid.append(
       element(
@@ -1348,12 +1435,38 @@ async function dashboard(
       );
     else action = element("p", labels[enrollment!.status], "muted");
 
-    grid.append(
-      card(course, action, "status" in course ? course.status : "PUBLISHED"),
+    const courseCard = card(
+      course,
+      action,
+      "status" in course ? course.status : "PUBLISHED",
     );
+    courseCard.dataset.search =
+      `${course.code} ${course.title}`.toLocaleLowerCase("vi");
+    courseCard.dataset.status =
+      "status" in course ? course.status : "PUBLISHED";
+    grid.append(courseCard);
   }
 
   body.append(grid);
+
+  const noResults = element("p", "Không tìm thấy khóa học phù hợp.", "empty");
+  noResults.hidden = true;
+  body.append(noResults);
+  const updateResults = () => {
+    const query = searchInput.value.trim().toLocaleLowerCase("vi");
+    let count = 0;
+    for (const item of grid.querySelectorAll<HTMLElement>(".course-card")) {
+      item.hidden =
+        !item.dataset.search!.includes(query) ||
+        (filter.value !== "ALL" && item.dataset.status !== filter.value);
+      if (!item.hidden) count++;
+    }
+    resultCount.textContent = `${count} / ${courses.length} khóa học`;
+    noResults.hidden = count > 0 || courses.length === 0;
+  };
+  searchInput.addEventListener("input", updateResults);
+  filter.addEventListener("change", updateResults);
+  updateResults();
 }
 
 async function coursePage(

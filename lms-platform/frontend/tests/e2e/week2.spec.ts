@@ -108,6 +108,18 @@ test("direct links and role guards; desktop and mobile views", async ({
     path: "test-results/week2-student.png",
     fullPage: true,
   });
+  const visibleCourses = await page.locator(".course-card:visible").count();
+  await page
+    .getByLabel("Tìm khóa học", { exact: true })
+    .fill("no-match-987654321");
+  await expect(page.locator(".course-card:visible")).toHaveCount(0);
+  await expect(
+    page.getByText("Không tìm thấy khóa học phù hợp."),
+  ).toBeVisible();
+  await page.getByLabel("Tìm khóa học", { exact: true }).fill("");
+  await expect(page.locator(".course-card:visible")).toHaveCount(
+    visibleCourses,
+  );
   await page.goto("/#/admin");
   await expect(
     page.getByRole("heading", { name: "Không có quyền truy cập" }),
@@ -141,4 +153,14 @@ test("admin portal and rejected credentials", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Khóa học của bạn" }),
   ).toBeVisible();
+  await page
+    .getByRole("combobox", { name: "Trạng thái", exact: true })
+    .selectOption("DRAFT");
+  await expect(
+    page.locator('.course-card:visible:not([data-status="DRAFT"])'),
+  ).toHaveCount(0);
+  await page
+    .getByRole("combobox", { name: "Trạng thái", exact: true })
+    .selectOption("ALL");
+  await expect(page.locator(".course-card[hidden]")).toHaveCount(0);
 });

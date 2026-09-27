@@ -28,7 +28,7 @@ nếu đổi cổng, đặt `LMS_API_TARGET` tương ứng khi chạy frontend.
 
 | Tài khoản | Vai trò | Mật khẩu demo |
 |---|---|---|
-| demo_admin | ADMIN | LmsDemo-Week2!2026 |
+| demo_admin | ADMIN |  |
 | demo_instructor | INSTRUCTOR | LmsDemo-Week2!2026 |
 | demo_student | STUDENT | LmsDemo-Week2!2026 |
 

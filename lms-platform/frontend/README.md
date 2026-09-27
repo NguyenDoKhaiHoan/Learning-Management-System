@@ -49,7 +49,28 @@ Hướng dẫn đầy đủ: [demo tuần 2](../docs/api/week-2-demo.md).
   sửa/xóa metadata đầy đủ và một số thao tác quản trị vẫn dùng API/Postman.
 - Danh sách demo tải tối đa 100 mục; pagination UI và portal đầy đủ còn thuộc các tuần sau.
 
-## Kiểm tra
+## Dữ liệu mẫu giao diện
+
+Bản showcase dùng database riêng `lms_demo_showcase`, API cổng 8004 và frontend
+cổng 5175. Từ thư mục `backend`, chạy:
+
+```powershell
+$env:LMS_DEMO_DATABASE = 'lms_demo_showcase'
+$env:LMS_DEMO_PORT = '8004'
+../../.venv/Scripts/python -m scripts.run_demo
+```
+
+Từ thư mục `frontend`, chạy `npm run seed:demo`, rồi `npm run dev:demo`.
+Mở http://127.0.0.1:5175 và đăng nhập bằng `demo_student`, `demo_instructor`
+hoặc `demo_admin`; mật khẩu mặc định `LmsDemo-Week2!2026`.
+
+Bộ mẫu gồm 8 khóa học, 24 chương, 48 bài học, 16 bài tập và 3 bài nộp.
+Có khóa học đang mở, bản nháp, lưu trữ; ghi danh đang học, chờ duyệt và tạm ngưng.
+Script bỏ qua các mục đã tồn tại theo mã/tên, không xóa dữ liệu hiện có.
+Chạy `node scripts/check-showcase.mjs` khi hai server đang hoạt động để kiểm tra
+trang danh sách, chi tiết, tiến độ và bố cục mobile; ảnh lưu trong `test-results`.
+
+## Kiểm tra tự động
 
 ```powershell
 npm test
