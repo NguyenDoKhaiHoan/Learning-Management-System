@@ -115,7 +115,7 @@ lms-platform/
 │   └── tests/{unit,integration}/
 ├── database/
 │   ├── migrations/{env.py,script.py.mako,versions/0001_p0.py}
-│   └── schemas/shared/0001_p0.sql       # DDL MySQL để xem/review
+│   └── schemas/shared/lms.sql       # DDL MySQL để xem/review
 ├── compose.yml
 └── infrastructure/scripts/build-backend.ps1
 ```
@@ -230,7 +230,7 @@ Datetime truyền từ application phải là UTC không tzinfo, phù hợp MySQ
 Revision `0001_p0.py` đã áp dụng nên giữ nguyên như lịch sử. File này dùng Alembic
 schema operations (không phải ORM, không import application model). Không sửa lịch sử
 chỉ để thay cách biểu diễn DDL. Có thể xem toàn bộ câu CREATE TABLE/INDEX thuần trong
-`database/schemas/shared/0001_p0.sql` hoặc lệnh xuất SQL bên dưới.
+`database/schemas/shared/lms.sql` hoặc lệnh xuất SQL bên dưới.
 
 Từ nay tạo migration thủ công và viết SQL rõ ràng:
 

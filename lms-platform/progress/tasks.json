@@ -289,6 +289,50 @@
       "progress": 1,
       "evidence": "Migration 0002 tạo ba bảng với FK/UNIQUE/CHECK; API completion rule, lesson progress và progress/me. State/position chỉ tăng; aggregate course và audit cập nhật cùng transaction. Unit, migration round-trip và MySQL acceptance kiểm scope/completion đạt; xem progress/week-3-review.md.",
       "verified_at": "2026-09-24"
+    },
+    {
+      "wbs": "4.1",
+      "title": "Schema/API question bank, category, difficulty và blueprint",
+      "sheet_titles": [
+        "Schema/API question bank, category, difficulty và blueprint"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Migration 0005_week4_exam_gradebook t?o question_banks, questions, question_options, exam_blueprints v? exam_questions; API t?o question bank/question v? g?n blueprint c?u h?i v?o exam. Schema snapshot lms.sql ???c xu?t t? to?n b? migration.",
+      "verified_at": "2026-10-01"
+    },
+    {
+      "wbs": "4.2",
+      "title": "Exam CRUD/publish và eligibility",
+      "sheet_titles": [
+        "Exam CRUD/publish và eligibility"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "API POST exam, publish exam v? eligibility ki?m tra course PUBLISHED, enrollment ACTIVE, c?a s? opens_at/due_at v? max_attempts; migration 0005 ?? ?p d?ng th?nh c?ng tr?n database lms.",
+      "verified_at": "2026-10-01"
+    },
+    {
+      "wbs": "4.3",
+      "title": "Attempt state machine và server timer",
+      "sheet_titles": [
+        "Attempt state machine và server timer"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "API start attempt t?o IN_PROGRESS v?i started_at/expires_at do server t?nh, kh?a enrollment/exam v? gi?i h?n max_attempts; submit chuy?n SUBMITTED ho?c AUTO_SUBMITTED khi h?t h?n.",
+      "verified_at": "2026-10-01"
+    },
+    {
+      "wbs": "4.4",
+      "title": "Autosave đáp án và resume theo policy",
+      "sheet_titles": [
+        "Autosave đáp án và resume theo policy"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "API PUT autosave ??p ?n d?ng UPSERT theo attempt/question, t?ng server_version, cho ph?p resume khi attempt c?n IN_PROGRESS v? t? ch?i sau expiry/submission; unit suite 46 passed, Ruff passed.",
+      "verified_at": "2026-10-01"
     }
   ]
 }

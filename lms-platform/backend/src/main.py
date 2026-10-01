@@ -17,6 +17,7 @@ from src.modules.file_management.presentation.router import router as file_route
 from src.modules.identity_access.presentation.router import router as identity_router
 from src.modules.learning_content.presentation.router import router as content_router
 from src.modules.learning_progress_analytics.presentation.router import router as progress_router
+from src.modules.quiz_exam.presentation.router import router as quiz_exam_router
 from src.modules.user_role.presentation.permissions import router as permission_router
 from src.modules.user_role.presentation.router import router as role_router
 
@@ -52,6 +53,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(content_router)
     app.include_router(file_router)
     app.include_router(progress_router)
+    app.include_router(quiz_exam_router)
     app.include_router(assignment_router)
     app.include_router(enrollment_router)
     return app
