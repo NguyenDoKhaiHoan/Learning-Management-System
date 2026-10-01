@@ -1,8 +1,7 @@
-"""Create/migrate/seed a dedicated demo database and serve the API on localhost:8002."""
+"""Migrate/seed the persistent lms database and serve the API on localhost:8002."""
 
 import asyncio
 import os
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -20,8 +19,8 @@ from src.main import create_app
 async def prepare(settings, database):
     if settings.app_env not in {"development", "test"}:
         raise ValueError("Demo is restricted to development/test")
-    if not re.fullmatch(r"lms_demo_[a-z0-9_]{1,40}", database):
-        raise ValueError("LMS_DEMO_DATABASE must start with lms_demo_ and use a-z, 0-9, underscore")
+    if database not in {"lms", "lms_demo_e2e"}:
+        raise ValueError("Use lms for the application; lms_demo_e2e is reserved for browser tests")
     url = settings.sqlalchemy_url.set(database=database)
     admin = create_async_engine(url._replace(database=None), isolation_level="AUTOCOMMIT")
     try:
@@ -58,14 +57,18 @@ async def prepare(settings, database):
     engine = build_engine(config)
     try:
         async with engine.begin() as connection:
-            await seed_demo(connection, os.getenv("LMS_DEMO_PASSWORD", DEMO_PASSWORD))
+            await seed_demo(
+                connection,
+                os.getenv("LMS_DEMO_PASSWORD", DEMO_PASSWORD),
+                allow_lms=database == "lms",
+            )
     finally:
         await engine.dispose()
     return config
 
 
 if __name__ == "__main__":
-    config = asyncio.run(prepare(Settings(), os.getenv("LMS_DEMO_DATABASE", "lms_demo_week2")))
+    config = asyncio.run(prepare(Settings(), os.getenv("LMS_DEMO_DATABASE", "lms")))
     print("Demo ready: demo_admin / demo_instructor / demo_student. See docs/api/week-2-demo.md.")
     uvicorn.run(
         create_app(config),

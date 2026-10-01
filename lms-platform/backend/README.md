@@ -1,5 +1,13 @@
 # LMS backend — FastAPI + MySQL, truy vấn SQL thuần
 
+Checkpoint tuần 4: WBS 4.1–4.4 (question bank/category/difficulty/blueprint, exam CRUD,
+eligibility, attempt/timer, autosave/resume) đã có API và kiểm thử MySQL thật.
+Xem [hướng dẫn API tuần 4](../docs/api/week-4.md) và
+[bằng chứng kiểm thử](../progress/week-4-review.md).
+Database ứng dụng/demo xuyên suốt là `lms`, revision `0006_exam_policy`.
+File khởi tạo duy nhất: `database/schemas/shared/lms.sql`; xuất lại bằng
+`python -m scripts.export_schema`. Database đang có dữ liệu dùng `alembic upgrade head`.
+
 Theo dõi và đồng bộ tiến độ Google Sheet: xem [progress/README.md](../progress/README.md).
 
 Backend dùng **câu SQL viết trực tiếp** cho SELECT/INSERT/UPDATE/DELETE. Không còn

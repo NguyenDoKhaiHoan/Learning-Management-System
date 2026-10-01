@@ -298,7 +298,7 @@
       ],
       "status": "Đã hoàn thành",
       "progress": 1,
-      "evidence": "Migration 0005_week4_exam_gradebook t?o question_banks, questions, question_options, exam_blueprints v? exam_questions; API t?o question bank/question v? g?n blueprint c?u h?i v?o exam. Schema snapshot lms.sql ???c xu?t t? to?n b? migration.",
+      "evidence": "Bank/category/question APIs, difficulty filters and blueprint selection with course boundaries and insufficient-pool rollback. Migration 0006 and canonical lms.sql import verified on MySQL. All four checks complete: schema, scoped API, acceptance, docs. See week-4-review.md.",
       "verified_at": "2026-10-01"
     },
     {
@@ -309,7 +309,7 @@
       ],
       "status": "Đã hoàn thành",
       "progress": 1,
-      "evidence": "API POST exam, publish exam v? eligibility ki?m tra course PUBLISHED, enrollment ACTIVE, c?a s? opens_at/due_at v? max_attempts; migration 0005 ?? ?p d?ng th?nh c?ng tr?n database lms.",
+      "evidence": "Exam create/list/detail/update/delete Draft, publish guard and live permissions/course scope; eligibility checks Published course, Active enrollment, time window and attempts. Real MySQL acceptance includes CRUD, invalid/cross-course input and audit rollback. See week-4-review.md.",
       "verified_at": "2026-10-01"
     },
     {
@@ -320,7 +320,7 @@
       ],
       "status": "Đã hoàn thành",
       "progress": 1,
-      "evidence": "API start attempt t?o IN_PROGRESS v?i started_at/expires_at do server t?nh, kh?a enrollment/exam v? gi?i h?n max_attempts; submit chuy?n SUBMITTED ho?c AUTO_SUBMITTED khi h?t h?n.",
+      "evidence": "Serialized start permits one active attempt; MySQL UTC timer capped at due_at, immutable question snapshot, idempotent submit and expiry transition on next request. Concurrent-start, timer, future-window and max-attempt acceptance passed. No background expiry worker claimed. See week-4-review.md.",
       "verified_at": "2026-10-01"
     },
     {
@@ -331,7 +331,7 @@
       ],
       "status": "Đã hoàn thành",
       "progress": 1,
-      "evidence": "API PUT autosave ??p ?n d?ng UPSERT theo attempt/question, t?ng server_version, cho ph?p resume khi attempt c?n IN_PROGRESS v? t? ch?i sau expiry/submission; unit suite 46 passed, Ruff passed.",
+      "evidence": "JSON autosave validates question/options and expected_version; stale concurrent writes return 409. Resume restores answers/version/deadline, honors allow_resume and active enrollment; late saves denied. Six week-4 MySQL scenarios passed. See docs/api/week-4.md and week-4-review.md.",
       "verified_at": "2026-10-01"
     }
   ]

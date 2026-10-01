@@ -1,121 +1,205 @@
-"""Question bank and exam MVP APIs for the week 4 assessment flow."""
-# ruff: noqa: E501
-from datetime import UTC, datetime, timedelta
-from typing import Annotated
+"""Question bank, blueprint, exam and attempt API."""
 
-from fastapi import APIRouter, HTTPException, Path, Request
-from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import text
+import random
+from datetime import UTC
+from typing import Literal
+
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 from src.core.contracts import ERROR_RESPONSES, SuccessResponse
 from src.core.database.database import ConnectionDependency
 from src.core.security.dependencies import CurrentUserDependency
-from src.modules.course.application.service import CourseService
+from src.modules.course.presentation.router import Id, Publish, Read, Write
+from src.modules.quiz_exam.application.service import ExamService
 
 router = APIRouter(prefix="/api/v1", tags=["Exams"], responses=ERROR_RESPONSES)
-Id = Annotated[int, Path(gt=0, le=18446744073709551615)]
 
 
-class OptionInput(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+class Input(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+
+class NameInput(Input):
+    name: str = Field(min_length=1, max_length=255)
+
+
+class OptionInput(Input):
     key: str = Field(min_length=1, max_length=16)
     text: str = Field(min_length=1, max_length=4000)
     is_correct: bool = False
 
 
-class QuestionInput(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
-    question_type: str = Field(pattern="^(SINGLE|MULTIPLE|TRUE_FALSE)$")
+class QuestionInput(Input):
+    question_type: Literal["SINGLE", "MULTIPLE", "TRUE_FALSE"]
     prompt: str = Field(min_length=1, max_length=16000)
     explanation: str | None = Field(default=None, max_length=16000)
     points: float = Field(default=1, gt=0, le=999999.99)
-    options: list[OptionInput] = Field(default_factory=list, max_length=20)
+    category_id: int | None = Field(default=None, gt=0)
+    difficulty: Literal["EASY", "MEDIUM", "HARD"] = "MEDIUM"
+    options: list[OptionInput] = Field(min_length=2, max_length=20)
+
+    @model_validator(mode="after")
+    def validate_options(self):
+        correct = sum(o.is_correct for o in self.options)
+        if (
+            len({o.key for o in self.options}) != len(self.options)
+            or not correct
+            or (self.question_type != "MULTIPLE" and correct != 1)
+            or (self.question_type == "TRUE_FALSE" and len(self.options) != 2)
+        ):
+            raise ValueError("Invalid options or correct answer count")
+        return self
 
 
-class BankInput(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
-    name: str = Field(min_length=1, max_length=255)
-    description: str | None = Field(default=None, max_length=16000)
-
-
-class ExamQuestionInput(BaseModel):
+class ExamQuestion(Input):
     question_id: int = Field(gt=0)
     position: int = Field(gt=0)
     points: float = Field(default=1, gt=0, le=999999.99)
 
 
-class ExamInput(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+class Blueprint(Input):
+    bank_id: int = Field(gt=0)
+    category_id: int | None = Field(default=None, gt=0)
+    difficulty: Literal["EASY", "MEDIUM", "HARD"] | None = None
+    question_type: Literal["SINGLE", "MULTIPLE", "TRUE_FALSE"]
+    question_count: int = Field(ge=1, le=1000)
+    points_each: float = Field(gt=0, le=999999.99)
+
+
+class ExamInput(Input):
     title: str = Field(min_length=1, max_length=255)
     instructions: str | None = Field(default=None, max_length=16000)
-    opens_at: datetime
-    due_at: datetime
+    opens_at: AwareDatetime
+    due_at: AwareDatetime
     duration_seconds: int = Field(gt=0, le=86400)
     max_attempts: int = Field(default=1, ge=1, le=100)
     shuffle_questions: bool = False
     show_results: bool = False
     pass_score: float = Field(default=0, ge=0, le=999999.99)
-    questions: list[ExamQuestionInput] = Field(min_length=1, max_length=1000)
+    allow_resume: bool = True
+    questions: list[ExamQuestion] = Field(default_factory=list, max_length=1000)
+    blueprint: list[Blueprint] = Field(default_factory=list, max_length=3)
+
+    @model_validator(mode="after")
+    def validate_exam(self):
+        total = sum(q.points for q in self.questions) + sum(
+            b.points_each * b.question_count for b in self.blueprint
+        )
+        if (
+            self.opens_at >= self.due_at
+            or bool(self.questions) == bool(self.blueprint)
+            or len({q.question_id for q in self.questions}) != len(self.questions)
+            or len({q.position for q in self.questions}) != len(self.questions)
+            or len({b.question_type for b in self.blueprint}) != len(self.blueprint)
+            or total > 999999.99
+            or self.pass_score > total
+        ):
+            raise ValueError("Invalid window, question selection or score")
+        return self
 
 
-class AnswerInput(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    selected_option_ids: list[int] | None = None
-    answer_text: str | None = Field(default=None, max_length=16000)
+class AnswerInput(Input):
+    selected_option_ids: list[int] = Field(default_factory=list, max_length=20)
+    expected_version: int = Field(ge=0)
 
 
-def result(request: Request, data):
+def service(connection, user, request):
+    return ExamService(connection, user, request.state.trace_id)
+
+
+def result(request, data):
     return SuccessResponse(data=data, trace_id=request.state.trace_id)
 
 
-async def manager(connection, user, course_id: int):
-    if not {"ADMIN", "INSTRUCTOR"}.intersection(user.roles):
-        raise HTTPException(403)
-    return await CourseService(connection, user, "week4").authorize(
-        course_id, write=True, draft=True
-    )
-
-
-async def exam_for(connection, exam_id: int, lock: bool = False):
-    suffix = " FOR UPDATE" if lock else ""
-    row = await connection.execute(
-        text(f"SELECT * FROM exams WHERE id=:id{suffix}"), {"id": exam_id}
-    )
-    return row.mappings().first()
-
-
 @router.post(
-    "/courses/{course_id}/question-banks", status_code=201, response_model=SuccessResponse[dict]
+    "/courses/{course_id}/question-banks",
+    dependencies=Write,
+    status_code=201,
+    response_model=SuccessResponse[dict],
 )
 async def create_bank(
     course_id: Id,
-    body: BankInput,
+    body: NameInput,
     request: Request,
     connection: ConnectionDependency,
     user: CurrentUserDependency,
 ):
-    await manager(connection, user, course_id)
-    row = await connection.execute(
-        text(
-            "INSERT INTO question_banks(course_id,name,description,created_by) VALUES (:course,:name,:description,:user)"
-        ),
-        {
-            "course": course_id,
-            "name": body.name,
-            "description": body.description,
-            "user": int(user.id),
-        },
+    s = service(connection, user, request)
+    await s.manager(course_id)
+    id = await s.repo.insert(
+        """INSERT INTO question_banks(course_id,name,created_by)
+        VALUES (:course,:name,:user)""",
+        {"course": course_id, "name": body.name, "user": int(user.id)},
     )
-    bank_id = row.lastrowid
-    await connection.commit()
+    await s.finish("bank.create", "question_bank", id)
+    return result(request, {"id": str(id), "name": body.name})
+
+
+@router.get(
+    "/courses/{course_id}/question-banks",
+    dependencies=Write,
+    response_model=SuccessResponse[list[dict]],
+)
+async def list_banks(
+    course_id: Id, request: Request, connection: ConnectionDependency, user: CurrentUserDependency
+):
+    s = service(connection, user, request)
+    await s.manager(course_id)
     return result(
         request,
-        {"id": str(bank_id), "course_id": str(course_id), **body.model_dump(), "status": "DRAFT"},
+        await s.repo.fetch_all(
+            "SELECT * FROM question_banks WHERE course_id=:id ORDER BY id", {"id": course_id}
+        ),
     )
 
 
 @router.post(
-    "/question-banks/{bank_id}/questions", status_code=201, response_model=SuccessResponse[dict]
+    "/question-banks/{bank_id}/categories",
+    dependencies=Write,
+    status_code=201,
+    response_model=SuccessResponse[dict],
+)
+async def create_category(
+    bank_id: Id,
+    body: NameInput,
+    request: Request,
+    connection: ConnectionDependency,
+    user: CurrentUserDependency,
+):
+    s = service(connection, user, request)
+    await s.bank(bank_id)
+    id = await s.repo.insert(
+        "INSERT INTO question_categories(bank_id,name) VALUES (:bank,:name)",
+        {"bank": bank_id, "name": body.name},
+    )
+    await s.finish("category.create", "question_category", id)
+    return result(request, {"id": str(id), "name": body.name})
+
+
+@router.get(
+    "/question-banks/{bank_id}/categories",
+    dependencies=Write,
+    response_model=SuccessResponse[list[dict]],
+)
+async def list_categories(
+    bank_id: Id, request: Request, connection: ConnectionDependency, user: CurrentUserDependency
+):
+    s = service(connection, user, request)
+    await s.bank(bank_id)
+    return result(
+        request,
+        await s.repo.fetch_all(
+            "SELECT * FROM question_categories WHERE bank_id=:id ORDER BY id", {"id": bank_id}
+        ),
+    )
+
+
+@router.post(
+    "/question-banks/{bank_id}/questions",
+    dependencies=Write,
+    status_code=201,
+    response_model=SuccessResponse[dict],
 )
 async def create_question(
     bank_id: Id,
@@ -124,48 +208,132 @@ async def create_question(
     connection: ConnectionDependency,
     user: CurrentUserDependency,
 ):
-    bank = (
-        (
-            await connection.execute(
-                text("SELECT * FROM question_banks WHERE id=:id"), {"id": bank_id}
-            )
-        )
-        .mappings()
-        .first()
+    s = service(connection, user, request)
+    await s.bank(bank_id)
+    if body.category_id and not await s.repo.fetch_one(
+        "SELECT id FROM question_categories WHERE id=:id AND bank_id=:bank",
+        {"id": body.category_id, "bank": bank_id},
+    ):
+        raise HTTPException(422, "Category outside bank")
+    id = await s.repo.insert(
+        """INSERT INTO questions
+        (bank_id,question_type,prompt,explanation,points,category_id,difficulty,status)
+        VALUES (:bank,:question_type,:prompt,:explanation,:points,:category_id,
+                :difficulty,'PUBLISHED')""",
+        body.model_dump(exclude={"options"}) | {"bank": bank_id},
     )
-    if not bank:
-        raise HTTPException(404)
-    await manager(connection, user, int(bank["course_id"]))
-    row = await connection.execute(
-        text(
-            "INSERT INTO questions(bank_id,question_type,prompt,explanation,points) VALUES (:bank,:type,:prompt,:explanation,:points)"
-        ),
-        {
-            "bank": bank_id,
-            "type": body.question_type,
-            "prompt": body.prompt,
-            "explanation": body.explanation,
-            "points": body.points,
-        },
-    )
-    question_id = row.lastrowid
     for option in body.options:
-        await connection.execute(
-            text(
-                "INSERT INTO question_options(question_id,option_key,option_text,is_correct) VALUES (:question,:key,:text,:correct)"
-            ),
-            {
-                "question": question_id,
-                "key": option.key,
-                "text": option.text,
-                "correct": option.is_correct,
-            },
+        await s.repo.insert(
+            """INSERT INTO question_options
+            (question_id,option_key,option_text,is_correct) VALUES (:id,:key,:text,:is_correct)""",
+            option.model_dump() | {"id": id},
         )
-    await connection.commit()
-    return result(request, {"id": str(question_id), "bank_id": str(bank_id), **body.model_dump()})
+    row = await s.question(id)
+    await s.finish("question.create", "question", id)
+    return result(request, row)
 
 
-@router.post("/courses/{course_id}/exams", status_code=201, response_model=SuccessResponse[dict])
+@router.get(
+    "/question-banks/{bank_id}/questions",
+    dependencies=Write,
+    response_model=SuccessResponse[list[dict]],
+)
+async def list_questions(
+    bank_id: Id,
+    request: Request,
+    connection: ConnectionDependency,
+    user: CurrentUserDependency,
+    difficulty: Literal["EASY", "MEDIUM", "HARD"] | None = None,
+    category_id: int | None = None,
+):
+    s = service(connection, user, request)
+    await s.bank(bank_id)
+    rows = await s.repo.fetch_all(
+        """SELECT id FROM questions WHERE bank_id=:bank
+        AND (:difficulty IS NULL OR difficulty=:difficulty)
+        AND (:category IS NULL OR category_id=:category) ORDER BY id""",
+        {"bank": bank_id, "difficulty": difficulty, "category": category_id},
+    )
+    return result(request, [await s.question(row["id"]) for row in rows])
+
+
+async def detail(s, id):
+    row, _ = await s.exam(id)
+    row["questions"] = await s.repo.fetch_all(
+        "SELECT * FROM exam_questions WHERE exam_id=:id ORDER BY position", {"id": id}
+    )
+    row["blueprint"] = await s.repo.fetch_all(
+        "SELECT * FROM exam_blueprints WHERE exam_id=:id", {"id": id}
+    )
+    return row
+
+
+async def save_exam(s, course_id, body, id=None):
+    await s.manager(course_id)
+    for q in body.questions:
+        row = await s.question(q.question_id)
+        bank = await s.bank(row["bank_id"])
+        if bank["course_id"] != course_id or row["status"] != "PUBLISHED":
+            raise HTTPException(422, "Question outside course or unavailable")
+    for b in body.blueprint:
+        bank = await s.bank(b.bank_id)
+        if bank["course_id"] != course_id:
+            raise HTTPException(422, "Blueprint bank outside course")
+        if b.category_id and not await s.repo.fetch_one(
+            "SELECT id FROM question_categories WHERE id=:id AND bank_id=:bank",
+            {"id": b.category_id, "bank": b.bank_id},
+        ):
+            raise HTTPException(422, "Blueprint category outside bank")
+    values = body.model_dump(exclude={"questions", "blueprint"})
+    for key in ("opens_at", "due_at"):
+        values[key] = values[key].astimezone(UTC).replace(tzinfo=None)
+    # Identifiers come exclusively from fixed schema fields, not client-supplied keys.
+    if id:
+        row, _ = await s.exam(id)
+        if row["course_id"] != course_id:
+            raise HTTPException(404)
+        if row["status"] != "DRAFT":
+            raise HTTPException(409, "Only draft exams can be edited")
+        await s.repo.execute(
+            "UPDATE exams SET " + ",".join(k + "=:" + k for k in values) + " WHERE id=:id",
+            values | {"id": id},
+        )
+        await s.repo.execute("DELETE FROM exam_questions WHERE exam_id=:id", {"id": id})
+        await s.repo.execute("DELETE FROM exam_blueprints WHERE exam_id=:id", {"id": id})
+    else:
+        id = await s.repo.insert(
+            "INSERT INTO exams ("
+            + ",".join(values)
+            + ",course_id,created_by) VALUES ("
+            + ",".join(":" + k for k in values)
+            + ",:course,:user)",
+            values | {"course": course_id, "user": int(s.user.id)},
+        )
+    for q in body.questions:
+        await s.repo.insert(
+            """INSERT INTO exam_questions(exam_id,question_id,position,points)
+            VALUES (:exam,:question_id,:position,:points)""",
+            q.model_dump() | {"exam": id},
+        )
+    for b in body.blueprint:
+        await s.repo.insert(
+            """INSERT INTO exam_blueprints
+            (exam_id,bank_id,category_id,difficulty,question_type,question_count,points_each)
+            VALUES (:exam,:bank_id,:category_id,:difficulty,:question_type,
+                    :question_count,:points_each)""",
+            b.model_dump() | {"exam": id},
+        )
+    row = await detail(s, id)
+    await s.finish("exam.save", "exam", id)
+    return row
+
+
+@router.post(
+    "/courses/{course_id}/exams",
+    dependencies=Write,
+    status_code=201,
+    response_model=SuccessResponse[dict],
+)
 async def create_exam(
     course_id: Id,
     body: ExamInput,
@@ -173,147 +341,159 @@ async def create_exam(
     connection: ConnectionDependency,
     user: CurrentUserDependency,
 ):
-    await manager(connection, user, course_id)
-    if body.opens_at >= body.due_at:
-        raise HTTPException(422, "opens_at must be before due_at")
-    row = await connection.execute(
-        text("""INSERT INTO exams(course_id,title,instructions,opens_at,due_at,duration_seconds,max_attempts,shuffle_questions,show_results,pass_score,created_by)
-        VALUES (:course,:title,:instructions,:opens,:due,:duration,:attempts,:shuffle,:results,:pass,:user)"""),
-        {
-            "course": course_id,
-            "title": body.title,
-            "instructions": body.instructions,
-            "opens": body.opens_at.astimezone(UTC).replace(tzinfo=None),
-            "due": body.due_at.astimezone(UTC).replace(tzinfo=None),
-            "duration": body.duration_seconds,
-            "attempts": body.max_attempts,
-            "shuffle": body.shuffle_questions,
-            "results": body.show_results,
-            "pass": body.pass_score,
-            "user": int(user.id),
-        },
+    return result(request, await save_exam(service(connection, user, request), course_id, body))
+
+
+@router.put(
+    "/courses/{course_id}/exams/{exam_id}", dependencies=Write, response_model=SuccessResponse[dict]
+)
+async def update_exam(
+    course_id: Id,
+    exam_id: Id,
+    body: ExamInput,
+    request: Request,
+    connection: ConnectionDependency,
+    user: CurrentUserDependency,
+):
+    return result(
+        request, await save_exam(service(connection, user, request), course_id, body, exam_id)
     )
-    exam_id = row.lastrowid
-    for question in body.questions:
-        await connection.execute(
-            text(
-                "INSERT INTO exam_questions(exam_id,question_id,position,points) VALUES (:exam,:question,:position,:points)"
-            ),
-            {
-                "exam": exam_id,
-                "question": question.question_id,
-                "position": question.position,
-                "points": question.points,
-            },
+
+
+@router.get(
+    "/courses/{course_id}/exams", dependencies=Read, response_model=SuccessResponse[list[dict]]
+)
+async def list_exams(
+    course_id: Id, request: Request, connection: ConnectionDependency, user: CurrentUserDependency
+):
+    s = service(connection, user, request)
+    course = await s.authorize(course_id)
+    manager = "ADMIN" in user.roles or (
+        "INSTRUCTOR" in user.roles
+        and (
+            course["created_by"] == int(user.id)
+            or await s.repo.fetch_one(
+                "SELECT id FROM course_staff WHERE course_id=:id "
+                "AND user_id=:user AND role='INSTRUCTOR'",
+                {"id": course_id, "user": int(user.id)},
+            )
         )
-    await connection.commit()
+    )
     return result(
         request,
-        {
-            "id": str(exam_id),
-            "course_id": str(course_id),
-            "status": "DRAFT",
-            **body.model_dump(exclude={"questions"}),
-            "questions": body.questions,
-        },
+        await s.repo.fetch_all(
+            """SELECT id,title,status,opens_at,due_at,
+        duration_seconds FROM exams WHERE course_id=:id AND (:manager=1 OR status='PUBLISHED')
+        ORDER BY id""",
+            {"id": course_id, "manager": bool(manager)},
+        ),
     )
 
 
-@router.post("/exams/{exam_id}/publish", response_model=SuccessResponse[dict])
+@router.get("/exams/{exam_id}", dependencies=Write, response_model=SuccessResponse[dict])
+async def get_exam(
+    exam_id: Id, request: Request, connection: ConnectionDependency, user: CurrentUserDependency
+):
+    return result(request, await detail(service(connection, user, request), exam_id))
+
+
+@router.delete("/exams/{exam_id}", dependencies=Write, response_model=SuccessResponse[dict])
+async def delete_exam(
+    exam_id: Id, request: Request, connection: ConnectionDependency, user: CurrentUserDependency
+):
+    s = service(connection, user, request)
+    row, _ = await s.exam(exam_id)
+    if row["status"] != "DRAFT":
+        raise HTTPException(409, "Only draft exams can be deleted")
+    await s.repo.execute("DELETE FROM exams WHERE id=:id", {"id": exam_id})
+    await s.finish("exam.delete", "exam", exam_id)
+    return result(request, {"id": str(exam_id)})
+
+
+@router.post("/exams/{exam_id}/publish", dependencies=Publish, response_model=SuccessResponse[dict])
 async def publish_exam(
     exam_id: Id, request: Request, connection: ConnectionDependency, user: CurrentUserDependency
 ):
-    exam = await exam_for(connection, exam_id)
-    if not exam:
-        raise HTTPException(404)
-    await manager(connection, user, int(exam["course_id"]))
-    await connection.execute(
-        text("UPDATE exams SET status='PUBLISHED' WHERE id=:id AND status='DRAFT'"), {"id": exam_id}
+    s = service(connection, user, request)
+    row, _ = await s.exam(exam_id)
+    if row["status"] != "DRAFT" or row["due_at"] <= await s.now():
+        raise HTTPException(409, "Exam cannot be published")
+    blueprint = await s.repo.fetch_all(
+        "SELECT * FROM exam_blueprints WHERE exam_id=:id", {"id": exam_id}
     )
-    await connection.commit()
+    position = 0
+    for b in blueprint:
+        candidates = await s.repo.fetch_all(
+            """SELECT id FROM questions WHERE bank_id=:bank_id
+            AND status='PUBLISHED' AND question_type=:question_type
+            AND (:category_id IS NULL OR category_id=:category_id)
+            AND (:difficulty IS NULL OR difficulty=:difficulty) ORDER BY id FOR UPDATE""",
+            b,
+        )
+        if len(candidates) < b["question_count"]:
+            raise HTTPException(409, "Insufficient questions for blueprint")
+        for q in random.SystemRandom().sample(candidates, b["question_count"]):
+            position += 1
+            await s.repo.insert(
+                """INSERT INTO exam_questions(exam_id,question_id,position,points)
+                VALUES (:exam,:q,:position,:points)""",
+                {"exam": exam_id, "q": q["id"], "position": position, "points": b["points_each"]},
+            )
+    questions = await s.repo.fetch_all(
+        "SELECT * FROM exam_questions WHERE exam_id=:id", {"id": exam_id}
+    )
+    if not questions or row["pass_score"] > sum(q["points"] for q in questions):
+        raise HTTPException(409, "Invalid exam score or empty exam")
+    for q in questions:
+        question = await s.question(q["question_id"])
+        bank = await s.bank(question["bank_id"])
+        correct = sum(o["is_correct"] for o in question["options"])
+        if (
+            bank["course_id"] != row["course_id"]
+            or question["status"] != "PUBLISHED"
+            or len(question["options"]) < 2
+            or correct < 1
+            or (question["question_type"] != "MULTIPLE" and correct != 1)
+        ):
+            raise HTTPException(409, "Invalid question")
+    await s.repo.execute("UPDATE exams SET status='PUBLISHED' WHERE id=:id", {"id": exam_id})
+    await s.finish("exam.publish", "exam", exam_id)
     return result(request, {"id": str(exam_id), "status": "PUBLISHED"})
 
 
-@router.get("/exams/{exam_id}/eligibility", response_model=SuccessResponse[dict])
+@router.get("/exams/{exam_id}/eligibility", dependencies=Read, response_model=SuccessResponse[dict])
 async def eligibility(
     exam_id: Id, request: Request, connection: ConnectionDependency, user: CurrentUserDependency
 ):
-    row = (
-        (
-            await connection.execute(
-                text("""SELECT x.id,x.status,x.opens_at,x.due_at,x.max_attempts,
-        (SELECT COUNT(*) FROM exam_attempts a WHERE a.exam_id=x.id AND a.enrollment_id=e.id) attempts
-        FROM exams x JOIN enrollments e ON e.course_id=x.course_id AND e.student_id=:user AND e.status='ACTIVE'
-        WHERE x.id=:exam AND x.status='PUBLISHED'"""),
-                {"exam": exam_id, "user": int(user.id)},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    if not row:
-        raise HTTPException(403)
-    now = datetime.now(UTC).replace(tzinfo=None)
-    allowed = row["opens_at"] <= now <= row["due_at"] and row["attempts"] < row["max_attempts"]
-    return result(
-        request,
-        {
-            "exam_id": str(exam_id),
-            "eligible": allowed,
-            "attempts_used": row["attempts"],
-            "max_attempts": row["max_attempts"],
-        },
-    )
+    _, _, _, data = await service(connection, user, request).eligibility(exam_id)
+    await connection.commit()
+    return result(request, data)
 
 
-@router.post("/exams/{exam_id}/attempts", status_code=201, response_model=SuccessResponse[dict])
+@router.post(
+    "/exams/{exam_id}/attempts",
+    dependencies=Read,
+    status_code=201,
+    response_model=SuccessResponse[dict],
+)
 async def start_attempt(
     exam_id: Id, request: Request, connection: ConnectionDependency, user: CurrentUserDependency
 ):
-    row = (
-        (
-            await connection.execute(
-                text("""SELECT x.*,e.id enrollment_id,(SELECT COALESCE(MAX(attempt_no),0)+1 FROM exam_attempts a WHERE a.exam_id=x.id AND a.enrollment_id=e.id) attempt_no
-        FROM exams x JOIN enrollments e ON e.course_id=x.course_id AND e.student_id=:user AND e.status='ACTIVE'
-        WHERE x.id=:exam AND x.status='PUBLISHED' FOR UPDATE"""),
-                {"exam": exam_id, "user": int(user.id)},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    if not row:
-        raise HTTPException(403)
-    now = datetime.now(UTC).replace(tzinfo=None)
-    if now < row["opens_at"] or now > row["due_at"] or row["attempt_no"] > row["max_attempts"]:
-        raise HTTPException(409, "Exam is not available")
-    expires = min(now + timedelta(seconds=row["duration_seconds"]), row["due_at"])
-    attempt = await connection.execute(
-        text("""INSERT INTO exam_attempts(exam_id,enrollment_id,attempt_no,status,started_at,expires_at,max_score)
-        SELECT :exam,:enrollment,:number,'IN_PROGRESS',:started,:expires,COALESCE(SUM(points),0) FROM exam_questions WHERE exam_id=:exam"""),
-        {
-            "exam": exam_id,
-            "enrollment": row["enrollment_id"],
-            "number": row["attempt_no"],
-            "started": now,
-            "expires": expires,
-        },
-    )
-    await connection.commit()
-    return result(
-        request,
-        {
-            "id": str(attempt.lastrowid),
-            "exam_id": str(exam_id),
-            "attempt_no": row["attempt_no"],
-            "status": "IN_PROGRESS",
-            "started_at": now,
-            "expires_at": expires,
-        },
-    )
+    return result(request, await service(connection, user, request).start(exam_id))
 
 
-@router.put("/attempts/{attempt_id}/answers/{question_id}", response_model=SuccessResponse[dict])
+@router.get("/attempts/{attempt_id}", dependencies=Read, response_model=SuccessResponse[dict])
+async def resume_attempt(
+    attempt_id: Id, request: Request, connection: ConnectionDependency, user: CurrentUserDependency
+):
+    return result(request, await service(connection, user, request).view(attempt_id))
+
+
+@router.put(
+    "/attempts/{attempt_id}/answers/{question_id}",
+    dependencies=Read,
+    response_model=SuccessResponse[dict],
+)
 async def autosave(
     attempt_id: Id,
     question_id: Id,
@@ -322,68 +502,15 @@ async def autosave(
     connection: ConnectionDependency,
     user: CurrentUserDependency,
 ):
-    attempt = (
-        (
-            await connection.execute(
-                text("""SELECT a.* FROM exam_attempts a JOIN enrollments e ON e.id=a.enrollment_id
-        WHERE a.id=:attempt AND e.student_id=:user FOR UPDATE"""),
-                {"attempt": attempt_id, "user": int(user.id)},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    if not attempt:
-        raise HTTPException(404)
-    now = datetime.now(UTC).replace(tzinfo=None)
-    if attempt["status"] != "IN_PROGRESS" or now >= attempt["expires_at"]:
-        raise HTTPException(409, "Attempt has expired or was submitted")
-    await connection.execute(
-        text("""INSERT INTO exam_answers(attempt_id,question_id,selected_option_ids,answer_text,answered_at)
-        VALUES (:attempt,:question,:options,:answer,:now)
-        ON DUPLICATE KEY UPDATE selected_option_ids=:options,answer_text=:answer,answered_at=:now"""),
-        {
-            "attempt": attempt_id,
-            "question": question_id,
-            "options": body.selected_option_ids,
-            "answer": body.answer_text,
-            "now": now,
-        },
-    )
-    await connection.execute(
-        text("UPDATE exam_attempts SET server_version=server_version+1 WHERE id=:id"),
-        {"id": attempt_id},
-    )
-    await connection.commit()
     return result(
-        request, {"attempt_id": str(attempt_id), "question_id": str(question_id), "saved_at": now}
+        request, await service(connection, user, request).save(attempt_id, question_id, body)
     )
 
 
-@router.post("/attempts/{attempt_id}/submit", response_model=SuccessResponse[dict])
+@router.post(
+    "/attempts/{attempt_id}/submit", dependencies=Read, response_model=SuccessResponse[dict]
+)
 async def submit_attempt(
     attempt_id: Id, request: Request, connection: ConnectionDependency, user: CurrentUserDependency
 ):
-    attempt = (
-        (
-            await connection.execute(
-                text("""SELECT a.* FROM exam_attempts a JOIN enrollments e ON e.id=a.enrollment_id
-        WHERE a.id=:attempt AND e.student_id=:user FOR UPDATE"""),
-                {"attempt": attempt_id, "user": int(user.id)},
-            )
-        )
-        .mappings()
-        .first()
-    )
-    if not attempt:
-        raise HTTPException(404)
-    if attempt["status"] != "IN_PROGRESS":
-        raise HTTPException(409, "Attempt already submitted")
-    now = datetime.now(UTC).replace(tzinfo=None)
-    status = "AUTO_SUBMITTED" if now >= attempt["expires_at"] else "SUBMITTED"
-    await connection.execute(
-        text("UPDATE exam_attempts SET status=:status,submitted_at=:now WHERE id=:id"),
-        {"status": status, "now": now, "id": attempt_id},
-    )
-    await connection.commit()
-    return result(request, {"id": str(attempt_id), "status": status, "submitted_at": now})
+    return result(request, await service(connection, user, request).submit(attempt_id))

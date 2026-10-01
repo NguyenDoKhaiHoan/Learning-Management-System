@@ -12,9 +12,8 @@ cd lms-platform/backend
 ../../.venv/Scripts/python -m scripts.run_demo
 ```
 
-Lệnh tạo/migrate/seed riêng database `lms_demo_week2` bằng cấu hình kết nối MySQL hiện có
-trong backend/.env rồi mở API tại http://127.0.0.1:8002. Không thay đổi database `lms`.
-Tài khoản kết nối MySQL cần quyền tạo database demo. Chỉ chạy ở development/test.
+Lệnh migrate/seed database `lms` bằng cấu hình MySQL trong backend/.env rồi mở API
+tại http://127.0.0.1:8002. Dữ liệu được dùng xuyên suốt các tuần. Chỉ chạy seed ở development/test.
 
 Terminal 2, từ thư mục gốc repository:
 
@@ -51,11 +50,11 @@ Hướng dẫn đầy đủ: [demo tuần 2](../docs/api/week-2-demo.md).
 
 ## Dữ liệu mẫu giao diện
 
-Bản showcase dùng database riêng `lms_demo_showcase`, API cổng 8004 và frontend
+Bản showcase dùng chung database `lms`, API cổng 8004 và frontend
 cổng 5175. Từ thư mục `backend`, chạy:
 
 ```powershell
-$env:LMS_DEMO_DATABASE = 'lms_demo_showcase'
+$env:LMS_DEMO_DATABASE = 'lms'
 $env:LMS_DEMO_PORT = '8004'
 ../../.venv/Scripts/python -m scripts.run_demo
 ```

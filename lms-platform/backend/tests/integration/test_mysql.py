@@ -62,6 +62,23 @@ async def test_mysql_migration_constraints_and_round_trip() -> None:
     try:
         alembic("upgrade", "head")
         alembic("current")
+        # Import the same canonical snapshot into this disposable schema, never lms.
+        async with engine.connect() as connection:
+            column_sql = text("""SELECT TABLE_NAME,COLUMN_NAME,COLUMN_TYPE,IS_NULLABLE
+                FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE()
+                ORDER BY TABLE_NAME,ORDINAL_POSITION""")
+            expected_columns = (await connection.execute(column_sql)).all()
+        alembic("downgrade", "base")
+        snapshot = (BACKEND.parent / "database/schemas/shared/lms.sql").read_text(encoding="utf-8")
+        snapshot = "\n".join(line for line in snapshot.splitlines() if not line.startswith("--"))
+        async with engine.begin() as connection:
+            await connection.execute(text("DROP TABLE IF EXISTS alembic_version"))
+            for statement in snapshot.split(";"):
+                statement = statement.strip()
+                if not statement or statement.startswith(("CREATE DATABASE", "USE ")):
+                    continue
+                await connection.execute(text(statement))
+            assert (await connection.execute(column_sql)).all() == expected_columns
         async with engine.begin() as connection:
             await connection.execute(
                 text(
@@ -106,7 +123,7 @@ async def test_mysql_migration_constraints_and_round_trip() -> None:
                 .mappings()
                 .all()
             )
-            assert len(tables) == 20
+            assert len(tables) == 30
             assert all(row["ENGINE"] == "InnoDB" for row in tables)
             assert all(row["TABLE_COLLATION"] == "utf8mb4_unicode_ci" for row in tables)
         await assert_sql_repositories(engine)

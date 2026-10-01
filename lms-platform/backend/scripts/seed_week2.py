@@ -17,10 +17,12 @@ DEMO_PASSWORD = "LmsDemo-Week2!2026"
 DEMO_USERS = {"admin": "ADMIN", "instructor": "INSTRUCTOR", "student": "STUDENT"}
 
 
-async def seed_demo(connection, password: str = DEMO_PASSWORD):
+async def seed_demo(connection, password: str = DEMO_PASSWORD, *, allow_lms: bool = False):
     """Caller owns the transaction. Existing demo learning progress is preserved."""
     database = connection.engine.url.database or ""
-    if not database.startswith(("lms_demo_", "lms_test_")):
+    if not (database == "lms" and allow_lms) and not database.startswith(
+        ("lms_demo_", "lms_test_")
+    ):
         raise ValueError("Demo seed requires a database named lms_demo_* or lms_test_*")
     if not 8 <= len(password) <= 128:
         raise ValueError("Demo password must have 8..128 characters")

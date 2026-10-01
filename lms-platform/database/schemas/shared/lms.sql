@@ -1,6 +1,8 @@
--- LMS canonical MySQL schema snapshot.
--- Generated from every Alembic migration through 0005_week4_exam_gradebook.
--- Apply this file to a new database; use Alembic for upgrades to an existing database.
+-- Canonical LMS schema. MySQL 8.0.16+; UTF-8.
+-- Fresh empty lms database only. Existing databases: alembic upgrade head.
+CREATE DATABASE IF NOT EXISTS lms CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE lms;
+SET time_zone = '+00:00';
 
 CREATE TABLE alembic_version (
     version_num VARCHAR(32) NOT NULL, 
@@ -275,7 +277,7 @@ CREATE TABLE completion_rules (
     CONSTRAINT fk_completion_rules_course_id_courses FOREIGN KEY(course_id) REFERENCES courses (id), 
     CONSTRAINT fk_completion_rules_updated_by_users FOREIGN KEY(updated_by) REFERENCES users (id), 
     CONSTRAINT uq_completion_rules_course_id UNIQUE (course_id)
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE lesson_progress (
     enrollment_id BIGINT UNSIGNED NOT NULL, 
@@ -292,7 +294,7 @@ CREATE TABLE lesson_progress (
     CONSTRAINT fk_lesson_progress_enrollment_id_enrollments FOREIGN KEY(enrollment_id) REFERENCES enrollments (id), 
     CONSTRAINT fk_lesson_progress_lesson_id_lessons FOREIGN KEY(lesson_id) REFERENCES lessons (id), 
     CONSTRAINT uq_lesson_progress_enrollment_lesson UNIQUE (enrollment_id, lesson_id)
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_lesson_progress_lesson_id ON lesson_progress (lesson_id);
 
@@ -309,7 +311,7 @@ CREATE TABLE course_progress (
     CONSTRAINT ck_course_progress_values CHECK (completed_lessons <= total_lessons AND progress_percent >= 0 AND progress_percent <= 100), 
     CONSTRAINT fk_course_progress_enrollment_id_enrollments FOREIGN KEY(enrollment_id) REFERENCES enrollments (id), 
     CONSTRAINT uq_course_progress_enrollment_id UNIQUE (enrollment_id)
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 UPDATE alembic_version SET version_num='0002_week3_learning' WHERE alembic_version.version_num = '0001_p0';
 
@@ -345,7 +347,7 @@ CREATE TABLE assignments (
     CONSTRAINT ck_assignments_limits CHECK (max_attempts > 0 AND max_file_bytes > 0 AND max_score > 0), 
     CONSTRAINT fk_assignments_course_id_courses FOREIGN KEY(course_id) REFERENCES courses (id), 
     CONSTRAINT fk_assignments_created_by_users FOREIGN KEY(created_by) REFERENCES users (id)
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_assignments_course_id ON assignments (course_id, status);
 
@@ -368,7 +370,7 @@ CREATE TABLE assignment_submissions (
     CONSTRAINT fk_assignment_submissions_enrollment_id_enrollments FOREIGN KEY(enrollment_id) REFERENCES enrollments (id), 
     CONSTRAINT fk_assignment_submissions_submitted_by_users FOREIGN KEY(submitted_by) REFERENCES users (id), 
     CONSTRAINT uq_assignment_submissions_version UNIQUE (assignment_id, enrollment_id, version)
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_assignment_submissions_enrollment_id ON assignment_submissions (enrollment_id);
 
@@ -384,7 +386,7 @@ CREATE TABLE submission_files (
     PRIMARY KEY (id), 
     CONSTRAINT ck_submission_files_positive_size CHECK (size_bytes > 0), 
     CONSTRAINT fk_submission_files_submission_id_assignment_submissions FOREIGN KEY(submission_id) REFERENCES assignment_submissions (id)
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_submission_files_submission_id ON submission_files (submission_id);
 
@@ -404,7 +406,7 @@ CREATE TABLE question_banks (
     PRIMARY KEY (id), 
     FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE RESTRICT, 
     FOREIGN KEY(created_by) REFERENCES users (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_question_banks_course_status ON question_banks (course_id, status);
 
@@ -421,7 +423,7 @@ CREATE TABLE questions (
     PRIMARY KEY (id), 
     CONSTRAINT ck_questions_positive_points CHECK (points > 0), 
     FOREIGN KEY(bank_id) REFERENCES question_banks (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_questions_bank_status ON questions (bank_id, status);
 
@@ -436,7 +438,7 @@ CREATE TABLE question_options (
     PRIMARY KEY (id), 
     CONSTRAINT uq_question_options_key UNIQUE (question_id, option_key), 
     FOREIGN KEY(question_id) REFERENCES questions (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE exams (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, 
@@ -460,7 +462,7 @@ CREATE TABLE exams (
     CONSTRAINT ck_exams_pass_score CHECK (pass_score >= 0), 
     FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE RESTRICT, 
     FOREIGN KEY(created_by) REFERENCES users (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_exams_course_status ON exams (course_id, status);
 
@@ -476,7 +478,7 @@ CREATE TABLE exam_blueprints (
     CONSTRAINT ck_exam_blueprints_values CHECK (question_count > 0 AND points_each > 0), 
     CONSTRAINT uq_exam_blueprints_type UNIQUE (exam_id, question_type), 
     FOREIGN KEY(exam_id) REFERENCES exams (id) ON DELETE CASCADE
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE exam_questions (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, 
@@ -490,7 +492,7 @@ CREATE TABLE exam_questions (
     CONSTRAINT ck_exam_questions_values CHECK (position > 0 AND points > 0), 
     FOREIGN KEY(exam_id) REFERENCES exams (id) ON DELETE CASCADE, 
     FOREIGN KEY(question_id) REFERENCES questions (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE exam_attempts (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, 
@@ -512,7 +514,7 @@ CREATE TABLE exam_attempts (
     CONSTRAINT uq_exam_attempts_number UNIQUE (exam_id, enrollment_id, attempt_no), 
     FOREIGN KEY(exam_id) REFERENCES exams (id) ON DELETE RESTRICT, 
     FOREIGN KEY(enrollment_id) REFERENCES enrollments (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_exam_attempts_student_status ON exam_attempts (enrollment_id, status);
 
@@ -531,7 +533,7 @@ CREATE TABLE exam_answers (
     CONSTRAINT uq_exam_answers_question UNIQUE (attempt_id, question_id), 
     FOREIGN KEY(attempt_id) REFERENCES exam_attempts (id) ON DELETE CASCADE, 
     FOREIGN KEY(question_id) REFERENCES questions (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE gradebook_entries (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, 
@@ -550,9 +552,39 @@ CREATE TABLE gradebook_entries (
     CONSTRAINT uq_gradebook_assessment UNIQUE (enrollment_id, assessment_type, assessment_id), 
     FOREIGN KEY(enrollment_id) REFERENCES enrollments (id) ON DELETE RESTRICT, 
     FOREIGN KEY(graded_by) REFERENCES users (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_gradebook_entries_enrollment_status ON gradebook_entries (enrollment_id, status);
 
 UPDATE alembic_version SET version_num='0005_week4_exam_gradebook' WHERE alembic_version.version_num = '0004_week3_submissions';
+
+-- Running upgrade 0005_week4_exam_gradebook -> 0006_exam_policy
+
+CREATE TABLE question_categories (
+        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        bank_id BIGINT UNSIGNED NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        UNIQUE KEY uq_category_bank_name(bank_id, name),
+        FOREIGN KEY (bank_id) REFERENCES question_banks(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE questions
+        ADD category_id BIGINT UNSIGNED NULL,
+        ADD difficulty ENUM('EASY','MEDIUM','HARD') NOT NULL DEFAULT 'MEDIUM',
+        ADD CONSTRAINT fk_questions_category FOREIGN KEY(category_id)
+        REFERENCES question_categories(id);
+
+ALTER TABLE exams ADD allow_resume BOOLEAN NOT NULL DEFAULT TRUE;
+
+ALTER TABLE exam_blueprints
+        ADD bank_id BIGINT UNSIGNED NULL,
+        ADD category_id BIGINT UNSIGNED NULL,
+        ADD difficulty ENUM('EASY','MEDIUM','HARD') NULL,
+        ADD CONSTRAINT fk_blueprint_bank FOREIGN KEY(bank_id) REFERENCES question_banks(id),
+        ADD CONSTRAINT fk_blueprint_category FOREIGN KEY(category_id)
+        REFERENCES question_categories(id);
+
+ALTER TABLE exam_attempts ADD question_snapshot JSON NULL;
+
+UPDATE alembic_version SET version_num='0006_exam_policy' WHERE alembic_version.version_num = '0005_week4_exam_gradebook';
 

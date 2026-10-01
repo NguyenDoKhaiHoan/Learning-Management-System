@@ -20,10 +20,10 @@ npm run dev
 ```
 
 Frontend: http://127.0.0.1:5173. API: http://127.0.0.1:8002/docs.
-Database `lms_demo_week2` được tạo riêng, migrate head rồi seed trong một transaction;
-không sửa dữ liệu database `lms`. Script dùng thông tin MySQL trong backend/.env,
-chỉ cho phép môi trường development/test và tên DB `lms_demo_*`.
-Đổi tên demo bằng `LMS_DEMO_DATABASE`, cổng API bằng `LMS_DEMO_PORT`;
+Từ tuần 4, database ứng dụng và demo đều là `lms`, migrate head rồi seed trong một transaction.
+Script dùng thông tin MySQL trong backend/.env và chỉ cho phép môi trường development/test.
+`LMS_DEMO_DATABASE=lms` là mặc định; chỉ E2E dùng database kiểm thử riêng.
+Đổi cổng API bằng `LMS_DEMO_PORT`;
 nếu đổi cổng, đặt `LMS_API_TARGET` tương ứng khi chạy frontend.
 
 | Tài khoản | Vai trò | Mật khẩu demo |
