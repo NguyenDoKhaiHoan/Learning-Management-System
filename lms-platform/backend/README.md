@@ -1,10 +1,14 @@
 # LMS backend — FastAPI + MySQL, truy vấn SQL thuần
 
-Checkpoint tuần 4: WBS 4.1–4.4 (question bank/category/difficulty/blueprint, exam CRUD,
-eligibility, attempt/timer, autosave/resume) đã có API và kiểm thử MySQL thật.
+Checkpoint 02/10/2026: WBS 4.1–4.6 có question bank/blueprint, exam/attempt,
+autosave/resume, submit/auto-submit/auto-grading và grade items/draft/publish/revise/
+feedback/history. Worker deadline chạy cùng API; version/audit/scope guard bảo vệ điểm.
 Xem [hướng dẫn API tuần 4](../docs/api/week-4.md) và
-[bằng chứng kiểm thử](../progress/week-4-review.md).
-Database ứng dụng/demo xuyên suốt là `lms`, revision `0006_exam_policy`.
+[bằng chứng grading/regression](../progress/week-4-grading-review.md).
+Database ứng dụng/demo xuyên suốt là `lms`; migration head mới **0007_grading**.
+MySQL80 local đang stopped, nên lms port 3306 vẫn ở revision 0006 và cần nâng migration
+trước khi chạy API mới. Đã kiểm chứng trên MySQL riêng: 87 test full suite và 2 case
+bổ sung; 18 scenario tuần 4. Frontend 11 unit/3 browser E2E và build đạt.
 File khởi tạo duy nhất: `database/schemas/shared/lms.sql`; xuất lại bằng
 `python -m scripts.export_schema`. Database đang có dữ liệu dùng `alembic upgrade head`.
 

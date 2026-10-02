@@ -1,7 +1,8 @@
 """Application factory. Schema changes are exclusively managed by Alembic."""
 
+import asyncio
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI
 
@@ -10,10 +11,12 @@ from src.core.database.database import build_engine
 from src.core.database.health import router as health_router
 from src.core.errors.handlers import register_handlers
 from src.core.middleware.trace import TraceMiddleware, configure_logging
+from src.jobs.processors.exam_expiry import run_expiry_worker
 from src.modules.assignment.presentation.router import router as assignment_router
 from src.modules.course.presentation.router import router as course_router
 from src.modules.enrollment.presentation.router import router as enrollment_router
 from src.modules.file_management.presentation.router import router as file_router
+from src.modules.gradebook.presentation.router import router as gradebook_router
 from src.modules.identity_access.presentation.router import router as identity_router
 from src.modules.learning_content.presentation.router import router as content_router
 from src.modules.learning_progress_analytics.presentation.router import router as progress_router
@@ -30,9 +33,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         engine = build_engine(settings)
         app.state.db_engine = engine
+        worker = asyncio.create_task(run_expiry_worker(engine))
         try:
             yield
         finally:
+            worker.cancel()
+            with suppress(asyncio.CancelledError):
+                await worker
             await engine.dispose()
 
     app = FastAPI(
@@ -54,6 +61,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(file_router)
     app.include_router(progress_router)
     app.include_router(quiz_exam_router)
+    app.include_router(gradebook_router)
     app.include_router(assignment_router)
     app.include_router(enrollment_router)
     return app

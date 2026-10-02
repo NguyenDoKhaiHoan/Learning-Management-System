@@ -1,4 +1,4 @@
-# Tuần 4: WBS 4.1–4.4
+# Tuần 4: WBS 4.1–4.6
 
 Ứng dụng và demo dùng database **lms** xuyên suốt. Chạy tại `backend`:
 
@@ -58,10 +58,96 @@ câu hỏi/option ngoài đề trả 422. Gửi mảng rỗng để xóa lựa c
 trong lúc đang làm; vẫn cho phép save/submit từ phiên đang mở.
 
 State: IN_PROGRESS → SUBMITTED hoặc AUTO_SUBMITTED. Submit lặp lại là idempotent.
-Hết hạn được ghi nhận khi đọc attempt/eligibility hoặc thao tác attempt kế tiếp;
-không có worker tự quét nền trong phạm vi 4.1–4.4. Server luôn từ chối đáp án đến muộn.
-Auto-grading, công bố điểm và UI thi không được đánh dấu hoàn thành trong checkpoint này.
+Hết hạn được ghi nhận khi đọc attempt/eligibility hoặc thao tác attempt kế tiếp.
+Từ WBS 4.5, lifespan API chạy worker quét deadline mỗi 5 giây, tối đa 100 attempt/lượt.
+Worker không cần Student còn online hoặc enrollment còn Active. Khi API khởi động lại,
+worker xử lý các attempt quá hạn còn lại; thời điểm nộp tự động luôn là `expires_at`.
+Server luôn từ chối đáp án đến muộn.
 
 Acceptance: `tests/integration/test_week4_exams.py` kiểm MySQL thật cho blueprint,
 CRUD, validation/scope, timer, autosave/resume, snapshot, cạnh tranh request,
 suspension và rollback khi audit lỗi. OpenAPI được xuất trong shared/contracts/openapi.json.
+
+## WBS 4.5 — submit/auto-submit và auto-grading
+
+Submit và worker dùng chung thao tác đóng bài/chấm điểm trong một transaction.
+Khóa course → enrollment → exam → attempt → grade giữ nhất quán giữa autosave,
+submit và nhiều worker. Các truy vấn đáp án/điểm dùng locking read để đọc commit mới
+nhất sau khi chờ khóa, tránh snapshot cũ do authentication đã bắt đầu transaction.
+Gọi submit lại không tăng version, không chấm lại, không tạo lịch sử/audit trùng.
+Audit lỗi làm rollback cả trạng thái, đáp án đã chấm, điểm và lịch sử.
+
+Chấm SINGLE/MULTIPLE/TRUE_FALSE bằng tập option đúng trong `question_snapshot`:
+đúng toàn bộ tập được đủ điểm, sai/thừa/thiếu/bỏ trống được 0. Không có điểm từng phần.
+Điểm dùng Decimal, tối đa 2 chữ số thập phân; input điểm có độ chính xác cao hơn bị 422.
+`exam_answers` lưu `is_correct`/`points_awarded`; attempt lưu score và graded_at nội bộ.
+Student không nhận answer key hoặc score từ API attempt.
+
+Auto-grading tạo grade DRAFT và grade item theo từng câu. Với nhiều lần thi, lấy điểm
+cao nhất khi grade vẫn là nháp tự động; điểm bằng nhau giữ lần trước. Instructor đã sửa
+nháp hoặc công bố thì các lần thi tiếp theo vẫn được chấm nhưng không ghi đè grade đó.
+Instructor điều chỉnh qua API grade. Không tự công bố điểm khi submit.
+
+Có thể chạy worker riêng tại backend: `python -m src.jobs.processors.exam_expiry`.
+API tự chạy worker nên local/demo/Docker không cần thêm service để tự nộp bài.
+Legacy attempt không có question_snapshot không được tự suy ra đáp án hoặc điểm;
+cần xử lý riêng trước khi sử dụng grading cho dữ liệu trước migration 0006.
+
+## WBS 4.6 — grade items, draft/publish/revise, feedback/history
+
+| Chức năng | API |
+|---|---|
+| Tạo grade thủ công | POST `/courses/{course_id}/grades` |
+| List grade quản lý | GET `/courses/{course_id}/grades` |
+| Chi tiết grade quản lý | GET `/grades/{grade_id}` |
+| Sửa nháp | PUT `/grades/{grade_id}` |
+| Công bố | POST `/grades/{grade_id}/publish` |
+| Sửa điểm đã công bố | POST `/grades/{grade_id}/revise` |
+| Lịch sử quản lý | GET `/grades/{grade_id}/history` |
+| Điểm đã công bố của mình | GET `/courses/{course_id}/grades/me` |
+
+Tạo thủ công cần `assessment_type` (ASSIGNMENT/EXAM), `assessment_id`, `enrollment_id`,
+`source_id` (submission/attempt đã nộp đúng học viên và assessment), `feedback`, `items`.
+Auto-grade EXAM đã tồn tại thì sửa nháp bằng PUT, không tạo thêm bản ghi.
+Mỗi item có `item_key`, `label`, `score`, `max_score`, `feedback`; key duy nhất,
+`0 <= score <= max_score`, tổng maximum phải bằng maximum của assessment/source.
+Điểm grade được tính từ tổng items, client không gửi một score tổng độc lập.
+
+Ví dụ sửa nháp:
+
+```json
+{
+  "expected_version": 1,
+  "feedback": "Đã kiểm tra bài làm",
+  "items": [
+    {"item_key": "overall", "label": "Kết quả", "score": 8, "max_score": 10,
+     "feedback": "Cần trình bày rõ hơn"}
+  ]
+}
+```
+
+Publish nhận `{"expected_version":2}`. Revise dùng payload sửa nháp và thêm `reason`
+không rỗng. Mỗi thay đổi tăng version; version cũ trả 409. Retry publish cùng version
+trước/sau lần publish gần nhất trả lại grade và không thêm lịch sử.
+Không sửa trực tiếp Published: revise đưa về DRAFT, ẩn điểm với Student đến khi công bố lại.
+Mỗi revision lưu snapshot đầy đủ grade/items/feedback, actor, reason và timestamp;
+history chỉ có thao tác INSERT, không có endpoint sửa/xóa lịch sử.
+
+Quản lý cần Admin/Instructor + course.write + owner/course_staff; publish cần
+course.publish. Student chỉ đọc grade Published của enrollment của mình, course
+Published và enrollment Active/Completed; enrollment Suspended không đọc được.
+`show_results` của exam chưa mở answer-key review: công bố grade là điều kiện hiển thị
+điểm/feedback, đáp án đúng không được trả cho Student.
+
+Migration `0007_grading` bổ sung grade_items, grade_history, feedback/source/version và
+graded_at; snapshot lms.sql và OpenAPI đã cập nhật. Tích hợp điểm với completion (4.7)
+và giao diện thi/điểm thuộc các task tiếp theo.
+
+Demo API tự kiểm chứng trên MySQL tạm (cần MYSQL_TEST_ADMIN_URL):
+
+```powershell
+python -m pytest tests/integration/test_week4_grading.py -v
+```
+
+Kịch bản `test_grade_draft_publish_revise_history_and_visibility` chạy
+exam → autosave → submit/chấm → sửa nháp → công bố → Student xem điểm → sửa/công bố lại.

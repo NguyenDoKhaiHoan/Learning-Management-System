@@ -38,3 +38,22 @@ Checkpoint: 24/09/2026. Phạm vi này chỉ gồm ba task đầu tuần 3 trên
 
 Google Sheet chưa được ghi trong lần triển khai này. `tasks.json` là checkpoint local; chỉ chạy
 preview/`--apply` khi có yêu cầu đồng bộ riêng.
+
+## Rà soát 02/10/2026 — WBS 3.4–3.8
+
+- **3.4:** completion rule và aggregate lesson/assignment tính trong cùng transaction;
+  state/position không lùi; test hoàn thành lesson → nộp bài → progress 50% → 100% đạt.
+- **3.5:** assignment create/list/detail/update/delete Draft, publish/close/archive,
+  cửa sổ mở/deadline và allow_late/late_until; manager trên Course Published; scope guard.
+- **3.6:** bài nộp text/file có version mới bất biến, submitted_at/status/submitted_by,
+  MIME/size/private storage; request đồng thời không vượt attempt limit.
+- **3.7:** manager xem submission/file trong course của mình; Student chỉ xem bài của
+  mình; user ngoài course/enrollment suspended bị chặn; rollback khi audit lỗi.
+- **3.8:** 5 MySQL assignment acceptance gồm lifecycle, version/late/file, deadline/
+  rollback, cạnh tranh attempt và demo learning → submission → progress.
+  Đã bổ sung hướng dẫn demo chạy lại tại docs/api/week-3.md.
+
+Full backend regression **87 passed** trên MySQL thật, không skip; frontend **11 unit**,
+**3 browser E2E** và build đạt. Sau đó thêm 2 case concurrency grading, tổng 89 test
+backend khác nhau đã đạt. Chi tiết môi trường tại week-4-grading-review.md.
+WBS 3.4–3.8 được bổ sung tracking đúng tên trên Master Plan để đồng bộ F/G theo yêu cầu.

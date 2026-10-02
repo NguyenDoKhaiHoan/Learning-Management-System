@@ -2,6 +2,7 @@
 
 import random
 from datetime import UTC
+from decimal import Decimal
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Request
@@ -34,7 +35,7 @@ class QuestionInput(Input):
     question_type: Literal["SINGLE", "MULTIPLE", "TRUE_FALSE"]
     prompt: str = Field(min_length=1, max_length=16000)
     explanation: str | None = Field(default=None, max_length=16000)
-    points: float = Field(default=1, gt=0, le=999999.99)
+    points: Decimal = Field(default=Decimal("1"), gt=0, max_digits=8, decimal_places=2)
     category_id: int | None = Field(default=None, gt=0)
     difficulty: Literal["EASY", "MEDIUM", "HARD"] = "MEDIUM"
     options: list[OptionInput] = Field(min_length=2, max_length=20)
@@ -55,7 +56,7 @@ class QuestionInput(Input):
 class ExamQuestion(Input):
     question_id: int = Field(gt=0)
     position: int = Field(gt=0)
-    points: float = Field(default=1, gt=0, le=999999.99)
+    points: Decimal = Field(default=Decimal("1"), gt=0, max_digits=8, decimal_places=2)
 
 
 class Blueprint(Input):
@@ -64,7 +65,7 @@ class Blueprint(Input):
     difficulty: Literal["EASY", "MEDIUM", "HARD"] | None = None
     question_type: Literal["SINGLE", "MULTIPLE", "TRUE_FALSE"]
     question_count: int = Field(ge=1, le=1000)
-    points_each: float = Field(gt=0, le=999999.99)
+    points_each: Decimal = Field(gt=0, max_digits=8, decimal_places=2)
 
 
 class ExamInput(Input):
@@ -76,7 +77,7 @@ class ExamInput(Input):
     max_attempts: int = Field(default=1, ge=1, le=100)
     shuffle_questions: bool = False
     show_results: bool = False
-    pass_score: float = Field(default=0, ge=0, le=999999.99)
+    pass_score: Decimal = Field(default=Decimal("0"), ge=0, max_digits=8, decimal_places=2)
     allow_resume: bool = True
     questions: list[ExamQuestion] = Field(default_factory=list, max_length=1000)
     blueprint: list[Blueprint] = Field(default_factory=list, max_length=3)

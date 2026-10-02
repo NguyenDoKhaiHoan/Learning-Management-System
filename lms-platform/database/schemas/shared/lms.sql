@@ -588,3 +588,47 @@ ALTER TABLE exam_attempts ADD question_snapshot JSON NULL;
 
 UPDATE alembic_version SET version_num='0006_exam_policy' WHERE alembic_version.version_num = '0005_week4_exam_gradebook';
 
+-- Running upgrade 0006_exam_policy -> 0007_grading
+
+ALTER TABLE exam_attempts ADD graded_at DATETIME(6) NULL;
+
+ALTER TABLE gradebook_entries
+        ADD feedback TEXT NULL,
+        ADD version INT UNSIGNED NOT NULL DEFAULT 1,
+        ADD source_attempt_id BIGINT UNSIGNED NULL,
+        ADD source_submission_id BIGINT UNSIGNED NULL,
+        ADD CONSTRAINT fk_grade_attempt FOREIGN KEY(source_attempt_id) REFERENCES exam_attempts(id),
+        ADD CONSTRAINT fk_grade_submission FOREIGN KEY(source_submission_id)
+            REFERENCES assignment_submissions(id);
+
+CREATE TABLE grade_items (
+        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        grade_id BIGINT UNSIGNED NOT NULL,
+        item_key VARCHAR(64) NOT NULL,
+        label TEXT NOT NULL,
+        score DECIMAL(8,2) NOT NULL,
+        max_score DECIMAL(8,2) NOT NULL,
+        feedback TEXT NULL,
+        UNIQUE KEY uq_grade_item(grade_id,item_key),
+        CONSTRAINT ck_grade_item_score CHECK(max_score>0 AND score>=0 AND score<=max_score),
+        FOREIGN KEY(grade_id) REFERENCES gradebook_entries(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE grade_history (
+        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        grade_id BIGINT UNSIGNED NOT NULL,
+        version INT UNSIGNED NOT NULL,
+        action ENUM('AUTO_GRADE','DRAFT','PUBLISH','REVISE') NOT NULL,
+        actor_id BIGINT UNSIGNED NULL,
+        reason TEXT NULL,
+        snapshot JSON NOT NULL,
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        UNIQUE KEY uq_grade_history_version(grade_id,version),
+        FOREIGN KEY(grade_id) REFERENCES gradebook_entries(id),
+        FOREIGN KEY(actor_id) REFERENCES users(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX ix_attempt_expiry ON exam_attempts(status,expires_at);
+
+UPDATE alembic_version SET version_num='0007_grading' WHERE alembic_version.version_num = '0006_exam_policy';
+

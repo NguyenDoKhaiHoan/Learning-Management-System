@@ -121,6 +121,13 @@ lms-platform/
 
 ## 7. Trạng thái hiện tại
 
+Checkpoint 02/10/2026: WBS 4.1–4.6 có API question/exam/attempt, autosave/resume,
+submit/worker deadline/auto-grading và grade draft/publish/revise/feedback/history.
+Rà soát các task trước bằng 87 backend tests full suite và 2 case concurrency bổ sung,
+11 frontend unit tests, 3 browser E2E tests và build. WBS 3.4–3.8 được bổ sung tracking
+theo bằng chứng code/acceptance/demo; xem [review grading](lms-platform/progress/week-4-grading-review.md).
+Migration mới 0007 cần áp dụng khi MySQL80 local hoạt động; lần kiểm chứng dùng MySQL riêng.
+
 Backend dùng FastAPI và MySQL SQL thuần, không ORM. Tuần 1 đã có schema 14 bảng, migration Alembic, healthcheck/Docker, JWT/RBAC skeleton, error contract, JSON logging/trace ID, shared contracts và cấu hình CI/PR template. Xem [hướng dẫn backend](lms-platform/backend/README.md) và [scope MVP](lms-platform/docs/architecture/week-1-scope.md).
 
 Tuần 2 đã hoàn thành cả 8 task: auth, phân quyền, CRUD khóa học/nội dung, publish,

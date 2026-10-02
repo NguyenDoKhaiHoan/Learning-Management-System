@@ -1,5 +1,11 @@
 # Tiến độ LMS ↔ Google Sheet
 
+Checkpoint mới nhất **02/10/2026**: WBS 4.5–4.6 hoàn thành submit/worker/auto-grading
+và grade items/draft/publish/revise/feedback/history; regression phần trước đạt.
+Bổ sung tracking 3.4–3.8 sau đối chiếu code/acceptance/demo. Xem
+[week-4-grading-review.md](week-4-grading-review.md) và [week-3-review.md](week-3-review.md).
+Tổng 37 task theo dõi đạt 100%; task 4.7–4.8 và các tuần sau giữ trạng thái trên sheet.
+
 Đây là nơi lưu link và trạng thái được xác minh để mỗi lần bạn yêu cầu **“cập nhật
 tiến độ LMS lên Google Sheet”**, trợ lý đọc cấu hình, kiểm tra phần vừa làm và đồng bộ.
 Không cần sửa từng ô trên Google Sheet. Đây là công cụ chạy theo yêu cầu, chưa có

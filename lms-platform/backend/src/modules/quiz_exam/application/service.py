@@ -7,6 +7,7 @@ from datetime import timedelta
 from fastapi import HTTPException
 
 from src.modules.course.application.service import CourseService
+from src.modules.quiz_exam.application.grading import AttemptGrader
 
 
 class ExamService(CourseService):
@@ -66,24 +67,16 @@ class ExamService(CourseService):
             raise HTTPException(404)
         row["options"] = await self.repo.fetch_all(
             """SELECT id,option_key,option_text,is_correct FROM question_options
-               WHERE question_id=:id ORDER BY id""",
+               WHERE question_id=:id ORDER BY id FOR UPDATE""",
             {"id": id},
         )
         return row
 
     async def expire(self, attempt, now):
         if attempt["status"] == "IN_PROGRESS" and now >= attempt["expires_at"]:
-            await self.repo.execute(
-                """UPDATE exam_attempts SET status='AUTO_SUBMITTED',
-                submitted_at=expires_at,server_version=server_version+1 WHERE id=:id""",
-                {"id": attempt["id"]},
+            await AttemptGrader(self.connection, int(self.user.id), self.trace_id).finalize(
+                attempt, automatic=True
             )
-            attempt.update(
-                status="AUTO_SUBMITTED",
-                submitted_at=attempt["expires_at"],
-                server_version=attempt["server_version"] + 1,
-            )
-            await self.audit("attempt.expire", "exam_attempt", attempt["id"])
 
     async def eligibility(self, id):
         exam, enrollment = await self.exam(id, student=True)
@@ -194,6 +187,7 @@ class ExamService(CourseService):
         if row["status"] != "IN_PROGRESS":
             row["remaining_seconds"] = 0
         row.pop("score", None)
+        row.pop("graded_at", None)
         await self.connection.commit()
         return row
 
@@ -216,6 +210,10 @@ class ExamService(CourseService):
         ):
             raise HTTPException(422, "Invalid options")
         now = await self.now()
+        await self.expire(row, now)
+        if row["status"] != "IN_PROGRESS":
+            await self.connection.commit()
+            raise HTTPException(409, "Attempt closed")
         await self.repo.execute(
             """INSERT INTO exam_answers
             (attempt_id,question_id,selected_option_ids,answered_at)
@@ -233,12 +231,8 @@ class ExamService(CourseService):
 
     async def submit(self, id):
         row, _ = await self.attempt(id)
-        if row["status"] == "IN_PROGRESS":
-            await self.repo.execute(
-                """UPDATE exam_attempts SET status='SUBMITTED',
-                submitted_at=UTC_TIMESTAMP(6),server_version=server_version+1 WHERE id=:id""",
-                {"id": id},
-            )
-            await self.audit("attempt.submit", "exam_attempt", id)
+        await AttemptGrader(self.connection, int(self.user.id), self.trace_id).finalize(
+            row, automatic=(await self.now()) >= row["expires_at"]
+        )
         await self.connection.commit()
         return await self.view(id, resume=False)

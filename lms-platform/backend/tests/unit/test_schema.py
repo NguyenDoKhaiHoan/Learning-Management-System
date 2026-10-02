@@ -39,6 +39,8 @@ TABLES = {
     "exam_attempts",
     "exam_answers",
     "gradebook_entries",
+    "grade_items",
+    "grade_history",
 }
 
 
@@ -54,7 +56,7 @@ def test_offline_upgrade_and_downgrade() -> None:
     assert sql.count("CHARSET=utf8mb4") == len(TABLES)
     output.truncate(0)
     output.seek(0)
-    command.downgrade(config, "0006_exam_policy:base", sql=True)
+    command.downgrade(config, "0007_grading:base", sql=True)
     for name in TABLES:
         assert f"DROP TABLE {name};" in output.getvalue()
 
