@@ -113,6 +113,9 @@ export interface CompletionRule {
   required_lesson_percent: number;
 
   require_submitted_assignments: boolean;
+  require_published_assignment_grades: boolean;
+  require_published_exam_grades: boolean;
+  minimum_grade_percent: number;
 
   updated_by: string | null;
   updated_at: string | null;
@@ -126,6 +129,9 @@ export interface CourseProgress {
 
   completed_assignments: number;
   total_assignments: number;
+  passed_assignments: number;
+  total_exams: number;
+  passed_exams: number;
 
   progress_percent: number;
 

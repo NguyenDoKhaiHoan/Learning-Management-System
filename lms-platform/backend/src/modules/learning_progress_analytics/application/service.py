@@ -97,55 +97,94 @@ class ProgressService:
         return lesson, course
 
     async def refresh_course(self, course_id: int, enrollment_id: int):
-        counts = await self.repo.fetch_one(
-            """SELECT COUNT(*) AS total_lessons,
-                      SUM(CASE WHEN lp.status='COMPLETED' THEN 1 ELSE 0 END) AS completed_lessons
-               FROM lessons l JOIN modules m ON m.id=l.module_id
-               LEFT JOIN lesson_progress lp ON lp.lesson_id=l.id
-                    AND lp.enrollment_id=:enrollment
-               WHERE m.course_id=:course AND m.deleted_at IS NULL AND l.deleted_at IS NULL""",
-            {"course": course_id, "enrollment": enrollment_id},
+        # All callers serialize on course -> enrollment before these current reads.
+        # Locking reads also see commits made after authentication's SQL snapshot.
+        params = {"course": course_id, "enrollment": enrollment_id}
+        lessons = await self.repo.fetch_all(
+            """SELECT l.id, lp.status FROM lessons l JOIN modules m ON m.id=l.module_id
+            LEFT JOIN lesson_progress lp ON lp.lesson_id=l.id AND lp.enrollment_id=:enrollment
+            WHERE m.course_id=:course AND m.deleted_at IS NULL AND l.deleted_at IS NULL
+            FOR UPDATE""",
+            params,
         )
-        total = int(counts["total_lessons"] or 0)
-        completed = int(counts["completed_lessons"] or 0)
+        total = len(lessons)
+        completed = sum(row["status"] == "COMPLETED" for row in lessons)
         rule = await self.repo.completion_rule(course_id)
-        required = Decimal(rule["required_lesson_percent"]) if rule else Decimal("100.00")
-        needs_assignments = bool(rule["require_submitted_assignments"]) if rule else False
-        assignment_counts = await self.repo.fetch_one(
-            """SELECT COUNT(*) AS total_assignments,
-                      SUM(CASE WHEN EXISTS (
-                        SELECT 1 FROM assignment_submissions s
-                        WHERE s.assignment_id=a.id AND s.enrollment_id=:enrollment
-                      ) THEN 1 ELSE 0 END) AS completed_assignments
-               FROM assignments a WHERE a.course_id=:course AND a.deleted_at IS NULL
-                 AND a.status IN ('PUBLISHED','CLOSED')""",
-            {"course": course_id, "enrollment": enrollment_id},
+        required = Decimal(rule["required_lesson_percent"]) if rule else Decimal("100")
+        needs_assignments = bool(rule and rule["require_submitted_assignments"])
+        needs_assignment_grades = bool(rule and rule["require_published_assignment_grades"])
+        needs_exam_grades = bool(rule and rule["require_published_exam_grades"])
+        minimum = Decimal(rule["minimum_grade_percent"]) if rule else Decimal("50")
+        assignments = await self.repo.fetch_all(
+            """SELECT id FROM assignments WHERE course_id=:course AND deleted_at IS NULL
+            AND status IN ('PUBLISHED','CLOSED') FOR UPDATE""",
+            params,
         )
-        total_assignments = int(assignment_counts["total_assignments"] or 0)
-        completed_assignments = int(assignment_counts["completed_assignments"] or 0)
-        total_items = total + (total_assignments if needs_assignments else 0)
-        completed_items = completed + (completed_assignments if needs_assignments else 0)
+        submissions = await self.repo.fetch_all(
+            "SELECT assignment_id FROM assignment_submissions WHERE enrollment_id=:enrollment "
+            "FOR UPDATE",
+            params,
+        )
+        exams = await self.repo.fetch_all(
+            "SELECT id FROM exams WHERE course_id=:course AND status IN ('PUBLISHED','CLOSED') "
+            "FOR UPDATE",
+            params,
+        )
+        grades = await self.repo.fetch_all(
+            """SELECT assessment_type,assessment_id,score,max_score FROM gradebook_entries
+            WHERE enrollment_id=:enrollment AND status='PUBLISHED' FOR UPDATE""",
+            params,
+        )
+        passed = {
+            (g["assessment_type"], g["assessment_id"])
+            for g in grades
+            if g["score"] is not None
+            and g["max_score"] > 0
+            and g["score"] * 100 >= minimum * g["max_score"]
+        }
+        submitted = {s["assignment_id"] for s in submissions}
+        total_assignments = len(assignments)
+        completed_assignments = sum(a["id"] in submitted for a in assignments)
+        passed_assignments = sum(("ASSIGNMENT", a["id"]) in passed for a in assignments)
+        total_exams = len(exams)
+        passed_exams = sum(("EXAM", e["id"]) in passed for e in exams)
+        # One assessment counts once even if both submission and grade gates are enabled.
+        assignment_done = sum(
+            (not needs_assignments or a["id"] in submitted)
+            and (not needs_assignment_grades or ("ASSIGNMENT", a["id"]) in passed)
+            for a in assignments
+        )
+        count_assignments = needs_assignments or needs_assignment_grades
+        total_items = total + (total_assignments if count_assignments else 0)
+        total_items += total_exams if needs_exam_grades else 0
+        completed_items = completed + (assignment_done if count_assignments else 0)
+        completed_items += passed_exams if needs_exam_grades else 0
         percent = (
             (Decimal(completed_items) * 100 / Decimal(total_items)).quantize(Decimal("0.01"))
             if total_items
-            else Decimal("0.00")
+            else Decimal("0")
         )
-        # The rule uses exact ratios; rounding the displayed percent must not mark
-        # a learner complete when the underlying lesson fraction is still below it.
         lessons_done = total > 0 and Decimal(completed) * 100 >= required * total
-        assignments_done = not needs_assignments or completed_assignments == total_assignments
-        is_complete = lessons_done and assignments_done
+        assignments_done = not count_assignments or assignment_done == total_assignments
+        exams_done = not needs_exam_grades or passed_exams == total_exams
+        is_complete = lessons_done and assignments_done and exams_done
         await self.repo.execute(
             """INSERT INTO course_progress
                (enrollment_id, completed_lessons, total_lessons,
-                completed_assignments, total_assignments, progress_percent, completed_at)
+                completed_assignments, total_assignments, passed_assignments,
+                total_exams, passed_exams,
+                progress_percent, completed_at)
                VALUES (:enrollment, :completed, :total,
-                       :completed_assignments, :total_assignments, :percent,
+                       :completed_assignments, :total_assignments, :passed_assignments,
+                       :total_exams,
+                       :passed_exams, :percent,
                        CASE WHEN :complete THEN UTC_TIMESTAMP(6) END)
                ON DUPLICATE KEY UPDATE completed_lessons=VALUES(completed_lessons),
                  total_lessons=VALUES(total_lessons),
                  completed_assignments=VALUES(completed_assignments),
                  total_assignments=VALUES(total_assignments),
+                 passed_assignments=VALUES(passed_assignments), total_exams=VALUES(total_exams),
+                 passed_exams=VALUES(passed_exams),
                  progress_percent=VALUES(progress_percent),
                  completed_at=CASE WHEN :complete
                    THEN COALESCE(completed_at, UTC_TIMESTAMP(6)) ELSE NULL END""",
@@ -155,6 +194,9 @@ class ProgressService:
                 "total": total,
                 "completed_assignments": completed_assignments,
                 "total_assignments": total_assignments,
+                "passed_assignments": passed_assignments,
+                "total_exams": total_exams,
+                "passed_exams": passed_exams,
                 "percent": percent,
                 "complete": is_complete,
             },

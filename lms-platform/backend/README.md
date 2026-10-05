@@ -1,5 +1,11 @@
 # LMS backend — FastAPI + MySQL, truy vấn SQL thuần
 
+Checkpoint **05/10/2026**: hoàn thành WBS **4.7–4.8**, tuần 4 đạt 100%.
+Completion theo điểm assignment/exam Published; demo API thực trên database `lms`
+đã nâng migration **0008**. Kiểm chứng 90 backend tests, 11 frontend unit tests và build.
+Xem [review](../progress/week-4-completion-review.md).
+
+
 Checkpoint 02/10/2026: WBS 4.1–4.6 có question bank/blueprint, exam/attempt,
 autosave/resume, submit/auto-submit/auto-grading và grade items/draft/publish/revise/
 feedback/history. Worker deadline chạy cùng API; version/audit/scope guard bảo vệ điểm.

@@ -410,6 +410,28 @@
       "progress": 1,
       "evidence": "Migration 0007 grade_items/history and scoped draft/publish/revise/feedback APIs; immutable revision snapshots, source validation and optimistic versions. Student sees only own Published grade; concurrent revision cannot leak Draft. Twelve grading MySQL scenarios passed; schema round-trip/snapshot and docs/contracts verified. See week-4-grading-review.md.",
       "verified_at": "2026-10-02"
+    },
+    {
+      "wbs": "4.7",
+      "title": "Tích hợp điểm assignment/exam và completion",
+      "sheet_titles": [
+        "Tích hợp điểm assignment/exam và completion"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Migration 0008, opt-in published assignment/exam grade gates and Decimal minimum percentage. Publish/revise refresh course completion atomically; draft/below-threshold results cannot complete a course. Real MySQL acceptance with rollback and scope verified; see week-4-completion-review.md.",
+      "verified_at": "2026-10-05"
+    },
+    {
+      "wbs": "4.8",
+      "title": "Test và demo exam → chấm → công bố → xem điểm",
+      "sheet_titles": [
+        "Test và demo exam → chấm → công bố → xem điểm"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "90 backend tests passed without skips, 21 week3/4 regression scenarios, schema round-trip/canonical import, 11 frontend unit tests and build passed. scripts.demo_week4 ran successfully on main lms: exam submit, hidden Draft, publication, Student score 10/10 and completion. See week-4-completion-review.md.",
+      "verified_at": "2026-10-05"
     }
   ]
 }

@@ -151,3 +151,17 @@ python -m pytest tests/integration/test_week4_grading.py -v
 
 Kịch bản `test_grade_draft_publish_revise_history_and_visibility` chạy
 exam → autosave → submit/chấm → sửa nháp → công bố → Student xem điểm → sửa/công bố lại.
+# Checkpoint 05/10/2026 — completion theo kết quả assessment
+
+`PUT /api/v1/courses/{id}/completion-rule` khi course Draft hỗ trợ
+`require_published_assignment_grades`, `require_published_exam_grades` (mặc định false)
+và `minimum_grade_percent` (0–100, mặc định 50), cùng hai trường rule cũ.
+Grade nháp không được tính. Điểm Published cần `score * 100 >= minimum * max_score`.
+Publish/revise tự cập nhật course_progress trong cùng transaction. Course completion
+không thay Enrollment.status. Assignment/exam PUBLISHED hoặc CLOSED được tính;
+assessment Draft/Archived được bỏ qua. Gate trên tập assessment rỗng được thỏa,
+nhưng vẫn phải có lesson và đạt tỷ lệ lesson đã cấu hình.
+
+`GET /api/v1/courses/{id}/progress/me` thêm `passed_assignments`, `total_exams`,
+`passed_exams`; không tiết lộ điểm nháp. Demo API thực trên database lms:
+`python -m scripts.demo_week4`. Bằng chứng: progress/week-4-completion-review.md.

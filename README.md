@@ -1,5 +1,11 @@
 # Learning Management System (LMS)
 
+Checkpoint **05/10/2026**: hoàn thành WBS **4.7–4.8**, tuần 4 đạt 100%.
+Completion theo điểm assignment/exam Published; demo API thực trên database `lms`
+đã nâng migration **0008**. Kiểm chứng 90 backend tests, 11 frontend unit tests và build.
+Xem [review](lms-platform/progress/week-4-completion-review.md).
+
+
 ## 1. Mục đích hệ thống
 
 Learning Management System là nền tảng quản lý hoạt động dạy và học trực tuyến. Hệ thống hỗ trợ quản trị người dùng, tổ chức khóa học, phân phối nội dung, giao và nộp bài, kiểm tra trực tuyến, chấm điểm, trao đổi và báo cáo tiến độ học tập.

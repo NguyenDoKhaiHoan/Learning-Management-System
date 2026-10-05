@@ -7,6 +7,7 @@ from fastapi import HTTPException
 
 from src.modules.course.application.service import CourseService
 from src.modules.gradebook.infrastructure.repository import GradeRepository
+from src.modules.learning_progress_analytics.application.service import ProgressService
 
 
 class GradeService(CourseService):
@@ -48,9 +49,10 @@ class GradeService(CourseService):
             raise HTTPException(404)
         await self.scope(row["course_id"], row["enrollment_id"])
         await self.assessment(row["course_id"], row["assessment_type"], row["assessment_id"])
-        return await self.grades.fetch_one(
+        grade = await self.grades.fetch_one(
             "SELECT * FROM gradebook_entries WHERE id=:id FOR UPDATE", {"id": id}
         )
+        return grade | {"course_id": row["course_id"]}
 
     def items(self, body, max_score):
         items = [item.model_dump() for item in body.items]
@@ -113,6 +115,11 @@ class GradeService(CourseService):
         await self.connection.commit()
         return row
 
+    async def refresh_completion(self, grade):
+        await ProgressService(self.connection, self.user, self.trace_id).refresh_course(
+            grade["course_id"], grade["enrollment_id"]
+        )
+
     async def edit(self, id, body, revise=False):
         grade = await self.locked(id)
         if grade["version"] != body.expected_version:
@@ -134,6 +141,7 @@ class GradeService(CourseService):
             self.trace_id,
             body.reason if revise else None,
         )
+        await self.refresh_completion(grade)
         await self.connection.commit()
         return row
 
@@ -154,6 +162,7 @@ class GradeService(CourseService):
             {"id": id},
         )
         row = await self.grades.record(id, "PUBLISH", int(self.user.id), self.trace_id)
+        await self.refresh_completion(grade)
         await self.connection.commit()
         return row
 

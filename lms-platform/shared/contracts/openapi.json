@@ -374,6 +374,23 @@
       "CompletionRuleInput": {
         "additionalProperties": false,
         "properties": {
+          "minimum_grade_percent": {
+            "default": 50,
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Minimum Grade Percent",
+            "type": "number"
+          },
+          "require_published_assignment_grades": {
+            "default": false,
+            "title": "Require Published Assignment Grades",
+            "type": "boolean"
+          },
+          "require_published_exam_grades": {
+            "default": false,
+            "title": "Require Published Exam Grades",
+            "type": "boolean"
+          },
           "require_submitted_assignments": {
             "default": false,
             "title": "Require Submitted Assignments",
@@ -397,6 +414,23 @@
           "course_id": {
             "title": "Course Id",
             "type": "string"
+          },
+          "minimum_grade_percent": {
+            "default": 50,
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Minimum Grade Percent",
+            "type": "number"
+          },
+          "require_published_assignment_grades": {
+            "default": false,
+            "title": "Require Published Assignment Grades",
+            "type": "boolean"
+          },
+          "require_published_exam_grades": {
+            "default": false,
+            "title": "Require Published Exam Grades",
+            "type": "boolean"
           },
           "require_submitted_assignments": {
             "default": false,
@@ -564,12 +598,24 @@
             "title": "Enrollment Id",
             "type": "string"
           },
+          "passed_assignments": {
+            "title": "Passed Assignments",
+            "type": "integer"
+          },
+          "passed_exams": {
+            "title": "Passed Exams",
+            "type": "integer"
+          },
           "progress_percent": {
             "title": "Progress Percent",
             "type": "number"
           },
           "total_assignments": {
             "title": "Total Assignments",
+            "type": "integer"
+          },
+          "total_exams": {
+            "title": "Total Exams",
             "type": "integer"
           },
           "total_lessons": {
@@ -595,6 +641,9 @@
           "total_lessons",
           "completed_assignments",
           "total_assignments",
+          "passed_assignments",
+          "total_exams",
+          "passed_exams",
           "progress_percent"
         ],
         "title": "CourseProgressOutput",

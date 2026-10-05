@@ -25,6 +25,9 @@ class CompletionRuleInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
     required_lesson_percent: float = Field(gt=0, le=100)
     require_submitted_assignments: bool = False
+    require_published_assignment_grades: bool = False
+    require_published_exam_grades: bool = False
+    minimum_grade_percent: float = Field(default=50, ge=0, le=100)
 
 
 class CompletionRuleOutput(CompletionRuleInput):
@@ -58,6 +61,9 @@ class CourseProgressOutput(BaseModel):
     total_lessons: int
     completed_assignments: int
     total_assignments: int
+    passed_assignments: int
+    total_exams: int
+    passed_exams: int
     progress_percent: float
     completed_at: datetime | None = None
     updated_at: datetime | None = None
@@ -111,16 +117,25 @@ async def put_completion_rule(
     repo = ProgressRepository(connection)
     await repo.execute(
         """INSERT INTO completion_rules
-           (course_id, required_lesson_percent, require_submitted_assignments, updated_by)
-           VALUES (:course, :percent, :assignments, :user)
+           (course_id, required_lesson_percent, require_submitted_assignments, updated_by,
+            require_published_assignment_grades, require_published_exam_grades,
+            minimum_grade_percent)
+           VALUES (:course, :percent, :assignments, :user, :assignment_grades,
+                   :exam_grades, :minimum)
            ON DUPLICATE KEY UPDATE required_lesson_percent=VALUES(required_lesson_percent),
              require_submitted_assignments=VALUES(require_submitted_assignments),
-             updated_by=VALUES(updated_by)""",
+             updated_by=VALUES(updated_by),
+             require_published_assignment_grades=VALUES(require_published_assignment_grades),
+             require_published_exam_grades=VALUES(require_published_exam_grades),
+             minimum_grade_percent=VALUES(minimum_grade_percent)""",
         {
             "course": course_id,
             "percent": body.required_lesson_percent,
             "assignments": body.require_submitted_assignments,
             "user": int(user.id),
+            "assignment_grades": body.require_published_assignment_grades,
+            "exam_grades": body.require_published_exam_grades,
+            "minimum": body.minimum_grade_percent,
         },
     )
     await service.audit("completion_rule.update", "course", course_id)

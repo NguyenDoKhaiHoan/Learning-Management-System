@@ -32,8 +32,9 @@ class ProgressRepository(SqlRepository):
     async def completion_rule(self, course_id: int):
         return await self.fetch_one(
             """SELECT course_id, required_lesson_percent,
-                      require_submitted_assignments, updated_by, updated_at
-               FROM completion_rules WHERE course_id=:course""",
+                      require_submitted_assignments, require_published_assignment_grades,
+                      require_published_exam_grades, minimum_grade_percent, updated_by, updated_at
+               FROM completion_rules WHERE course_id=:course FOR UPDATE""",
             {"course": course_id},
         )
 
@@ -41,6 +42,7 @@ class ProgressRepository(SqlRepository):
         return await self.fetch_one(
             """SELECT enrollment_id, completed_lessons, total_lessons,
                       completed_assignments, total_assignments,
+                      passed_assignments, total_exams, passed_exams,
                       progress_percent, completed_at, updated_at
                FROM course_progress WHERE enrollment_id=:enrollment""",
             {"enrollment": enrollment_id},
