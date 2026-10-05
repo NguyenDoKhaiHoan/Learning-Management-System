@@ -23,6 +23,40 @@ export interface CurrentUser {
   roles: string[];
 }
 
+export interface AdminUser {
+  id: string;
+  email: string;
+  username: string;
+  status: "ACTIVE" | "INACTIVE" | "LOCKED";
+  roles: string[];
+  created_at: string;
+  updated_at: string;
+}
+export interface UserPage {
+  items: AdminUser[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+export interface CourseReport {
+  id: string;
+  code: string;
+  title: string;
+  status: CourseStatus;
+  enrollments: number;
+  active_enrollments: number;
+  completed_learners: number;
+  draft_grades: number;
+  submissions: number;
+}
+export interface DashboardReport {
+  totals: Record<string, number>;
+  courses: CourseReport[];
+  total_courses: number;
+  limit: number;
+  offset: number;
+}
+
 export interface AccessToken {
   access_token: string;
   refresh_token: string;

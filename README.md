@@ -1,9 +1,11 @@
 # Learning Management System (LMS)
 
-Checkpoint **05/10/2026**: hoàn thành WBS **4.7–4.8**, tuần 4 đạt 100%.
-Completion theo điểm assignment/exam Published; demo API thực trên database `lms`
-đã nâng migration **0008**. Kiểm chứng 90 backend tests, 11 frontend unit tests và build.
-Xem [review](lms-platform/progress/week-4-completion-review.md).
+Checkpoint **05/10/2026**: tuần 4 đạt 100%; hoàn thành thêm **5.1–5.3**:
+layout/routing/UI states, Admin users/roles/reports và Instructor dashboard/content builder.
+Database chính `lms` ở migration **0008**, thêm 8 course mẫu.
+Kiểm chứng **93 backend tests, 11 unit frontend, 7 browser E2E**, build/lint đạt.
+Xem [review tuần 4](lms-platform/progress/week-4-completion-review.md)
+và [review tuần 5](lms-platform/progress/week-5-review.md).
 
 
 ## 1. Mục đích hệ thống

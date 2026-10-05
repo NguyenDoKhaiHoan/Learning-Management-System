@@ -1,16 +1,17 @@
 # Tiến độ LMS ↔ Google Sheet
 
-Checkpoint **05/10/2026**: hoàn thành WBS **4.7–4.8**, tuần 4 đạt 100%.
-Completion theo điểm assignment/exam Published; demo API thực trên database `lms`
-đã nâng migration **0008**. Kiểm chứng 90 backend tests, 11 frontend unit tests và build.
-Xem [review](week-4-completion-review.md).
+Checkpoint **05/10/2026**: hoàn thành WBS **4.7–4.8** và **5.1–5.3**.
+Tuần 4 đạt 100%; 42 task đang theo dõi đã hoàn thành. Giữ nguyên 5.4–5.8 trên sheet.
+Database chính **lms** ở migration **0008**; thêm 8 course mẫu, demo API và UI đạt.
+Kiểm chứng **93 backend tests, 11 frontend unit, 7 browser E2E**, build/lint/contracts đạt.
+Xem [review tuần 4](week-4-completion-review.md) và [review tuần 5](week-5-review.md).
 
 
-Checkpoint mới nhất **02/10/2026**: WBS 4.5–4.6 hoàn thành submit/worker/auto-grading
+Checkpoint trước **02/10/2026**: WBS 4.5–4.6 hoàn thành submit/worker/auto-grading
 và grade items/draft/publish/revise/feedback/history; regression phần trước đạt.
 Bổ sung tracking 3.4–3.8 sau đối chiếu code/acceptance/demo. Xem
 [week-4-grading-review.md](week-4-grading-review.md) và [week-3-review.md](week-3-review.md).
-Tổng 37 task theo dõi đạt 100%; task 4.7–4.8 và các tuần sau giữ trạng thái trên sheet.
+Tại thời điểm đó, 37 task theo dõi đạt 100%; 4.7–4.8 chưa thực hiện.
 
 Đây là nơi lưu link và trạng thái được xác minh để mỗi lần bạn yêu cầu **“cập nhật
 tiến độ LMS lên Google Sheet”**, trợ lý đọc cấu hình, kiểm tra phần vừa làm và đồng bộ.

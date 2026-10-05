@@ -12,7 +12,17 @@ export const progressApi = {
     return api.request<CompletionRule>(`/courses/${courseId}/completion-rule`);
   },
 
-  updateRule(courseId: string, percent: number, assignments: boolean) {
+  updateRule(
+    courseId: string,
+    percent: number,
+    assignments: boolean,
+    grades: Pick<
+      CompletionRule,
+      | "require_published_assignment_grades"
+      | "require_published_exam_grades"
+      | "minimum_grade_percent"
+    >,
+  ) {
     return api.request<CompletionRule>(
       `/courses/${courseId}/completion-rule`,
 
@@ -22,6 +32,7 @@ export const progressApi = {
         required_lesson_percent: percent,
 
         require_submitted_assignments: assignments,
+        ...grades,
       },
     );
   },

@@ -21,6 +21,8 @@ from src.modules.identity_access.presentation.router import router as identity_r
 from src.modules.learning_content.presentation.router import router as content_router
 from src.modules.learning_progress_analytics.presentation.router import router as progress_router
 from src.modules.quiz_exam.presentation.router import router as quiz_exam_router
+from src.modules.reporting_export.presentation.router import router as dashboard_router
+from src.modules.user_role.presentation.admin import router as admin_users_router
 from src.modules.user_role.presentation.permissions import router as permission_router
 from src.modules.user_role.presentation.router import router as role_router
 
@@ -55,6 +57,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health_router)
     app.include_router(identity_router)
     app.include_router(role_router)
+    app.include_router(admin_users_router)
+    app.include_router(dashboard_router)
     app.include_router(permission_router)
     app.include_router(course_router)
     app.include_router(content_router)

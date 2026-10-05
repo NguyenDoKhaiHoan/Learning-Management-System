@@ -6,6 +6,68 @@
   --muted: #626c7b;
 }
 
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-block: 24px;
+}
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.report-table caption {
+  text-align: left;
+  padding: 12px 0;
+  color: var(--muted);
+}
+.report-table th,
+.report-table td {
+  text-align: left;
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.report-table th {
+  background: #edf3f2;
+}
+.user-card details,
+.builder-edit,
+.course-settings form {
+  margin-block: 14px;
+}
+.user-card .actions,
+.builder-edit .actions {
+  flex-wrap: wrap;
+}
+.builder-edit {
+  padding: 12px;
+  background: #f5f8f7;
+  border-radius: 6px;
+}
+.delete-control {
+  margin-top: 16px;
+}
+.button.danger {
+  background: #a83434;
+}
+.field input[type="checkbox"] {
+  width: auto;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+:focus-visible {
+  outline: 3px solid #15887c;
+  outline-offset: 3px;
+}
+
 * {
   letter-spacing: 0 !important;
 }
@@ -105,7 +167,8 @@ h2 {
 }
 .dashboard-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  row-gap: 20px;
   border-block: 1px solid var(--border);
   padding: 20px 0;
   margin-bottom: 28px;

@@ -1,5 +1,5 @@
-// Populate only the dedicated local demo API. Existing courses are preserved.
-const base = "http://127.0.0.1:8004/api/v1";
+// Populate the local application API (database lms). Existing courses are preserved.
+const base = process.env.LMS_API_BASE ?? "http://127.0.0.1:8002/api/v1";
 const password = process.env.LMS_DEMO_PASSWORD ?? "LmsDemo-Week2!2026";
 async function request(token, path, method = "GET", data) {
   const response = await fetch(base + path, {
@@ -272,5 +272,5 @@ for (const sample of samples) {
   console.log(`${code}: ${sample.title}`);
 }
 console.log(
-  "Showcase ready at http://127.0.0.1:5175. Log in with demo_student, demo_instructor or demo_admin.",
+  "Showcase ready. Open the frontend and log in with demo_student, demo_instructor or demo_admin.",
 );

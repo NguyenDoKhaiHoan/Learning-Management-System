@@ -432,6 +432,39 @@
       "progress": 1,
       "evidence": "90 backend tests passed without skips, 21 week3/4 regression scenarios, schema round-trip/canonical import, 11 frontend unit tests and build passed. scripts.demo_week4 ran successfully on main lms: exam submit, hidden Draft, publication, Student score 10/10 and completion. See week-4-completion-review.md.",
       "verified_at": "2026-10-05"
+    },
+    {
+      "wbs": "5.1",
+      "title": "Layout dùng chung; API client, routing và trạng thái UI",
+      "sheet_titles": [
+        "Layout dùng chung; API client, routing và trạng thái UI"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Shared shell/forms/API client, nested/query route guards, active navigation on filtered pages, loading/empty/error/retry/forbidden/success and stale-response suppression. 11 frontend unit and 7 browser E2E tests passed; build and live lms portal smoke verified. See week-5-review.md.",
+      "verified_at": "2026-10-05"
+    },
+    {
+      "wbs": "5.2",
+      "title": "Admin dashboard: user/role, course oversight và reports",
+      "sheet_titles": [
+        "Admin dashboard: user/role, course oversight và reports"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Admin user create/edit/search/pagination/status/roles/permissions and course oversight/report UI. Admin-only API projections exclude credentials; transactional audit/rollback and global report totals verified by real MySQL acceptance and browser E2E. See docs/api/week-5.md and week-5-review.md.",
+      "verified_at": "2026-10-05"
+    },
+    {
+      "wbs": "5.3",
+      "title": "Instructor dashboard và course/content builder",
+      "sheet_titles": [
+        "Instructor dashboard và course/content builder"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Scoped Instructor dashboard counts and complete Draft course/content builder: metadata, module/lesson CRUD and ordering, lesson type/preview, LINK/FILE resources, assessment completion gates and publication. Real MySQL scope/staff/permission tests, browser CRUD/reorder/upload/publish/delete and main lms desktop/mobile smoke passed. See week-5-review.md.",
+      "verified_at": "2026-10-05"
     }
   ]
 }

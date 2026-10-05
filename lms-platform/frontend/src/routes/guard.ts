@@ -13,12 +13,13 @@ export function guardRoute(
 ): "allow" | "login" | "forbidden" {
   if (path === "/login") return "allow";
   if (!user) return "login";
+  const section = "/" + path.split("?")[0].split("/")[1];
   const role = (
     {
       "/admin": "ADMIN",
       "/instructor": "INSTRUCTOR",
       "/student": "STUDENT",
     } as Record<string, string>
-  )[path];
+  )[section];
   return role && !user.roles.includes(role) ? "forbidden" : "allow";
 }

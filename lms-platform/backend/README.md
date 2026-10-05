@@ -1,9 +1,10 @@
 # LMS backend — FastAPI + MySQL, truy vấn SQL thuần
 
-Checkpoint **05/10/2026**: hoàn thành WBS **4.7–4.8**, tuần 4 đạt 100%.
-Completion theo điểm assignment/exam Published; demo API thực trên database `lms`
-đã nâng migration **0008**. Kiểm chứng 90 backend tests, 11 frontend unit tests và build.
-Xem [review](../progress/week-4-completion-review.md).
+Checkpoint **05/10/2026**: tuần 4 hoàn thành; **5.1–5.3** có dashboard/portal UI,
+Admin user APIs và report APIs phân quyền/scoped, giữ SQL thuần và audit transaction.
+MySQL80 Running; database chính **lms** đã nâng migration **0008** và thêm 8 course mẫu.
+**93 backend tests, 11 frontend unit, 7 browser E2E**, build/lint/contract check đạt.
+Xem [API tuần 5](../docs/api/week-5.md) và [review](../progress/week-5-review.md).
 
 
 Checkpoint 02/10/2026: WBS 4.1–4.6 có question bank/blueprint, exam/attempt,
@@ -12,8 +13,8 @@ feedback/history. Worker deadline chạy cùng API; version/audit/scope guard b�
 Xem [hướng dẫn API tuần 4](../docs/api/week-4.md) và
 [bằng chứng grading/regression](../progress/week-4-grading-review.md).
 Database ứng dụng/demo xuyên suốt là `lms`; migration head mới **0007_grading**.
-MySQL80 local đang stopped, nên lms port 3306 vẫn ở revision 0006 và cần nâng migration
-trước khi chạy API mới. Đã kiểm chứng trên MySQL riêng: 87 test full suite và 2 case
+Tại checkpoint 02/10, MySQL80 local stopped, lms port 3306 ở revision 0006.
+Tình trạng này đã được xử lý ở checkpoint 05/10. Khi đó kiểm chứng trên MySQL riêng: 87 test full suite và 2 case
 bổ sung; 18 scenario tuần 4. Frontend 11 unit/3 browser E2E và build đạt.
 File khởi tạo duy nhất: `database/schemas/shared/lms.sql`; xuất lại bằng
 `python -m scripts.export_schema`. Database đang có dữ liệu dùng `alembic upgrade head`.

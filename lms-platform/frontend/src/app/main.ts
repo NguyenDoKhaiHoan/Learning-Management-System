@@ -5,6 +5,7 @@ import type {
   Course,
   CourseModule,
   CourseStaff,
+  DashboardReport,
   CurrentUser,
   Enrollment,
   MyEnrollment,
@@ -22,6 +23,19 @@ import { guardRoute, homeFor } from "../routes/guard";
 
 import { button, element, field } from "../components/dom";
 
+import {
+  actionForm,
+  pagination,
+  prefill,
+  type PageActions,
+} from "../components/forms";
+import { renderUsers, renderReports } from "../portals/admin/pages/dashboard";
+import { renderInstructorSummary } from "../portals/instructor/pages/dashboard";
+import {
+  courseSettings,
+  moduleEditor,
+  lessonEditor,
+} from "../features/courses/pages/builder";
 import "../styles/main.css";
 import "../styles/workspace.css";
 
@@ -118,14 +132,16 @@ function showError(error: unknown) {
 }
 
 async function perform(action: () => Promise<unknown>, success: string) {
+  const serial = generation;
   try {
     await action();
+    if (serial !== generation) return;
 
     notice = success;
 
     await render();
   } catch (error) {
-    showError(error);
+    if (serial === generation) showError(error);
   }
 }
 
@@ -136,31 +152,7 @@ function form(
 
   action: (data: FormData) => Promise<unknown>,
 ) {
-  const node = element("form", "", "form-stack");
-
-  const submit = element("button", submitLabel, "button");
-
-  submit.type = "submit";
-
-  node.append(...fields, submit);
-
-  node.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    if (submit.disabled) return;
-
-    submit.disabled = true;
-
-    try {
-      await action(new FormData(node));
-    } catch (error) {
-      showError(error);
-    } finally {
-      submit.disabled = false;
-    }
-  });
-
-  return node;
+  return actionForm(fields, submitLabel, action, showError);
 }
 
 function textareaField(label: string, name: string, required = true) {
@@ -450,6 +442,24 @@ async function renderProgress(
 
   // ==========================
 
+  if (
+    rule.require_published_assignment_grades ||
+    rule.require_published_exam_grades
+  ) {
+    panel.append(
+      element(
+        "p",
+        `Yêu cầu điểm đã công bố đạt ít nhất ${rule.minimum_grade_percent}%: ${[
+          rule.require_published_assignment_grades ? "bài tập" : "",
+          rule.require_published_exam_grades ? "bài thi" : "",
+        ]
+          .filter(Boolean)
+          .join(", ")}.`,
+        "muted",
+      ),
+    );
+  }
+
   if (manager && course.status === "DRAFT") {
     const percent = field("Phần trăm lesson bắt buộc", "percent", "number");
 
@@ -465,10 +475,23 @@ async function renderProgress(
 
     requireAssignments.querySelector("input")!.checked =
       rule.require_submitted_assignments;
+    const assignmentGrades = prefill(
+      checkboxField("Yêu cầu điểm bài tập đã công bố", "assignment_grades"),
+      rule.require_published_assignment_grades,
+    );
+    const examGrades = prefill(
+      checkboxField("Yêu cầu điểm bài thi đã công bố", "exam_grades"),
+      rule.require_published_exam_grades,
+    );
+    const minimum = prefill(
+      field("Ngưỡng điểm đạt (%)", "minimum", "number"),
+      rule.minimum_grade_percent,
+    );
+    minimum.querySelector("input")!.step = "0.01";
 
     panel.append(
       form(
-        [percent, requireAssignments],
+        [percent, requireAssignments, assignmentGrades, examGrades, minimum],
 
         "Lưu điều kiện hoàn thành",
 
@@ -481,6 +504,13 @@ async function renderProgress(
                 Number(data.get("percent")),
 
                 data.get("assignments") === "on",
+                {
+                  require_published_assignment_grades:
+                    data.get("assignment_grades") === "on",
+                  require_published_exam_grades:
+                    data.get("exam_grades") === "on",
+                  minimum_grade_percent: Number(data.get("minimum")),
+                },
               ),
 
             "Đã cập nhật điều kiện hoàn thành.",
@@ -1000,6 +1030,8 @@ function shell(title: string, subtitle: string, showNotice = true) {
   if (user) {
     const items: [string, string, string][] = [
       ["ADMIN", "/admin", "Quản lý khóa học"],
+      ["ADMIN", "/admin/users", "Tài khoản & vai trò"],
+      ["ADMIN", "/admin/reports", "Báo cáo tổng quan"],
 
       ["INSTRUCTOR", "/instructor", "Lớp tôi giảng dạy"],
 
@@ -1013,12 +1045,14 @@ function shell(title: string, subtitle: string, showNotice = true) {
 
           label,
 
-          location.hash === "#" + path ? "nav-link active" : "nav-link",
+          location.hash.split("?")[0] === "#" + path
+            ? "nav-link active"
+            : "nav-link",
         );
 
         link.href = "#" + path;
 
-        if (location.hash === "#" + path)
+        if (location.hash.split("?")[0] === "#" + path)
           link.setAttribute("aria-current", "page");
 
         nav.append(link);
@@ -1071,6 +1105,7 @@ function shell(title: string, subtitle: string, showNotice = true) {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
+      timeZone: "Asia/Bangkok",
     }).format(new Date()),
     "header-date",
   );
@@ -1241,11 +1276,22 @@ async function dashboard(
 
   serial: number,
 ) {
-  const student = location.hash === "#/student";
+  const student = location.hash.split("?")[0] === "#/student";
+  const query = new URLSearchParams(location.hash.split("?")[1] ?? "");
+  const offset = student ? 0 : Math.max(0, Number(query.get("offset")) || 0);
 
   const courses = await api.request<(Course | CatalogCourse)[]>(
-    student ? "/catalog/courses?limit=100" : "/courses?limit=100",
+    student
+      ? "/catalog/courses?limit=100"
+      : `/courses?limit=20&offset=${offset}`,
   );
+  const pageReport = student
+    ? null
+    : await api.request<DashboardReport>(
+        location.hash.startsWith("#/admin")
+          ? "/reports/overview?limit=1"
+          : "/dashboard/instructor?limit=1",
+      );
 
   const enrollments = student
     ? await api.request<MyEnrollment[]>("/enrollments/me?limit=100")
@@ -1280,7 +1326,7 @@ async function dashboard(
         ],
       ]
     : [
-        ["Tổng khóa học", courses.length],
+        ["Khóa học trên trang", courses.length],
         [
           "Đang mở",
           courses.filter(
@@ -1467,6 +1513,14 @@ async function dashboard(
   searchInput.addEventListener("input", updateResults);
   filter.addEventListener("change", updateResults);
   updateResults();
+  if (pageReport)
+    body.append(
+      pagination(offset, 20, pageReport.total_courses, (next) =>
+        navigate(
+          `${location.hash.startsWith("#/admin") ? "/admin" : "/instructor"}?offset=${next}`,
+        ),
+      ),
+    );
 }
 
 async function coursePage(
@@ -1510,7 +1564,14 @@ async function coursePage(
 
   body.append(overview);
 
+  const pageActions: PageActions = {
+    perform,
+    error: showError,
+    navigate,
+    current: () => serial === generation,
+  };
   if (manager) {
+    body.append(courseSettings(course, pageActions, homeFor(current)));
     const actions = element("div", "", "actions");
 
     for (const [status, label] of course.status === "DRAFT"
@@ -1550,6 +1611,8 @@ async function coursePage(
       ),
     );
 
+    if (manager && course.status === "DRAFT")
+      section.append(moduleEditor(cid, module, modules, pageActions));
     for (const lesson of module.lessons) {
       const details = element("details", "", "lesson");
 
@@ -1565,6 +1628,8 @@ async function coursePage(
         ),
       );
 
+      if (manager && course.status === "DRAFT")
+        details.append(lessonEditor(cid, module, lesson, pageActions));
       // =================================
 
       // STUDENT UPDATE PROGRESS
@@ -1788,7 +1853,9 @@ async function coursePage(
 async function render() {
   const serial = ++generation;
 
-  const path = location.hash.slice(1) || "/login";
+  const fullPath = location.hash.slice(1) || "/login";
+  const [path, search = ""] = fullPath.split("?");
+  const query = new URLSearchParams(search);
 
   if (path === "/login") {
     loginPage();
@@ -1844,20 +1911,53 @@ async function render() {
     const target = shell(
       path === "/student" ? "Hôm nay, bạn muốn học gì?" : "Khóa học của bạn",
 
-      "Mỗi bài học là một bước tiến mới.",
+      path === "/admin/users"
+        ? "Quản lý tài khoản, vai trò và quyền truy cập."
+        : path === "/admin/reports"
+          ? "Theo dõi ghi danh và kết quả học tập theo khóa học."
+          : "Mỗi bài học là một bước tiến mới.",
     );
 
+    target.append(element("p", "Đang tải…", "loading"));
+    target.setAttribute("aria-busy", "true");
+    const actions: PageActions = {
+      perform,
+      error: showError,
+      navigate,
+      current: () => serial === generation,
+    };
     const course = /^\/courses\/(\d+)$/.exec(path);
-
-    if (course) await coursePage(target, user, course[1], serial);
-    else if (["/admin", "/instructor", "/student"].includes(path))
-      await dashboard(target, user, serial);
-    else target.append(element("p", "Trang không tồn tại.", "empty"));
+    if (path === "/admin/users") {
+      document.querySelector("h1")!.textContent = "Tài khoản & vai trò";
+      await renderUsers(target, user, query, actions);
+    } else if (path === "/admin/reports") {
+      document.querySelector("h1")!.textContent = "Báo cáo tổng quan";
+      await renderReports(target, query, actions);
+    } else if (course) await coursePage(target, user, course[1], serial);
+    else if (["/admin", "/instructor", "/student"].includes(path)) {
+      if (path === "/instructor")
+        await renderInstructorSummary(target, actions);
+      if (serial === generation) await dashboard(target, user, serial);
+    } else target.append(element("p", "Trang không tồn tại.", "empty"));
+    target.querySelector(".loading")?.remove();
+    target.removeAttribute("aria-busy");
   } catch (error) {
     if (serial === generation) {
       document.querySelector(".loading")?.remove();
 
+      document
+        .querySelector('[aria-busy="true"]')
+        ?.removeAttribute("aria-busy");
       showError(error);
+      document.querySelector("#messages")?.append(
+        button(
+          "Thử tải lại",
+          () => {
+            void render();
+          },
+          "button secondary",
+        ),
+      );
     }
   }
 }

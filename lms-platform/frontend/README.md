@@ -1,4 +1,9 @@
-# LMS frontend — nền tảng tuần 2
+# LMS frontend — portal tuần 5 (5.1–5.3)
+
+Checkpoint 05/10/2026: Admin accounts/roles/permissions/reports; Instructor dashboard
+và course/content builder CRUD/order/resources/completion gates; shared routing/forms/UI states.
+Database chính **lms**, API **8002**, frontend **5173**. **11 unit, 7 browser E2E**, build đạt.
+Hướng dẫn: [API/demo tuần 5](../docs/api/week-5.md), [review](../progress/week-5-review.md).
 
 TypeScript + Vite, dùng shared transport types tại `../shared/contracts/api.ts`.
 Node.js 24 được kiểm chứng local và dùng trong CI. Dependency được khóa trong package-lock.json.
@@ -34,7 +39,7 @@ Hướng dẫn đầy đủ: [demo tuần 2](../docs/api/week-2-demo.md).
 
 ## Phạm vi và bảo vệ phiên
 
-- `/login`, `/admin`, `/instructor`, `/student`, `/courses/{id}` qua hash routes.
+- `/login`, `/admin`, `/admin/users`, `/admin/reports`, `/instructor`, `/student`, `/courses/{id}` qua hash routes.
 - Guard gọi `/auth/me` trước mỗi lần mở trang; role lấy từ server, không giải mã JWT
   để tự cấp quyền. Backend vẫn kiểm permission và resource scope ở mỗi API.
 - Token chỉ ở bộ nhớ; không lưu localStorage/sessionStorage. Reload tab cần đăng nhập lại.
@@ -44,30 +49,32 @@ Hướng dẫn đầy đủ: [demo tuần 2](../docs/api/week-2-demo.md).
 - Logout xóa state ngay và gọi revoke family; response cũ không khôi phục phiên sau logout.
 - Nội dung từ API được gán qua textContent, không render HTML tùy ý.
 - Có loading/empty/error/success, form chống submit lặp và layout cho desktop/mobile.
-- Giao diện nền tảng phục vụ demo tạo/publish/ghi danh/duyệt/tạm ngưng; ordering,
-  sửa/xóa metadata đầy đủ và một số thao tác quản trị vẫn dùng API/Postman.
-- Danh sách demo tải tối đa 100 mục; pagination UI và portal đầy đủ còn thuộc các tuần sau.
+- Admin/Instructor có sửa/xóa/order metadata; file/link resources và completion gates.
+- Tài khoản và report phân trang 10 mục; course quản lý 20 mục, tìm/lọc trong trang hiện tại.
+  Student nền tảng tối đa 100 mục; UI Student/exam/grade riêng vẫn thuộc WBS 5.4–5.5.
 
 ## Dữ liệu mẫu giao diện
 
-Bản showcase dùng chung database `lms`, API cổng 8004 và frontend
-cổng 5175. Từ thư mục `backend`, chạy:
+Bản showcase dùng chung database `lms`, API cổng 8002 và frontend
+cổng 5173. Từ thư mục `backend`, chạy:
 
 ```powershell
 $env:LMS_DEMO_DATABASE = 'lms'
-$env:LMS_DEMO_PORT = '8004'
+$env:LMS_DEMO_PORT = '8002'
 ../../.venv/Scripts/python -m scripts.run_demo
 ```
 
-Từ thư mục `frontend`, chạy `npm run seed:demo`, rồi `npm run dev:demo`.
-Mở http://127.0.0.1:5175 và đăng nhập bằng `demo_student`, `demo_instructor`
+Từ thư mục `frontend`, chạy `npm run seed:demo`, rồi `npm run dev`.
+Mở http://127.0.0.1:5173 và đăng nhập bằng `demo_student`, `demo_instructor`
 hoặc `demo_admin`; mật khẩu mặc định `LmsDemo-Week2!2026`.
 
 Bộ mẫu gồm 8 khóa học, 24 chương, 48 bài học, 16 bài tập và 3 bài nộp.
 Có khóa học đang mở, bản nháp, lưu trữ; ghi danh đang học, chờ duyệt và tạm ngưng.
 Script bỏ qua các mục đã tồn tại theo mã/tên, không xóa dữ liệu hiện có.
-Chạy `node scripts/check-showcase.mjs` khi hai server đang hoạt động để kiểm tra
-trang danh sách, chi tiết, tiến độ và bố cục mobile; ảnh lưu trong `test-results`.
+Chạy `node scripts/check-week5.mjs` khi hai server đang hoạt động để kiểm tra
+Admin users/reports và Instructor dashboard/builder/desktop/mobile; ảnh lưu trong `.local-logs`.
+Showcase cũ cổng 8004/5175 vẫn có thể chạy bằng `LMS_DEMO_PORT=8004`,
+`LMS_API_BASE=http://127.0.0.1:8004/api/v1`, `npm run dev:demo` và `check-showcase.mjs`.
 
 ## Kiểm tra tự động
 
@@ -78,7 +85,8 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-11 unit tests cho API client/guard; 3 browser E2E tests gọi MySQL/API thật, không mock API.
+11 unit tests cho API client/guard; 7 browser E2E tests dùng MySQL/API thật.
+Riêng case error/loading/retry mô phỏng 503 và response chậm để kiểm tra UI.
 E2E tự mở backend 8013/frontend 5174 và database riêng `lms_demo_e2e`.
 DB này được giữ để debug; mỗi lần test dùng course code mới và seed idempotent.
 Ảnh desktop/mobile được lưu tại `test-results/` (Git ignore).
