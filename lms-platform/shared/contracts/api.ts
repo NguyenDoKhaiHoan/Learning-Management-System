@@ -260,3 +260,73 @@ export interface SubmissionFile {
 
   created_at: string;
 }
+
+export type ExamStatus = "DRAFT" | "PUBLISHED" | "CLOSED" | "ARCHIVED";
+export interface ExamSummary {
+  id: string;
+  title: string;
+  status: ExamStatus;
+  opens_at: string;
+  due_at: string;
+  duration_seconds: number;
+}
+export interface ExamEligibility {
+  eligible: boolean;
+  reasons: string[];
+  attempts_used: number;
+  max_attempts: number;
+  active_attempt_id: string | null;
+  can_resume: boolean;
+  server_time: string;
+}
+export interface ExamQuestionView {
+  id: number;
+  prompt: string;
+  question_type: "SINGLE" | "MULTIPLE" | "TRUE_FALSE";
+  points: number;
+  options: { id: number; option_key: string; option_text: string }[];
+}
+export interface ExamAttemptView {
+  id: string;
+  exam_id: string;
+  status: "IN_PROGRESS" | "SUBMITTED" | "AUTO_SUBMITTED" | "CANCELLED";
+  started_at: string;
+  expires_at: string;
+  server_version: number;
+  remaining_seconds: number;
+  questions: ExamQuestionView[];
+  answers: { question_id: number; selected_option_ids: number[] }[];
+  server_time: string;
+}
+export interface GradeView {
+  id: string;
+  enrollment_id: string;
+  assessment_type: "ASSIGNMENT" | "EXAM";
+  assessment_id: string;
+  score: number;
+  max_score: number;
+  status: "PUBLISHED";
+  feedback: string | null;
+  version: number;
+  items: { item_key: string; label: string; score: number; max_score: number; feedback: string | null }[];
+  published_at: string | null;
+}
+export interface Notification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  course_id: string | null;
+  resource_type: string | null;
+  resource_id: string | null;
+  is_read: boolean;
+  created_at: string;
+  read_at: string | null;
+}
+export interface NotificationPage {
+  items: Notification[];
+  total: number;
+  unread: number;
+  limit: number;
+  offset: number;
+}

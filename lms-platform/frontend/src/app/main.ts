@@ -16,6 +16,9 @@ import { assignmentsApi } from "../features/assignments/services/assignments";
 import { resourcesApi } from "../features/files/services/resources";
 
 import { progressApi } from "../features/progress-analytics/services/progress";
+import { examsApi } from "../features/quizzes-exams/services/exams";
+import { gradesApi } from "../features/grades/services/grades";
+import { notificationsApi } from "../features/notifications/services/notifications";
 
 import { api, ApiRequestError } from "../services/api/client";
 
@@ -29,6 +32,7 @@ import {
   prefill,
   type PageActions,
 } from "../components/forms";
+import type { ExamAttemptView, ExamSummary, GradeView, Notification } from "../../../shared/contracts/api";
 import { renderUsers, renderReports } from "../portals/admin/pages/dashboard";
 import { renderInstructorSummary } from "../portals/instructor/pages/dashboard";
 import {
@@ -1012,6 +1016,135 @@ async function renderAssignments(
   target.append(section);
 }
 
+function formatDate(value: string) {
+  return new Date(value).toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
+}
+
+async function renderExamAttempt(card: HTMLElement, attempt: ExamAttemptView) {
+  const box = element("section", "", "attempt-box panel");
+  box.append(element("h4", "Bài thi đang làm"));
+  const timer = element("p", "", "exam-timer");
+  timer.setAttribute("aria-live", "polite");
+  box.append(timer);
+  let remaining = attempt.remaining_seconds;
+  const updateTimer = () => {
+    timer.textContent = remaining > 0 ? `Thời gian còn lại: ${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}` : "Đã hết thời gian";
+  };
+  updateTimer();
+  const timerId = window.setInterval(() => {
+    remaining -= 1;
+    updateTimer();
+    if (remaining <= 0) {
+      window.clearInterval(timerId);
+      submit.click();
+    }
+  }, 1000);
+  const answers = new Map<number, number[]>();
+  for (const answer of attempt.answers) answers.set(answer.question_id, answer.selected_option_ids);
+  let version = attempt.server_version;
+  let saveChain: Promise<void> = Promise.resolve();
+  for (const question of attempt.questions) {
+    const fieldset = document.createElement("fieldset");
+    fieldset.className = "exam-question";
+    fieldset.append(element("legend", `${question.prompt} (${question.points} điểm)`));
+    for (const option of question.options) {
+      const label = element("label", "", "check-field");
+      const input = document.createElement("input");
+      input.type = question.question_type === "MULTIPLE" ? "checkbox" : "radio";
+      input.name = `question-${question.id}`;
+      input.value = String(option.id);
+      input.checked = (answers.get(question.id) ?? []).includes(option.id);
+      input.addEventListener("change", () => {
+        const selected = [...fieldset.querySelectorAll<HTMLInputElement>("input:checked")].map((item) => Number(item.value));
+        answers.set(question.id, selected);
+        saveChain = saveChain.then(async () => {
+          const saved = await examsApi.save(attempt.id, question.id, selected, version);
+          version = saved.server_version;
+        }).catch(showError);
+      });
+      label.append(input, document.createTextNode(option.option_text));
+      fieldset.append(label);
+    }
+    box.append(fieldset);
+  }
+  const submit = button("Nộp bài thi", () => {
+    submit.disabled = true;
+    void saveChain.then(() => examsApi.submit(attempt.id)).then(() => {
+      window.clearInterval(timerId);
+      box.replaceChildren(element("p", "Đã nộp bài thi.", "alert success"));
+    }).catch((error) => { submit.disabled = false; showError(error); });
+  }, "button secondary");
+  box.append(submit);
+  card.append(box);
+}
+
+async function renderExams(target: HTMLElement, current: CurrentUser, courseId: string) {
+  if (!current.roles.includes("STUDENT")) return;
+  const section = element("section", "", "student-assessments");
+  section.append(element("h2", "Bài thi"));
+  const exams = await examsApi.list(courseId);
+  if (!exams.length) {
+    section.append(element("p", "Khóa học chưa có bài thi.", "empty"));
+    target.append(section);
+    return;
+  }
+  for (const exam of exams) {
+    const card = element("article", "", "panel assessment-card");
+    card.append(badge(exam.status), element("h3", exam.title), element("p", `Mở: ${formatDate(exam.opens_at)} · Hạn: ${formatDate(exam.due_at)}`, "muted"), element("p", `Thời lượng: ${Math.ceil(exam.duration_seconds / 60)} phút`, "muted"));
+    try {
+      const eligibility = await examsApi.eligibility(exam.id);
+      const status = element("p", eligibility.eligible ? "Bạn có thể bắt đầu bài thi." : `Chưa thể làm bài: ${eligibility.reasons.join(", ")}`, eligibility.eligible ? "muted" : "alert error");
+      card.append(status);
+      const action = button(eligibility.active_attempt_id ? "Tiếp tục bài thi" : "Bắt đầu bài thi", () => {
+        action.disabled = true;
+        const request = eligibility.active_attempt_id ? examsApi.resume(eligibility.active_attempt_id) : examsApi.start(exam.id);
+        void request.then((attempt) => renderExamAttempt(card, attempt)).catch(showError).finally(() => { action.disabled = false; });
+      }, "button secondary");
+      action.disabled = !eligibility.eligible && !eligibility.active_attempt_id;
+      card.append(action);
+    } catch (error) {
+      card.append(element("p", errorText(error), "alert error"));
+    }
+    section.append(card);
+  }
+  target.append(section);
+}
+
+async function renderGrades(target: HTMLElement, current: CurrentUser, courseId: string) {
+  if (!current.roles.includes("STUDENT")) return;
+  const section = element("section", "", "student-grades");
+  section.append(element("h2", "Điểm của tôi"));
+  const grades = await gradesApi.mine(courseId);
+  if (!grades.length) {
+    section.append(element("p", "Chưa có điểm được công bố.", "empty"));
+  }
+  for (const grade of grades) {
+    const card = element("article", "", "panel grade-card");
+    const percent = grade.max_score ? Math.round((Number(grade.score) / Number(grade.max_score)) * 100) : 0;
+    card.append(element("h3", `${grade.assessment_type === "EXAM" ? "Bài thi" : "Bài tập"} #${grade.assessment_id}`), element("strong", `${grade.score}/${grade.max_score} (${percent}%)`), grade.feedback ? element("p", `Nhận xét: ${grade.feedback}`) : element("p", "Không có nhận xét.", "muted"));
+    section.append(card);
+  }
+  target.append(section);
+}
+
+function notificationRow(item: Notification, onRead: () => void) {
+  const row = element("article", "", item.is_read ? "notification-row" : "notification-row unread");
+  row.append(element("strong", item.title), element("p", item.body), element("time", formatDate(item.created_at), "muted"));
+  if (!item.is_read) row.append(button("Đánh dấu đã đọc", onRead, "button ghost"));
+  return row;
+}
+
+async function renderNotifications(target: HTMLElement) {
+  const section = element("section", "", "notifications-page");
+  const heading = element("div", "", "section-heading");
+  heading.append(element("h2", "Thông báo"), button("Đánh dấu tất cả đã đọc", () => { void notificationsApi.markAllRead().then(() => void renderNotifications(target)).catch(showError); }, "button ghost"));
+  section.append(heading);
+  const page = await notificationsApi.list(50);
+  if (!page.items.length) section.append(element("p", "Bạn chưa có thông báo nào.", "empty"));
+  for (const item of page.items) section.append(notificationRow(item, () => { void notificationsApi.markRead(item.id).then(() => void renderNotifications(target)).catch(showError); }));
+  target.append(section);
+}
+
 function shell(title: string, subtitle: string, showNotice = true) {
   root.replaceChildren();
 
@@ -1036,10 +1169,11 @@ function shell(title: string, subtitle: string, showNotice = true) {
       ["INSTRUCTOR", "/instructor", "Lớp tôi giảng dạy"],
 
       ["STUDENT", "/student", "Không gian học tập"],
+      ["", "/notifications", "Thông báo"],
     ];
 
     for (const [role, path, label] of items)
-      if (user.roles.includes(role)) {
+      if (!role || user.roles.includes(role)) {
         const link = element(
           "a",
 
@@ -1744,6 +1878,8 @@ async function coursePage(
   await renderProgress(body, current, course, cid);
 
   await renderAssignments(body, current, course, cid);
+  await renderExams(body, current, cid);
+  await renderGrades(body, current, cid);
 
   if (manager) {
     const enrollments = await api.request<Enrollment[]>(
@@ -1935,13 +2071,16 @@ async function render() {
       navigate,
       current: () => serial === generation,
     };
-    const course = /^\/courses\/(\d+)$/.exec(path);
+    const course = /^(?:\/student)?\/courses\/(\d+)$/.exec(path);
     if (path === "/admin/users") {
       document.querySelector("h1")!.textContent = "Tài khoản & vai trò";
       await renderUsers(target, user, query, actions);
     } else if (path === "/admin/reports") {
       document.querySelector("h1")!.textContent = "Báo cáo tổng quan";
       await renderReports(target, query, actions);
+    } else if (path === "/notifications") {
+      document.querySelector("h1")!.textContent = "Thông báo";
+      await renderNotifications(target);
     } else if (course) await coursePage(target, user, course[1], serial);
     else if (["/admin", "/instructor", "/student"].includes(path)) {
       if (path === "/instructor")

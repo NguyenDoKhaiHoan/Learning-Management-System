@@ -613,3 +613,42 @@ section.panel {
     scroll-behavior: auto !important;
   }
 }
+.student-assessments,
+.student-grades,
+.notifications-page {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.assessment-card,
+.grade-card,
+.notification-row,
+.attempt-box {
+  display: grid;
+  gap: .6rem;
+}
+
+.exam-question {
+  border: 1px solid var(--line, #d9e1ec);
+  border-radius: .75rem;
+  padding: 1rem;
+  display: grid;
+  gap: .5rem;
+}
+
+.exam-timer {
+  font-weight: 700;
+  color: var(--accent, #2563eb);
+}
+
+.notification-row.unread {
+  border-left: 4px solid var(--accent, #2563eb);
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
