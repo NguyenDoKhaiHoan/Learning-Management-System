@@ -1356,9 +1356,18 @@ async function dashboard(
 
     for (const item of enrollments) {
       const row = element("div", "", "list-row");
+      let progressText = "";
+      if (item.status === "ACTIVE" && item.course_status === "PUBLISHED") {
+        try {
+          const progress = await progressApi.mine(item.course_id);
+          progressText = ` · ${progress.progress_percent}% hoàn thành`;
+        } catch {
+          progressText = "";
+        }
+      }
 
       row.append(
-        element("strong", item.title ?? "Khóa học"),
+        element("strong", (item.title ?? "Khóa học") + progressText),
 
         badge(item.status),
       );

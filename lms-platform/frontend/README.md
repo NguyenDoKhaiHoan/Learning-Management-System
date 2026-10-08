@@ -51,7 +51,7 @@ Hướng dẫn đầy đủ: [demo tuần 2](../docs/api/week-2-demo.md).
 - Có loading/empty/error/success, form chống submit lặp và layout cho desktop/mobile.
 - Admin/Instructor có sửa/xóa/order metadata; file/link resources và completion gates.
 - Tài khoản và report phân trang 10 mục; course quản lý 20 mục, tìm/lọc trong trang hiện tại.
-  Student nền tảng tối đa 100 mục; UI Student/exam/grade riêng vẫn thuộc WBS 5.4–5.5.
+  Student portal có dashboard/My Courses/lesson player; UI assignment/exam/grade thuộc WBS 5.5.
 
 ## Dữ liệu mẫu giao diện
 
