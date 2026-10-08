@@ -112,9 +112,18 @@ async def test_dashboard_reports_scope_global_totals_and_staff_assignment(api):
     await call(
         "POST", f"/courses/{first}/enrollments", json={"student_id": users["student"]}, expected=201
     )
+    owner_notifications = await call("GET", "/notifications", actor="owner")
+    assert owner_notifications["unread"] >= 1
+    assert any(item["type"] == "ENROLLMENT_REQUEST" for item in owner_notifications["items"])
     await call(
         "PATCH", f"/courses/{first}/enrollments/{users['student']}", json={"status": "ACTIVE"}
     )
+    student_notifications = await call("GET", "/notifications", actor="student")
+    status_notice = next(
+        item for item in student_notifications["items"] if item["type"] == "ENROLLMENT_STATUS"
+    )
+    await call("PATCH", f"/notifications/{status_notice['id']}/read", actor="student")
+    assert (await call("GET", "/notifications/unread-count", actor="student"))["unread"] == 0
     assert (await call("GET", "/reports/overview", actor="admin"))["totals"][
         "active_enrollments"
     ] == 1

@@ -7,6 +7,7 @@ from src.modules.assignment.infrastructure.repository import AssignmentRepositor
 from src.modules.audit_security.infrastructure.repository import AuditRepository
 from src.modules.course.application.service import CourseService
 from src.modules.learning_progress_analytics.application.service import ProgressService
+from src.modules.notification.application.events import NotificationEvents
 
 
 class AssignmentService(CourseService):
@@ -124,6 +125,11 @@ class AssignmentService(CourseService):
             resource_id=str(submission_id),
             trace_id=self.trace_id,
             details={"assignment_id": str(assignment_id), "version": version, "status": status},
+        )
+        await NotificationEvents(self.connection).assignment_submitted(
+            course_id,
+            int(self.user.id),
+            {"id": assignment_id, "title": assignment["title"]},
         )
         await self.connection.commit()
         return {

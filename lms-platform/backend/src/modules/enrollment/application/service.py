@@ -4,6 +4,7 @@ from fastapi import HTTPException
 
 from src.modules.course.application.service import CourseService
 from src.modules.enrollment.infrastructure.repository import EnrollmentRepository
+from src.modules.notification.application.events import NotificationEvents
 
 
 class EnrollmentService(CourseService):
@@ -40,6 +41,7 @@ class EnrollmentService(CourseService):
             student_id=student_id, course_id=course_id
         )
         await self.audit("enrollment.request", "enrollment", enrollment_id)
+        await NotificationEvents(self.connection).enrollment_requested(course_id, student_id)
         await self.connection.commit()
         return {
             "id": enrollment_id,
@@ -70,6 +72,9 @@ class EnrollmentService(CourseService):
             row["id"], expected=row["status"], new=new
         )
         await self.audit("enrollment." + new.lower(), "enrollment", row["id"])
+        await NotificationEvents(self.connection).enrollment_changed(
+            course_id, int(student_id), new, str(course["title"])
+        )
         await self.connection.commit()
         return {**row, "status": new, "completed_at": None}
 

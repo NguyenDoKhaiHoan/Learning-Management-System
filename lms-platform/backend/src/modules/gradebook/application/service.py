@@ -8,6 +8,7 @@ from fastapi import HTTPException
 from src.modules.course.application.service import CourseService
 from src.modules.gradebook.infrastructure.repository import GradeRepository
 from src.modules.learning_progress_analytics.application.service import ProgressService
+from src.modules.notification.application.events import NotificationEvents
 
 
 class GradeService(CourseService):
@@ -163,6 +164,9 @@ class GradeService(CourseService):
         )
         row = await self.grades.record(id, "PUBLISH", int(self.user.id), self.trace_id)
         await self.refresh_completion(grade)
+        await NotificationEvents(self.connection).grade_published(
+            grade["course_id"], grade["enrollment_id"], id
+        )
         await self.connection.commit()
         return row
 

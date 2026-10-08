@@ -1,7 +1,7 @@
-# Tuần 5 — WBS 5.1–5.3
+# Tuần 5 — WBS 5.1–5.6
 
 Ứng dụng tiếp tục dùng **database lms**. API: http://127.0.0.1:8002;
-frontend: http://127.0.0.1:5173. Không cần migration mới ngoài head tuần 4 (0008).
+frontend: http://127.0.0.1:5173. Database head hiện tại là migration 0009.
 
 ## 5.1 Layout, API client, routing và trạng thái UI
 
@@ -67,8 +67,25 @@ progress. `scripts/seed-showcase.mjs` mặc định gọi API 8002; tùy chọn 
 cho API localhost khác. Tài khoản demo_admin/demo_instructor/demo_student và mật khẩu
 demo trong seed_week2.py. Seed giữ dữ liệu hiện có; smoke check không ghi nghiệp vụ.
 
+## 5.4 Student portal, 5.5 assessment UI và 5.6 notification
+
+- Student dashboard hiển thị khóa học đã ghi danh, trạng thái và phần trăm tiến độ; trang khóa học có lesson player, tài nguyên riêng tư và nút cập nhật completion.
+- Student có thể xem assignment, nộp text/file và lịch sử version; làm exam với eligibility, timer server, autosave, resume và submit; chỉ xem grade đã Published.
+- Notification in-app lưu theo người nhận, có danh sách phân trang, unread count, đánh dấu từng thông báo hoặc tất cả đã đọc. Các event enrollment, assignment submission và grade publication tạo thông báo trong cùng transaction.
+
+API notification:
+
+| Method | Path | Mô tả |
+| --- | --- | --- |
+| GET | `/api/v1/notifications` | Danh sách, `limit`, `offset`, `unread_only` |
+| GET | `/api/v1/notifications/unread-count` | Số thông báo chưa đọc |
+| PATCH | `/api/v1/notifications/{id}/read` | Đánh dấu đã đọc, chỉ chủ sở hữu |
+| POST | `/api/v1/notifications/read-all` | Đánh dấu toàn bộ đã đọc |
+
+Migration `0009_notifications` bổ sung bảng thông báo trên database `lms`.
+
 ## Phạm vi tiếp theo
 
-WBS 5.4–5.8 chưa nghiệm thu ở checkpoint này: Student portal chuyên biệt,
-assignment/exam/grade UI, notification, forum và nghiệm thu responsive/a11y toàn bộ.
+Phạm vi tiếp theo còn lại là WBS 5.7–5.8: forum/discussion cơ bản và nghiệm thu
+responsive/a11y toàn bộ. UI Student, assignment/exam/grade và notification đã có ở trên.
 UI Student nền tảng từ tuần 2/3 vẫn được regression, không đánh dấu những task này.

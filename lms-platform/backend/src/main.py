@@ -20,6 +20,7 @@ from src.modules.gradebook.presentation.router import router as gradebook_router
 from src.modules.identity_access.presentation.router import router as identity_router
 from src.modules.learning_content.presentation.router import router as content_router
 from src.modules.learning_progress_analytics.presentation.router import router as progress_router
+from src.modules.notification.presentation.router import router as notification_router
 from src.modules.quiz_exam.presentation.router import router as quiz_exam_router
 from src.modules.reporting_export.presentation.router import router as dashboard_router
 from src.modules.user_role.presentation.admin import router as admin_users_router
@@ -67,5 +68,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(quiz_exam_router)
     app.include_router(gradebook_router)
     app.include_router(assignment_router)
+    app.include_router(notification_router)
     app.include_router(enrollment_router)
     return app

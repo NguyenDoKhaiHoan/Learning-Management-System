@@ -465,6 +465,39 @@
       "progress": 1,
       "evidence": "Scoped Instructor dashboard counts and complete Draft course/content builder: metadata, module/lesson CRUD and ordering, lesson type/preview, LINK/FILE resources, assessment completion gates and publication. Real MySQL scope/staff/permission tests, browser CRUD/reorder/upload/publish/delete and main lms desktop/mobile smoke passed. See week-5-review.md.",
       "verified_at": "2026-10-05"
+    },
+    {
+      "wbs": "5.4",
+      "title": "Student dashboard, My Courses và lesson player",
+      "sheet_titles": [
+        "Student dashboard, My Courses và lesson player"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Student portal hiển thị enrollment/progress, lesson player cập nhật completion và tài nguyên theo scope enrollment; route dùng backend authorization.",
+      "verified_at": "2026-10-08"
+    },
+    {
+      "wbs": "5.5",
+      "title": "Assignment submission, exam attempt và grade UI",
+      "sheet_titles": [
+        "Assignment submission, exam attempt và grade UI"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Student UI nối assignment text/file, exam eligibility/start/resume/timer/autosave/submit và chỉ đọc grade Published qua API hiện có.",
+      "verified_at": "2026-10-08"
+    },
+    {
+      "wbs": "5.6",
+      "title": "Notification in-app cơ bản theo event",
+      "sheet_titles": [
+        "Notification in-app cơ bản theo event"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Migration 0009, API danh sách/đọc/unread và UI thông báo; enrollment, assignment submission và grade publication tạo event trong cùng transaction.",
+      "verified_at": "2026-10-08"
     }
   ]
 }

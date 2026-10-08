@@ -648,3 +648,26 @@ ALTER TABLE course_progress
 
 UPDATE alembic_version SET version_num='0008_assessment_completion' WHERE alembic_version.version_num = '0007_grading';
 
+
+-- Running upgrade 0008_assessment_completion -> 0009_notifications
+
+CREATE TABLE notifications (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    recipient_id BIGINT UNSIGNED NOT NULL,
+    course_id BIGINT UNSIGNED NULL,
+    type VARCHAR(64) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    body TEXT NOT NULL,
+    resource_type VARCHAR(64) NULL,
+    resource_id BIGINT UNSIGNED NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    read_at DATETIME(6) NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_notifications_recipient FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_notifications_course FOREIGN KEY (course_id) REFERENCES courses(id),
+    INDEX ix_notifications_recipient_created (recipient_id, created_at),
+    INDEX ix_notifications_recipient_unread (recipient_id, is_read, created_at)
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
+
+UPDATE alembic_version SET version_num='0009_notifications' WHERE version_num='0008_assessment_completion';
