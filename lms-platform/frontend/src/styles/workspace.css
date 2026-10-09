@@ -622,6 +622,12 @@ section.panel {
 .forum-excerpt, .forum-body { white-space: pre-wrap; overflow-wrap: anywhere; }
 .forum-detail { display: grid; gap: .8rem; }
 .forum-detail > .button { justify-self: start; }
+
+@media (max-width: 640px) {
+  .forum-page .form-stack,
+  .forum-detail .form-stack { padding: .85rem; }
+  .forum-thread { min-width: 0; }
+}
 .student-assessments,
 .student-grades,
 .notifications-page {

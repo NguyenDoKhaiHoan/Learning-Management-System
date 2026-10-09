@@ -297,3 +297,27 @@ test("loading, server errors, retry and stale responses preserve the active page
   ).toBeVisible();
   await expect(page.locator(".user-card")).toHaveCount(0);
 });
+
+test("three portals remain usable on mobile and expose labelled controls", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const [actor, path, heading] of [
+    ["admin", "/admin", "Khóa học của bạn"],
+    ["instructor", "/instructor", "Tổng quan giảng dạy"],
+    ["student", "/student", "Hôm nay, bạn muốn học gì?"],
+  ] as const) {
+    await login(page, actor);
+    await page.goto("#" + path);
+    await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+    await expect(page.locator("nav[aria-label='Điều hướng chính']")).toBeVisible();
+    await expect(page.locator("body")).toHaveJSProperty("scrollWidth", 390);
+    const unlabeled = await page.locator("input, textarea, select, button").evaluateAll((controls) =>
+      controls.filter((control) => {
+        const label = control.getAttribute("aria-label") || control.textContent ||
+          (control.id && document.querySelector(`label[for='${control.id}']`)?.textContent);
+        return !label?.trim();
+      }).length,
+    );
+    expect(unlabeled).toBe(0);
+    await page.getByRole("button", { name: "Đăng xuất" }).click();
+  }
+});

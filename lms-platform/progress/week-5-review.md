@@ -47,3 +47,10 @@
 Hướng dẫn API/demo: [week-5.md](../docs/api/week-5.md).
 Chỉ thêm 5.1–5.3 vào tasks.json và sync F/G của ba task này. 5.4–5.8 giữ nguyên
 trên sheet. Không nghiệm thu trước Student/exam/grade/notification/forum UI tuần 5.
+
+
+## Checkpoint 5.7?5.8
+
+- **5.7 Forum**: migration 0010 t?o forum/thread/message; API course-scoped c? danh s?ch ph?n trang, t?o thread, ??c detail v? reply. Student ch? truy c?p course PUBLISHED v?i enrollment ACTIVE; acceptance test ki?m tra reply v? cross-course forbidden. UI forum t?ch h?p v?o course page.
+- **5.8 Responsive/a11y**: Playwright viewport 390px nghi?m thu ba portal, kh?ng overflow ngang, landmark nav/heading c? m?t, control c? accessible name, logout ho?t ??ng. Shell gi? skip link, `aria-busy`, live region, focus-visible v? reduced-motion.
+- Frontend build, backend Ruff/compile v? contract export ??t. Docker/MySQL integration c?n m?i tr??ng Docker ?ang ch?y ?? th?c thi l?i.

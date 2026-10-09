@@ -501,13 +501,24 @@
     },
     {
       "wbs": "5.7",
-      "title": "Forum/discussion c? b?n trong course",
+      "title": "Forum/discussion cơ bản trong course",
       "sheet_titles": [
-        "Forum/discussion c? b?n trong course"
+        "Forum/discussion cơ bản trong course"
       ],
-      "status": "?? ho?n th?nh",
+      "status": "Đã hoàn thành",
       "progress": 1,
-      "evidence": "Migration 0010 t?o forums/threads/messages; API course-scoped ??c forum, ph?n trang thread, t?o thread, xem detail v? reply. Student c?n enrollment ACTIVE; acceptance test ki?m tra reply v? ch?n truy c?p kh?c course. UI discussion t?ch h?p trong course page; xem docs/api/week-5.md.",
+      "evidence": "Migration 0010 creates forums/threads/messages; course-scoped API supports paginated threads, thread creation, detail and replies. Students require ACTIVE enrollment in a PUBLISHED course; acceptance test covers replies and cross-course forbidden. Discussion UI is integrated in the course page; see docs/api/week-5.md.",
+      "verified_at": "2026-10-09"
+    },
+    {
+      "wbs": "5.8",
+      "title": "Responsive, accessibility cơ bản và demo ba portal",
+      "sheet_titles": [
+        "Responsive, accessibility cơ bản và demo ba portal"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Playwright responsive/accessibility acceptance at 390px for Admin, Instructor and Student: no horizontal overflow, heading/nav landmarks, accessible names for controls and logout. Shell includes skip link, aria-busy/live region, focus-visible and reduced-motion; desktop/mobile smoke suite passes. See docs/api/week-5.md.",
       "verified_at": "2026-10-09"
     }
   ]

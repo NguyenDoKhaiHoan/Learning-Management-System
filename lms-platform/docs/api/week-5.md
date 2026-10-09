@@ -105,4 +105,12 @@ không bị lộ giữa các course và thread LOCKED/ARCHIVED được xử lý
 
 Phạm vi tiếp theo còn lại là WBS 5.8: nghiệm thu responsive/a11y toàn bộ. UI Student,
 assignment/exam/grade, notification và forum/discussion đã có ở trên.
+
+### 5.8 Responsive và accessibility
+
+Ba portal dùng shell chung, skip link, landmark navigation có nhãn, trạng thái loading
+`aria-busy`, live region cho thông báo/lỗi và focus-visible cho điều khiển. Bộ kiểm tra
+Playwright chạy ở viewport 390px xác nhận Admin, Instructor và Student không tạo
+horizontal overflow, heading/nav tồn tại, mọi input/textarea/select/button có accessible
+name và thao tác đăng xuất hoạt động; layout desktop tiếp tục được kiểm tra trong suite tuần 5.
 UI Student nền tảng từ tuần 2/3 vẫn được regression, không đánh dấu những task này.
