@@ -84,8 +84,25 @@ API notification:
 
 Migration `0009_notifications` bổ sung bảng thông báo trên database `lms`.
 
+### 5.7 Forum/discussion trong course
+
+Forum được tạo theo từng course và dùng cùng scope `course.read`: Admin/Instructor có
+quyền quản lý course, Student cần enrollment ACTIVE trong course PUBLISHED. API hỗ trợ
+đọc forum, phân trang thread, tạo thread, xem chi tiết và gửi reply:
+
+| Method | Path | Mô tả |
+| --- | --- | --- |
+| GET | `/api/v1/courses/{course_id}/forum` | Thông tin forum của course |
+| GET | `/api/v1/courses/{course_id}/forum/threads` | Danh sách thread, `limit`, `offset` |
+| POST | `/api/v1/courses/{course_id}/forum/threads` | Tạo thread với `title`, `body` |
+| GET | `/api/v1/courses/{course_id}/forum/threads/{thread_id}` | Thread và các reply |
+| POST | `/api/v1/courses/{course_id}/forum/threads/{thread_id}/messages` | Gửi reply với `body` |
+
+Migration `0010_forum_messaging` tạo các bảng `forums`, `threads`, `messages`; bài viết
+không bị lộ giữa các course và thread LOCKED/ARCHIVED được xử lý theo trạng thái.
+
 ## Phạm vi tiếp theo
 
-Phạm vi tiếp theo còn lại là WBS 5.7–5.8: forum/discussion cơ bản và nghiệm thu
-responsive/a11y toàn bộ. UI Student, assignment/exam/grade và notification đã có ở trên.
+Phạm vi tiếp theo còn lại là WBS 5.8: nghiệm thu responsive/a11y toàn bộ. UI Student,
+assignment/exam/grade, notification và forum/discussion đã có ở trên.
 UI Student nền tảng từ tuần 2/3 vẫn được regression, không đánh dấu những task này.

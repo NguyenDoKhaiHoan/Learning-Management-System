@@ -613,6 +613,15 @@ section.panel {
     scroll-behavior: auto !important;
   }
 }
+
+.forum-page { display: grid; gap: 1rem; }
+.forum-page h2 { margin-bottom: 0; }
+.forum-list, .forum-replies { display: grid; gap: .75rem; }
+.forum-thread, .forum-reply { display: grid; gap: .4rem; }
+.forum-thread .link-button { justify-self: start; font-weight: 700; }
+.forum-excerpt, .forum-body { white-space: pre-wrap; overflow-wrap: anywhere; }
+.forum-detail { display: grid; gap: .8rem; }
+.forum-detail > .button { justify-self: start; }
 .student-assessments,
 .student-grades,
 .notifications-page {

@@ -330,3 +330,44 @@ export interface NotificationPage {
   limit: number;
   offset: number;
 }
+
+export interface Forum {
+  id: string;
+  course_id: string;
+  title: string;
+  description: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+export interface ForumThread {
+  id: string;
+  forum_id: string;
+  course_id: string;
+  author_id: string;
+  author_username: string;
+  title: string;
+  body: string;
+  status: "OPEN" | "LOCKED" | "ARCHIVED";
+  reply_count: number;
+  created_at: string;
+  updated_at: string;
+}
+export interface ForumMessage {
+  id: string;
+  thread_id: string;
+  author_id: string;
+  author_username: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
+}
+export interface ForumThreadPage {
+  items: ForumThread[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+export interface ForumThreadDetail extends ForumThread {
+  messages: ForumMessage[];
+}

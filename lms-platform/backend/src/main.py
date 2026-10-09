@@ -16,6 +16,7 @@ from src.modules.assignment.presentation.router import router as assignment_rout
 from src.modules.course.presentation.router import router as course_router
 from src.modules.enrollment.presentation.router import router as enrollment_router
 from src.modules.file_management.presentation.router import router as file_router
+from src.modules.forum_messaging.presentation.router import router as forum_router
 from src.modules.gradebook.presentation.router import router as gradebook_router
 from src.modules.identity_access.presentation.router import router as identity_router
 from src.modules.learning_content.presentation.router import router as content_router
@@ -64,6 +65,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(course_router)
     app.include_router(content_router)
     app.include_router(file_router)
+    app.include_router(forum_router)
     app.include_router(progress_router)
     app.include_router(quiz_exam_router)
     app.include_router(gradebook_router)

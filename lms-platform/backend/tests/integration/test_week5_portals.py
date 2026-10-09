@@ -163,3 +163,45 @@ async def test_account_audit_failure_rolls_back_user_and_role_assignments(api, m
         assert await conn.scalar(text("SELECT COUNT(*) FROM user_roles")) == 4
     monkeypatch.setattr(AuditRepository, "append_log", original)
     await call("POST", "/users", actor="admin", expected=201, json=body)
+
+
+async def test_course_forum_threads_replies_and_enrollment_scope(api):
+    call, _, users, _, _ = api
+    course = (await new_course(call))['id']
+    await new_content(call, course)
+    await call("POST", f"/courses/{course}/status", json={"status": "PUBLISHED"})
+    await call(
+        "POST",
+        f"/courses/{course}/enrollments",
+        actor="owner",
+        json={"student_id": users["student"]},
+        expected=201,
+    )
+    await call(
+        "PATCH",
+        f"/courses/{course}/enrollments/{users['student']}",
+        actor="owner",
+        json={"status": "ACTIVE"},
+    )
+
+    forum = await call("GET", f"/courses/{course}/forum", actor="student")
+    assert forum["course_id"] == course
+    thread = await call(
+        "POST",
+        f"/courses/{course}/forum/threads",
+        actor="student",
+        json={"title": "Hỏi bài", "body": "Mình cần trợ giúp với lesson đầu tiên."},
+        expected=201,
+    )
+    listed = await call("GET", f"/courses/{course}/forum/threads", actor="owner")
+    assert listed["total"] == 1 and listed["items"][0]["id"] == thread["id"]
+    reply = await call(
+        "POST",
+        f"/courses/{course}/forum/threads/{thread['id']}/messages",
+        actor="owner",
+        json={"body": "Bạn hãy xem phần nội dung mẫu."},
+        expected=201,
+    )
+    detail = await call("GET", f"/courses/{course}/forum/threads/{thread['id']}", actor="student")
+    assert detail["messages"][0]["id"] == reply["id"]
+    await call("GET", f"/courses/{course}/forum", actor="other", expected=403)

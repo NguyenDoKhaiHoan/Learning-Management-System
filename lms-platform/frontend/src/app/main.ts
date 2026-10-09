@@ -35,6 +35,7 @@ import {
 import type { ExamAttemptView, ExamSummary, GradeView, Notification } from "../../../shared/contracts/api";
 import { renderUsers, renderReports } from "../portals/admin/pages/dashboard";
 import { renderInstructorSummary } from "../portals/instructor/pages/dashboard";
+import { renderForum } from "../features/forum-chat/pages/forum";
 import {
   courseSettings,
   moduleEditor,
@@ -1880,6 +1881,7 @@ async function coursePage(
   await renderAssignments(body, current, course, cid);
   await renderExams(body, current, cid);
   await renderGrades(body, current, cid);
+  await renderForum(body, cid, pageActions);
 
   if (manager) {
     const enrollments = await api.request<Enrollment[]>(

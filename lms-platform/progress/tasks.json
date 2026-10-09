@@ -498,6 +498,17 @@
       "progress": 1,
       "evidence": "Migration 0009, API danh sách/đọc/unread và UI thông báo; enrollment, assignment submission và grade publication tạo event trong cùng transaction.",
       "verified_at": "2026-10-08"
+    },
+    {
+      "wbs": "5.7",
+      "title": "Forum/discussion c? b?n trong course",
+      "sheet_titles": [
+        "Forum/discussion c? b?n trong course"
+      ],
+      "status": "?? ho?n th?nh",
+      "progress": 1,
+      "evidence": "Migration 0010 t?o forums/threads/messages; API course-scoped ??c forum, ph?n trang thread, t?o thread, xem detail v? reply. Student c?n enrollment ACTIVE; acceptance test ki?m tra reply v? ch?n truy c?p kh?c course. UI discussion t?ch h?p trong course page; xem docs/api/week-5.md.",
+      "verified_at": "2026-10-09"
     }
   ]
 }
