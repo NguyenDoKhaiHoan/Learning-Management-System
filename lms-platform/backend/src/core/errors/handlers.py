@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 from starlette.exceptions import HTTPException
 
 from src.core.contracts import ErrorDetail, ErrorResponse
+from src.modules.audit_security.application.security import record_denial
 
 logger = logging.getLogger("lms")
 CODES = {
@@ -52,6 +53,7 @@ def error_response(
 
 
 async def http_error(request: Request, exc: HTTPException) -> JSONResponse:
+    await record_denial(request, exc.status_code)
     # HTTPException.detail may contain internal data; expose safe status text instead.
     return error_response(request, exc.status_code, headers=exc.headers)
 

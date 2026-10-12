@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from src.core.contracts import ERROR_RESPONSES, SuccessResponse
 from src.core.database.database import ConnectionDependency
 from src.core.security.dependencies import require_roles
+from src.modules.audit_security.domain.enums import SecurityEventType, SecuritySeverity
 from src.modules.audit_security.infrastructure.repository import AuditRepository
 
 router = APIRouter(
@@ -68,6 +69,48 @@ async def logs(
     rows = await repo.fetch_all(
         "SELECT id,actor_id,action,resource,resource_id,ip_address,trace_id,details,timestamp "
         "FROM audit_logs " + where + " ORDER BY timestamp DESC,id DESC LIMIT :limit OFFSET :offset",
+        params,
+    )
+    return SuccessResponse(
+        data={
+            "items": public_records(rows),
+            "total": count["total"],
+            "limit": limit,
+            "offset": offset,
+        },
+        trace_id=request.state.trace_id,
+    )
+
+
+@router.get("/security-events", response_model=SuccessResponse[dict])
+async def security_events(
+    request: Request,
+    connection: ConnectionDependency,
+    event_type: SecurityEventType | None = None,
+    severity: SecuritySeverity | None = None,
+    actor_id: Annotated[int | None, Query(gt=0)] = None,
+    trace_id: Annotated[str | None, Query(max_length=64)] = None,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    offset: Annotated[int, Query(ge=0)] = 0,
+):
+    params = {
+        "type": event_type,
+        "severity": severity,
+        "actor": actor_id,
+        "trace": trace_id,
+        "limit": limit,
+        "offset": offset,
+    }
+    where = """WHERE (:type IS NULL OR event_type=:type)
+        AND (:severity IS NULL OR severity=:severity) AND (:actor IS NULL OR actor_id=:actor)
+        AND (:trace IS NULL OR trace_id=:trace)"""
+    repo = AuditRepository(connection)
+    count = await repo.fetch_one("SELECT COUNT(*) total FROM security_events " + where, params)
+    rows = await repo.fetch_all(
+        "SELECT id,actor_id,event_type,severity,ip_address,trace_id,details,created_at "
+        "FROM security_events "
+        + where
+        + " ORDER BY created_at DESC,id DESC LIMIT :limit OFFSET :offset",
         params,
     )
     return SuccessResponse(

@@ -37,6 +37,8 @@ import { renderUsers, renderReports } from "../portals/admin/pages/dashboard";
 import { renderInstructorSummary } from "../portals/instructor/pages/dashboard";
 import { renderForum } from "../features/forum-chat/pages/forum";
 import { renderAudit } from "../features/audit-security/pages/audit";
+import { renderSecurity, renderAttemptReview } from "../features/audit-security/pages/security";
+import { observeAttempt } from "../features/quizzes-exams/services/telemetry";
 import {
   courseSettings,
   moduleEditor,
@@ -50,6 +52,7 @@ const root = document.querySelector<HTMLDivElement>("#app")!;
 let user: CurrentUser | null = null;
 
 let generation = 0;
+const attemptCleanups = new Set<() => void>();
 
 let notice = "";
 
@@ -1023,8 +1026,17 @@ function formatDate(value: string) {
 }
 
 async function renderExamAttempt(card: HTMLElement, attempt: ExamAttemptView) {
+  if (!card.isConnected) return;
+  card.querySelector(".attempt-box")?.remove();
+  if (attempt.status !== "IN_PROGRESS") {
+    card.append(element("p", "Bài thi đã kết thúc.", "alert success"));
+    return;
+  }
+  const serial = generation;
   const box = element("section", "", "attempt-box panel");
   box.append(element("h4", "Bài thi đang làm"));
+  box.append(element("p", "Khi làm bài, việc đổi tab hoặc rời cửa sổ được ghi nhận để giảng viên xem xét.", "muted"));
+  const stopObserving = observeAttempt(attempt.id, () => serial === generation && box.isConnected);
   const timer = element("p", "", "exam-timer");
   timer.setAttribute("aria-live", "polite");
   box.append(timer);
@@ -1041,6 +1053,10 @@ async function renderExamAttempt(card: HTMLElement, attempt: ExamAttemptView) {
       submit.click();
     }
   }, 1000);
+  const cleanup = () => {
+    stopObserving(); window.clearInterval(timerId); attemptCleanups.delete(cleanup);
+  };
+  attemptCleanups.add(cleanup);
   const answers = new Map<number, number[]>();
   for (const answer of attempt.answers) answers.set(answer.question_id, answer.selected_option_ids);
   let version = attempt.server_version;
@@ -1072,7 +1088,7 @@ async function renderExamAttempt(card: HTMLElement, attempt: ExamAttemptView) {
   const submit = button("Nộp bài thi", () => {
     submit.disabled = true;
     void saveChain.then(() => examsApi.submit(attempt.id)).then(() => {
-      window.clearInterval(timerId);
+      cleanup();
       box.replaceChildren(element("p", "Đã nộp bài thi.", "alert success"));
     }).catch((error) => { submit.disabled = false; showError(error); });
   }, "button secondary");
@@ -1100,7 +1116,7 @@ async function renderExams(target: HTMLElement, current: CurrentUser, courseId: 
       const action = button(eligibility.active_attempt_id ? "Tiếp tục bài thi" : "Bắt đầu bài thi", () => {
         action.disabled = true;
         const request = eligibility.active_attempt_id ? examsApi.resume(eligibility.active_attempt_id) : examsApi.start(exam.id);
-        void request.then((attempt) => renderExamAttempt(card, attempt)).catch(showError).finally(() => { action.disabled = false; });
+        void request.then((attempt) => { action.hidden = true; return renderExamAttempt(card, attempt); }).catch(showError).finally(() => { action.disabled = false; });
       }, "button secondary");
       action.disabled = !eligibility.eligible && !eligibility.active_attempt_id;
       card.append(action);
@@ -1168,6 +1184,7 @@ function shell(title: string, subtitle: string, showNotice = true) {
       ["ADMIN", "/admin/users", "Tài khoản & vai trò"],
       ["ADMIN", "/admin/reports", "Báo cáo tổng quan"],
       ["ADMIN", "/admin/audit", "Nhật ký kiểm toán"],
+      ["ADMIN", "/admin/security", "Sự kiện bảo mật"],
 
       ["INSTRUCTOR", "/instructor", "Lớp tôi giảng dạy"],
 
@@ -1883,6 +1900,7 @@ async function coursePage(
   await renderAssignments(body, current, course, cid);
   await renderExams(body, current, cid);
   await renderGrades(body, current, cid);
+  if (manager) await renderAttemptReview(body, cid, pageActions);
   await renderForum(body, cid, pageActions);
 
   if (manager) {
@@ -2000,6 +2018,7 @@ async function coursePage(
 }
 
 async function render() {
+  for (const cleanup of attemptCleanups) cleanup();
   const serial = ++generation;
 
   const fullPath = location.hash.slice(1) || "/login";
@@ -2085,6 +2104,9 @@ async function render() {
     } else if (path === "/admin/audit") {
       document.querySelector("h1")!.textContent = "Nhật ký kiểm toán";
       await renderAudit(target, query, actions);
+    } else if (path === "/admin/security") {
+      document.querySelector("h1")!.textContent = "Sự kiện bảo mật";
+      await renderSecurity(target, query, actions);
     } else if (path === "/notifications") {
       document.querySelector("h1")!.textContent = "Thông báo";
       await renderNotifications(target);

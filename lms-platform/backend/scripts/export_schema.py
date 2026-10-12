@@ -20,7 +20,7 @@ def main():
         "SET time_zone = '+00:00';\n\n"
     )
     target = backend.parent / "database/schemas/shared/lms.sql"
-    target.write_text(header + sql, encoding="utf-8")
+    target.write_text((header + sql).rstrip() + "\n", encoding="utf-8")
     print("Updated database/schemas/shared/lms.sql")
 
 

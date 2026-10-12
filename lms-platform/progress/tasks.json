@@ -529,6 +529,15 @@
       "progress": 1,
       "evidence": "Transactional audit for course/assignment/exam publish, roles/permissions, grade changes and assignment/exam submissions. Admin-only filtered/paginated immutable API and UI. 25 MySQL audit/assignment/grading/portal tests and audit browser acceptance passed; build/lint/contracts passed. See week-6-review.md.",
       "verified_at": "2026-10-12"
+    },
+    {
+      "wbs": "6.2",
+      "title": "Security events và anti-cheating event/review flag",
+      "sheet_titles": ["Security events và anti-cheating event/review flag"],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Persisted login/denial/account/token security events with Admin filtered UI. Migration 0011 adds bounded, idempotent attempt telemetry and scoped optimistic human review with transactional audit. Real MySQL concurrency/ownership/review/rollback/cap/no-penalty tests, auth/unit regression, schema round-trip, 2 browser acceptance tests, build/lint/contracts passed. See week-6-review.md.",
+      "verified_at": "2026-10-12"
     }
   ]
 }

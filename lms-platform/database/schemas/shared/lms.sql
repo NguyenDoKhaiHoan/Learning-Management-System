@@ -277,7 +277,7 @@ CREATE TABLE completion_rules (
     CONSTRAINT fk_completion_rules_course_id_courses FOREIGN KEY(course_id) REFERENCES courses (id), 
     CONSTRAINT fk_completion_rules_updated_by_users FOREIGN KEY(updated_by) REFERENCES users (id), 
     CONSTRAINT uq_completion_rules_course_id UNIQUE (course_id)
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE lesson_progress (
     enrollment_id BIGINT UNSIGNED NOT NULL, 
@@ -294,7 +294,7 @@ CREATE TABLE lesson_progress (
     CONSTRAINT fk_lesson_progress_enrollment_id_enrollments FOREIGN KEY(enrollment_id) REFERENCES enrollments (id), 
     CONSTRAINT fk_lesson_progress_lesson_id_lessons FOREIGN KEY(lesson_id) REFERENCES lessons (id), 
     CONSTRAINT uq_lesson_progress_enrollment_lesson UNIQUE (enrollment_id, lesson_id)
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_lesson_progress_lesson_id ON lesson_progress (lesson_id);
 
@@ -311,7 +311,7 @@ CREATE TABLE course_progress (
     CONSTRAINT ck_course_progress_values CHECK (completed_lessons <= total_lessons AND progress_percent >= 0 AND progress_percent <= 100), 
     CONSTRAINT fk_course_progress_enrollment_id_enrollments FOREIGN KEY(enrollment_id) REFERENCES enrollments (id), 
     CONSTRAINT uq_course_progress_enrollment_id UNIQUE (enrollment_id)
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 UPDATE alembic_version SET version_num='0002_week3_learning' WHERE alembic_version.version_num = '0001_p0';
 
@@ -347,7 +347,7 @@ CREATE TABLE assignments (
     CONSTRAINT ck_assignments_limits CHECK (max_attempts > 0 AND max_file_bytes > 0 AND max_score > 0), 
     CONSTRAINT fk_assignments_course_id_courses FOREIGN KEY(course_id) REFERENCES courses (id), 
     CONSTRAINT fk_assignments_created_by_users FOREIGN KEY(created_by) REFERENCES users (id)
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_assignments_course_id ON assignments (course_id, status);
 
@@ -370,7 +370,7 @@ CREATE TABLE assignment_submissions (
     CONSTRAINT fk_assignment_submissions_enrollment_id_enrollments FOREIGN KEY(enrollment_id) REFERENCES enrollments (id), 
     CONSTRAINT fk_assignment_submissions_submitted_by_users FOREIGN KEY(submitted_by) REFERENCES users (id), 
     CONSTRAINT uq_assignment_submissions_version UNIQUE (assignment_id, enrollment_id, version)
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_assignment_submissions_enrollment_id ON assignment_submissions (enrollment_id);
 
@@ -386,7 +386,7 @@ CREATE TABLE submission_files (
     PRIMARY KEY (id), 
     CONSTRAINT ck_submission_files_positive_size CHECK (size_bytes > 0), 
     CONSTRAINT fk_submission_files_submission_id_assignment_submissions FOREIGN KEY(submission_id) REFERENCES assignment_submissions (id)
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_submission_files_submission_id ON submission_files (submission_id);
 
@@ -406,7 +406,7 @@ CREATE TABLE question_banks (
     PRIMARY KEY (id), 
     FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE RESTRICT, 
     FOREIGN KEY(created_by) REFERENCES users (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_question_banks_course_status ON question_banks (course_id, status);
 
@@ -423,7 +423,7 @@ CREATE TABLE questions (
     PRIMARY KEY (id), 
     CONSTRAINT ck_questions_positive_points CHECK (points > 0), 
     FOREIGN KEY(bank_id) REFERENCES question_banks (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_questions_bank_status ON questions (bank_id, status);
 
@@ -438,7 +438,7 @@ CREATE TABLE question_options (
     PRIMARY KEY (id), 
     CONSTRAINT uq_question_options_key UNIQUE (question_id, option_key), 
     FOREIGN KEY(question_id) REFERENCES questions (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE exams (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, 
@@ -462,7 +462,7 @@ CREATE TABLE exams (
     CONSTRAINT ck_exams_pass_score CHECK (pass_score >= 0), 
     FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE RESTRICT, 
     FOREIGN KEY(created_by) REFERENCES users (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_exams_course_status ON exams (course_id, status);
 
@@ -478,7 +478,7 @@ CREATE TABLE exam_blueprints (
     CONSTRAINT ck_exam_blueprints_values CHECK (question_count > 0 AND points_each > 0), 
     CONSTRAINT uq_exam_blueprints_type UNIQUE (exam_id, question_type), 
     FOREIGN KEY(exam_id) REFERENCES exams (id) ON DELETE CASCADE
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE exam_questions (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, 
@@ -492,7 +492,7 @@ CREATE TABLE exam_questions (
     CONSTRAINT ck_exam_questions_values CHECK (position > 0 AND points > 0), 
     FOREIGN KEY(exam_id) REFERENCES exams (id) ON DELETE CASCADE, 
     FOREIGN KEY(question_id) REFERENCES questions (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE exam_attempts (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, 
@@ -514,7 +514,7 @@ CREATE TABLE exam_attempts (
     CONSTRAINT uq_exam_attempts_number UNIQUE (exam_id, enrollment_id, attempt_no), 
     FOREIGN KEY(exam_id) REFERENCES exams (id) ON DELETE RESTRICT, 
     FOREIGN KEY(enrollment_id) REFERENCES enrollments (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_exam_attempts_student_status ON exam_attempts (enrollment_id, status);
 
@@ -533,7 +533,7 @@ CREATE TABLE exam_answers (
     CONSTRAINT uq_exam_answers_question UNIQUE (attempt_id, question_id), 
     FOREIGN KEY(attempt_id) REFERENCES exam_attempts (id) ON DELETE CASCADE, 
     FOREIGN KEY(question_id) REFERENCES questions (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE gradebook_entries (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, 
@@ -552,7 +552,7 @@ CREATE TABLE gradebook_entries (
     CONSTRAINT uq_gradebook_assessment UNIQUE (enrollment_id, assessment_type, assessment_id), 
     FOREIGN KEY(enrollment_id) REFERENCES enrollments (id) ON DELETE RESTRICT, 
     FOREIGN KEY(graded_by) REFERENCES users (id) ON DELETE RESTRICT
-)ENGINE=InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
+)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
 
 CREATE INDEX ix_gradebook_entries_enrollment_status ON gradebook_entries (enrollment_id, status);
 
@@ -648,73 +648,107 @@ ALTER TABLE course_progress
 
 UPDATE alembic_version SET version_num='0008_assessment_completion' WHERE alembic_version.version_num = '0007_grading';
 
-
 -- Running upgrade 0008_assessment_completion -> 0009_notifications
 
 CREATE TABLE notifications (
-    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    recipient_id BIGINT UNSIGNED NOT NULL,
-    course_id BIGINT UNSIGNED NULL,
-    type VARCHAR(64) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    body TEXT NOT NULL,
-    resource_type VARCHAR(64) NULL,
-    resource_id BIGINT UNSIGNED NULL,
-    is_read BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    read_at DATETIME(6) NULL,
-    PRIMARY KEY (id),
-    CONSTRAINT fk_notifications_recipient FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT fk_notifications_course FOREIGN KEY (course_id) REFERENCES courses(id),
-    INDEX ix_notifications_recipient_created (recipient_id, created_at),
-    INDEX ix_notifications_recipient_unread (recipient_id, is_read, created_at)
-)CHARSET=utf8mb4 ENGINE=InnoDB COLLATE utf8mb4_unicode_ci;
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        recipient_id BIGINT UNSIGNED NOT NULL,
+        course_id BIGINT UNSIGNED NULL,
+        type VARCHAR(64) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        body TEXT NOT NULL,
+        resource_type VARCHAR(64) NULL,
+        resource_id BIGINT UNSIGNED NULL,
+        is_read BOOLEAN NOT NULL DEFAULT FALSE,
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        read_at DATETIME(6) NULL,
+        PRIMARY KEY (id),
+        CONSTRAINT fk_notifications_recipient FOREIGN KEY (recipient_id)
+            REFERENCES users(id) ON DELETE CASCADE,
+        CONSTRAINT fk_notifications_course FOREIGN KEY (course_id) REFERENCES courses(id),
+        INDEX ix_notifications_recipient_created (recipient_id, created_at),
+        INDEX ix_notifications_recipient_unread (recipient_id, is_read, created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-UPDATE alembic_version SET version_num='0009_notifications' WHERE version_num='0008_assessment_completion';
+UPDATE alembic_version SET version_num='0009_notifications' WHERE alembic_version.version_num = '0008_assessment_completion';
 
 -- Running upgrade 0009_notifications -> 0010_forum_messaging
 
 CREATE TABLE forums (
-    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    course_id BIGINT UNSIGNED NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    description TEXT NULL,
-    created_by BIGINT UNSIGNED NOT NULL,
-    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-    PRIMARY KEY (id),
-    CONSTRAINT uq_forums_course UNIQUE (course_id),
-    CONSTRAINT fk_forums_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
-    CONSTRAINT fk_forums_creator FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        course_id BIGINT UNSIGNED NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        description TEXT NULL,
+        created_by BIGINT UNSIGNED NOT NULL,
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+            ON UPDATE CURRENT_TIMESTAMP(6),
+        PRIMARY KEY (id),
+        CONSTRAINT uq_forums_course UNIQUE (course_id),
+        CONSTRAINT fk_forums_course FOREIGN KEY (course_id) REFERENCES courses(id)
+            ON DELETE CASCADE,
+        CONSTRAINT fk_forums_creator FOREIGN KEY (created_by) REFERENCES users(id)
+            ON DELETE RESTRICT
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE threads (
-    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    forum_id BIGINT UNSIGNED NOT NULL,
-    author_id BIGINT UNSIGNED NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    body TEXT NOT NULL,
-    status ENUM('OPEN','LOCKED','ARCHIVED') NOT NULL DEFAULT 'OPEN',
-    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-    PRIMARY KEY (id),
-    CONSTRAINT fk_threads_forum FOREIGN KEY (forum_id) REFERENCES forums(id) ON DELETE CASCADE,
-    CONSTRAINT fk_threads_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE RESTRICT,
-    INDEX ix_threads_forum_updated (forum_id, updated_at, id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        forum_id BIGINT UNSIGNED NOT NULL,
+        author_id BIGINT UNSIGNED NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        body TEXT NOT NULL,
+        status ENUM('OPEN','LOCKED','ARCHIVED') NOT NULL DEFAULT 'OPEN',
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+            ON UPDATE CURRENT_TIMESTAMP(6),
+        PRIMARY KEY (id),
+        CONSTRAINT fk_threads_forum FOREIGN KEY (forum_id) REFERENCES forums(id)
+            ON DELETE CASCADE,
+        CONSTRAINT fk_threads_author FOREIGN KEY (author_id) REFERENCES users(id)
+            ON DELETE RESTRICT,
+        INDEX ix_threads_forum_updated (forum_id, updated_at, id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE messages (
-    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    thread_id BIGINT UNSIGNED NOT NULL,
-    author_id BIGINT UNSIGNED NOT NULL,
-    body TEXT NOT NULL,
-    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-    deleted_at DATETIME(6) NULL,
-    PRIMARY KEY (id),
-    CONSTRAINT fk_messages_thread FOREIGN KEY (thread_id) REFERENCES threads(id) ON DELETE CASCADE,
-    CONSTRAINT fk_messages_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE RESTRICT,
-    INDEX ix_messages_thread_created (thread_id, created_at, id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        thread_id BIGINT UNSIGNED NOT NULL,
+        author_id BIGINT UNSIGNED NOT NULL,
+        body TEXT NOT NULL,
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+            ON UPDATE CURRENT_TIMESTAMP(6),
+        deleted_at DATETIME(6) NULL,
+        PRIMARY KEY (id),
+        CONSTRAINT fk_messages_thread FOREIGN KEY (thread_id) REFERENCES threads(id)
+            ON DELETE CASCADE,
+        CONSTRAINT fk_messages_author FOREIGN KEY (author_id) REFERENCES users(id)
+            ON DELETE RESTRICT,
+        INDEX ix_messages_thread_created (thread_id, created_at, id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-UPDATE alembic_version SET version_num='0010_forum_messaging' WHERE version_num='0009_notifications';
+UPDATE alembic_version SET version_num='0010_forum_messaging' WHERE alembic_version.version_num = '0009_notifications';
+
+-- Running upgrade 0010_forum_messaging -> 0011_attempt_events
+
+CREATE TABLE attempt_events (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        attempt_id BIGINT UNSIGNED NOT NULL,
+        client_event_id CHAR(36) NOT NULL,
+        event_type ENUM('TAB_HIDDEN','WINDOW_BLUR') NOT NULL,
+        trace_id VARCHAR(64) NOT NULL,
+        review_status ENUM('PENDING','REVIEWED','DISMISSED') NOT NULL DEFAULT 'PENDING',
+        version INT UNSIGNED NOT NULL DEFAULT 1,
+        reviewed_by BIGINT UNSIGNED NULL,
+        reviewed_at DATETIME(6) NULL,
+        review_note VARCHAR(1000) NULL,
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        PRIMARY KEY (id),
+        CONSTRAINT uq_attempt_events_client UNIQUE (attempt_id,client_event_id),
+        CONSTRAINT fk_attempt_events_attempt FOREIGN KEY (attempt_id) REFERENCES exam_attempts(id)
+            ON DELETE RESTRICT,
+        CONSTRAINT fk_attempt_events_reviewer FOREIGN KEY (reviewed_by) REFERENCES users(id)
+            ON DELETE RESTRICT,
+        INDEX ix_attempt_events_review (review_status,created_at,id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+UPDATE alembic_version SET version_num='0011_attempt_events' WHERE alembic_version.version_num = '0010_forum_messaging';

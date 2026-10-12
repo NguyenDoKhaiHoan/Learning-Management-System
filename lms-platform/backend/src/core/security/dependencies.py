@@ -31,11 +31,13 @@ def get_token_subject(request: Request, credentials: BearerCredentials) -> int:
 async def get_current_user(
     user_id: Annotated[int, Depends(get_token_subject)],
     connection: ConnectionDependency,
+    request: Request,
 ) -> CurrentUser:
     unauthorized = HTTPException(401, headers={"WWW-Authenticate": "Bearer"})
     user = await IdentityRepository(connection).get_user(user_id)
     if user is None or user["status"] != "ACTIVE":
         raise unauthorized
+    request.state.audit_actor_id = user_id
     roles = await RoleRepository(connection).get_role_codes(user_id)
     return CurrentUser(
         id=str(user["id"]), email=user["email"], username=user["username"], roles=tuple(roles)
@@ -65,9 +67,7 @@ def require_permissions(required_permissions: Sequence[str]) -> Callable[..., Cu
     if not required or isinstance(required_permissions, str):
         raise ValueError("Provide a non-empty list of permission codes")
 
-    async def check(
-        user: CurrentUserDependency, connection: ConnectionDependency
-    ) -> CurrentUser:
+    async def check(user: CurrentUserDependency, connection: ConnectionDependency) -> CurrentUser:
         granted = frozenset(await RoleRepository(connection).get_permission_codes(int(user.id)))
         if not required.issubset(granted):
             raise HTTPException(403)

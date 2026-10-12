@@ -8,6 +8,8 @@ from pydantic import BaseModel, Field, field_validator
 from src.core.contracts import ERROR_RESPONSES, AccessToken, CurrentUser, SuccessResponse
 from src.core.database.database import ConnectionDependency
 from src.core.security.dependencies import CurrentUserDependency, require_roles
+from src.modules.audit_security.application.security import request_ip
+from src.modules.audit_security.domain.enums import SecurityEventType, SecuritySeverity
 from src.modules.audit_security.infrastructure.repository import AuditRepository
 from src.modules.identity_access.application.passwords import verify_password
 from src.modules.identity_access.application.sessions import consume_refresh, issue_tokens
@@ -54,9 +56,24 @@ async def login(
         or credentials["status"] != UserStatus.ACTIVE.value
         or not password_valid
     ):
+        await AuditRepository(connection).append_security_event(
+            actor_id=int(credentials["id"]) if credentials else None,
+            event_type=SecurityEventType.LOGIN_FAILED,
+            severity=SecuritySeverity.WARNING,
+            ip_address=request_ip(request),
+            trace_id=request.state.trace_id,
+        )
+        await connection.commit()
+        request.state.security_recorded = True
         raise HTTPException(401, headers={"WWW-Authenticate": "Bearer"})
     settings = request.app.state.settings
     tokens = await issue_tokens(connection, settings, int(credentials["id"]))
+    await AuditRepository(connection).append_security_event(
+        actor_id=int(credentials["id"]),
+        event_type=SecurityEventType.LOGIN_SUCCEEDED,
+        ip_address=request_ip(request),
+        trace_id=request.state.trace_id,
+    )
     await connection.commit()
     return SuccessResponse(
         data=tokens,
@@ -122,6 +139,15 @@ async def update_account_status(
         trace_id=request.state.trace_id,
         details={"status": body.status},
     )
+    if body.status == "LOCKED":
+        await AuditRepository(connection).append_security_event(
+            actor_id=int(actor.id),
+            event_type=SecurityEventType.ACCOUNT_LOCKED,
+            severity=SecuritySeverity.WARNING,
+            trace_id=request.state.trace_id,
+            ip_address=request_ip(request),
+            details={"user_id": str(user_id)},
+        )
     await connection.commit()
     return SuccessResponse(
         data={"user_id": str(user_id), "status": body.status},

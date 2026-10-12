@@ -16,6 +16,7 @@ from src.config.config import Settings
 from src.core.database.database import build_engine
 from tests.integration.auth_checks import assert_http_auth
 from tests.integration.sql_repository_checks import assert_sql_repositories
+from tests.unit.test_schema import TABLES
 
 pytestmark = pytest.mark.integration
 BACKEND = Path(__file__).resolve().parents[2]
@@ -123,7 +124,7 @@ async def test_mysql_migration_constraints_and_round_trip() -> None:
                 .mappings()
                 .all()
             )
-            assert len(tables) == 33
+            assert {row["TABLE_NAME"] for row in tables} == TABLES
             assert all(row["ENGINE"] == "InnoDB" for row in tables)
             assert all(row["TABLE_COLLATION"] == "utf8mb4_unicode_ci" for row in tables)
         await assert_sql_repositories(engine)

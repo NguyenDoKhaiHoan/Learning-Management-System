@@ -45,6 +45,7 @@ TABLES = {
     "forums",
     "threads",
     "messages",
+    "attempt_events",
 }
 
 
