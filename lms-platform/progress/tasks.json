@@ -538,6 +538,15 @@
       "progress": 1,
       "evidence": "Persisted login/denial/account/token security events with Admin filtered UI. Migration 0011 adds bounded, idempotent attempt telemetry and scoped optimistic human review with transactional audit. Real MySQL concurrency/ownership/review/rollback/cap/no-penalty tests, auth/unit regression, schema round-trip, 2 browser acceptance tests, build/lint/contracts passed. See week-6-review.md.",
       "verified_at": "2026-10-12"
+    },
+    {
+      "wbs": "6.3",
+      "title": "Report/dashboard và gradebook export cơ bản",
+      "sheet_titles": ["Report/dashboard và gradebook export cơ bản"],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Manager-scoped learner/gradebook reports with filters, pagination and global filtered aggregates. Durable bounded CSV jobs, private downloads with live scope checks, audit, formula protection and nonblocking/cancellation-safe serialization. 107 backend full regression tests, final 6 report/export tests, CSV safety, 11 frontend unit and 11 browser E2E passed; lint/build/contracts/sync tests passed. See week-6-review.md.",
+      "verified_at": "2026-10-12"
     }
   ]
 }

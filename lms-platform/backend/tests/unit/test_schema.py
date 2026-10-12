@@ -46,6 +46,7 @@ TABLES = {
     "threads",
     "messages",
     "attempt_events",
+    "export_jobs",
 }
 
 

@@ -752,3 +752,31 @@ CREATE TABLE attempt_events (
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 UPDATE alembic_version SET version_num='0011_attempt_events' WHERE alembic_version.version_num = '0010_forum_messaging';
+
+-- Running upgrade 0011_attempt_events -> 0012_export_jobs
+
+CREATE TABLE export_jobs (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        requested_by BIGINT UNSIGNED NOT NULL,
+        request_id CHAR(36) NOT NULL,
+        kind ENUM('OVERVIEW','LEARNERS','GRADEBOOK') NOT NULL,
+        course_id BIGINT UNSIGNED NULL,
+        filters JSON NOT NULL,
+        status ENUM('PENDING','READY','FAILED') NOT NULL DEFAULT 'PENDING',
+        location VARCHAR(512) NULL,
+        row_count INT UNSIGNED NULL,
+        error_code VARCHAR(64) NULL,
+        trace_id VARCHAR(64) NOT NULL,
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        completed_at DATETIME(6) NULL,
+        PRIMARY KEY (id),
+        CONSTRAINT uq_export_jobs_request UNIQUE (requested_by,request_id),
+        CONSTRAINT fk_export_jobs_requester FOREIGN KEY (requested_by) REFERENCES users(id)
+            ON DELETE RESTRICT,
+        CONSTRAINT fk_export_jobs_course FOREIGN KEY (course_id) REFERENCES courses(id)
+            ON DELETE RESTRICT,
+        INDEX ix_export_jobs_queue (status,created_at,id),
+        INDEX ix_export_jobs_owner (requested_by,created_at,id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+UPDATE alembic_version SET version_num='0012_export_jobs' WHERE alembic_version.version_num = '0011_attempt_events';

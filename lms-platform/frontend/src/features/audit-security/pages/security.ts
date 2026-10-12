@@ -1,4 +1,5 @@
 import { api } from "../../../services/api/client";
+import { displayAuditTime } from "./audit";
 import { element, field } from "../../../components/dom";
 import {
   actionForm,
@@ -61,7 +62,7 @@ export async function renderSecurity(
       ),
       element(
         "p",
-        `${new Date(String(row.created_at)).toLocaleString("vi-VN")} · Trace ID: ${row.trace_id}`,
+        `${displayAuditTime(row.created_at)} · Trace ID: ${row.trace_id}`,
         "muted",
       ),
       element("pre", JSON.stringify(row.details, null, 2), "lesson-text"),
@@ -125,11 +126,7 @@ export async function renderAttemptReview(
           "p",
           `Học viên #${item.student_id} · ${item.event_type} · ${item.review_status}`,
         ),
-        element(
-          "p",
-          new Date(item.created_at).toLocaleString("vi-VN"),
-          "muted",
-        ),
+        element("p", displayAuditTime(item.created_at), "muted"),
       );
       if (item.review_status === "PENDING")
         card.append(

@@ -1,11 +1,10 @@
 # Learning Management System (LMS)
 
-Checkpoint **05/10/2026**: tuần 4 đạt 100%; hoàn thành thêm **5.1–5.3**:
-layout/routing/UI states, Admin users/roles/reports và Instructor dashboard/content builder.
-Database chính `lms` ở migration **0008**, thêm 8 course mẫu.
-Kiểm chứng **93 backend tests, 11 unit frontend, 7 browser E2E**, build/lint đạt.
-Xem [review tuần 4](lms-platform/progress/week-4-completion-review.md)
-và [review tuần 5](lms-platform/progress/week-5-review.md).
+Checkpoint **12/10/2026**: hoàn thành **6.1–6.3**: audit trail, security events,
+exam event/review flag, report theo course và private CSV export bằng job nền.
+Database chính `lms` ở migration **0012_export_jobs**; tuần 5 đã hoàn thành.
+Xem [API tuần 6](lms-platform/docs/api/week-6.md) và
+[review tuần 6](lms-platform/progress/week-6-review.md) để xem phạm vi và bằng chứng.
 
 
 ## 1. Mục đích hệ thống

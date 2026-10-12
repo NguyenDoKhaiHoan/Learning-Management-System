@@ -5,6 +5,7 @@ import type {
 } from "../../../../../shared/contracts/api";
 import { api } from "../../../services/api/client";
 import { button, element, field } from "../../../components/dom";
+import { renderExports } from "../../../features/reports-exports/pages/reports";
 import {
   actionForm,
   pagination,
@@ -288,4 +289,5 @@ export async function renderReports(
       actions.navigate(`/admin/reports?offset=${n}`),
     ),
   );
+  await renderExports(body, actions, () => [{ label: "Xuất tổng quan CSV", kind: "OVERVIEW" }]);
 }

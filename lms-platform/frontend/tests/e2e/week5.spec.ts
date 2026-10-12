@@ -313,7 +313,8 @@ test("three portals remain usable on mobile and expose labelled controls", async
     const unlabeled = await page.locator("input, textarea, select, button").evaluateAll((controls) =>
       controls.filter((control) => {
         const label = control.getAttribute("aria-label") || control.textContent ||
-          (control.id && document.querySelector(`label[for='${control.id}']`)?.textContent);
+          Array.from((control as HTMLInputElement).labels ?? [])
+            .map((label) => label.textContent).join(" ");
         return !label?.trim();
       }).length,
     );

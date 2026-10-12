@@ -12,6 +12,7 @@ from src.core.database.health import router as health_router
 from src.core.errors.handlers import register_handlers
 from src.core.middleware.trace import TraceMiddleware, configure_logging
 from src.jobs.processors.exam_expiry import run_expiry_worker
+from src.jobs.processors.exports import run_export_worker
 from src.modules.anti_cheating.presentation.router import router as attempt_events_router
 from src.modules.assignment.presentation.router import router as assignment_router
 from src.modules.audit_security.presentation.router import router as audit_router
@@ -25,6 +26,7 @@ from src.modules.learning_content.presentation.router import router as content_r
 from src.modules.learning_progress_analytics.presentation.router import router as progress_router
 from src.modules.notification.presentation.router import router as notification_router
 from src.modules.quiz_exam.presentation.router import router as quiz_exam_router
+from src.modules.reporting_export.presentation.exports import router as exports_router
 from src.modules.reporting_export.presentation.router import router as dashboard_router
 from src.modules.user_role.presentation.admin import router as admin_users_router
 from src.modules.user_role.presentation.permissions import router as permission_router
@@ -40,12 +42,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         engine = build_engine(settings)
         app.state.db_engine = engine
         worker = asyncio.create_task(run_expiry_worker(engine))
+        export_worker = asyncio.create_task(run_export_worker(engine, settings))
         try:
             yield
         finally:
             worker.cancel()
+            export_worker.cancel()
             with suppress(asyncio.CancelledError):
                 await worker
+            with suppress(asyncio.CancelledError):
+                await export_worker
             await engine.dispose()
 
     app = FastAPI(
@@ -65,6 +71,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(role_router)
     app.include_router(admin_users_router)
     app.include_router(dashboard_router)
+    app.include_router(exports_router)
     app.include_router(permission_router)
     app.include_router(course_router)
     app.include_router(content_router)

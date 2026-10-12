@@ -7,6 +7,13 @@ import {
   type PageActions,
 } from "../../../components/forms";
 
+export function displayAuditTime(value: unknown) {
+  const timestamp = String(value);
+  return new Date(
+    /(?:Z|[+-]\d{2}:\d{2})$/i.test(timestamp) ? timestamp : timestamp + "Z",
+  ).toLocaleString("vi-VN");
+}
+
 export async function renderAudit(
   body: HTMLElement,
   query: URLSearchParams,
@@ -63,7 +70,7 @@ export async function renderAudit(
       ),
       element(
         "p",
-        `${new Date(String(row.timestamp)).toLocaleString("vi-VN")} · Trace ID: ${row.trace_id}`,
+        `${displayAuditTime(row.timestamp)} · Trace ID: ${row.trace_id}`,
         "muted",
       ),
       element("pre", JSON.stringify(row.details, null, 2), "lesson-text"),

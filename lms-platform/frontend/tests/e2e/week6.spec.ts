@@ -4,6 +4,7 @@ import {
   type Page,
   type APIRequestContext,
 } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 
 const password = process.env.LMS_DEMO_PASSWORD ?? "LmsDemo-Week2!2026";
 async function login(page: Page, actor: string) {
@@ -77,7 +78,14 @@ async function examFixture(request: APIRequestContext) {
     status: "ACTIVE",
   });
   await call(`/exams/${exam.id}/publish`, "POST");
-  return { cid, call };
+  return {
+    cid,
+    call,
+    examId: exam.id as string,
+    question,
+    studentCall: (path: string, method = "GET", data?: unknown) =>
+      call(path, method, data, student),
+  };
 }
 
 test("Admin can filter audit records and Student route guard prevents audit requests", async ({
@@ -183,4 +191,73 @@ test("Student telemetry stops on navigation and Instructor reviews the flag", as
   await expect(
     page.getByRole("heading", { name: "LOGIN_SUCCEEDED", exact: true }).first(),
   ).toBeVisible();
+});
+
+test("Instructor filters course reports and downloads a gradebook; Admin exports overview", async ({
+  page,
+  request,
+}) => {
+  const { cid, call, examId, question, studentCall } =
+    await examFixture(request);
+  const attempt = await studentCall(`/exams/${examId}/attempts`, "POST");
+  await studentCall(`/attempts/${attempt.id}/answers/${question.id}`, "PUT", {
+    selected_option_ids: [question.options[0].id],
+    expected_version: 0,
+  });
+  await studentCall(`/attempts/${attempt.id}/submit`, "POST");
+  const grade = (await call(`/courses/${cid}/grades`))[0];
+  await call(`/grades/${grade.id}/publish`, "POST", {
+    expected_version: grade.version,
+  });
+  await login(page, "instructor");
+  await page.goto(`/#/courses/${cid}`);
+  const reports = page.locator(".course-reports");
+  await expect(
+    reports.getByRole("table", { name: "Tiến độ học viên" }),
+  ).toContainText("demo_student");
+  await expect(
+    reports.getByRole("table", { name: "Gradebook theo bộ lọc" }),
+  ).toContainText("Telemetry exam");
+  await reports
+    .getByLabel("Tìm học viên trong báo cáo")
+    .fill("no-such-student");
+  await reports
+    .getByRole("button", { name: "Lọc báo cáo", exact: true })
+    .click();
+  await expect(reports.getByText("Không có học viên phù hợp.")).toBeVisible();
+  await reports.getByLabel("Tìm học viên trong báo cáo").fill("");
+  await reports
+    .getByRole("button", { name: "Lọc báo cáo", exact: true })
+    .click();
+  await expect(
+    reports.getByRole("table", { name: "Gradebook theo bộ lọc" }),
+  ).toContainText("demo_student");
+  async function exportCsv(label: string) {
+    const created = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/exports") &&
+        response.request().method() === "POST",
+    );
+    await page.getByRole("button", { name: label, exact: true }).click();
+    const job = (await (await created).json()).data;
+    const row = page.locator(`.export-job[data-job-id="${job.id}"]`);
+    await expect(row).toContainText("Sẵn sàng tải", { timeout: 15000 });
+    const downloading = page.waitForEvent("download");
+    await row.getByRole("button", { name: "Tải CSV", exact: true }).click();
+    const downloaded = await downloading;
+    expect(downloaded.suggestedFilename()).toContain(".csv");
+    return readFile((await downloaded.path())!, "utf8");
+  }
+  const gradebook = await exportCsv("Xuất gradebook CSV");
+  expect(gradebook).toContain("grade_id,enrollment_id,student_id");
+  expect(gradebook).toContain("demo_student");
+  expect(gradebook).toContain("PUBLISHED");
+  await page.getByRole("button", { name: "Đăng xuất" }).click();
+  await login(page, "admin");
+  await page
+    .getByRole("link", { name: "Báo cáo tổng quan", exact: true })
+    .click();
+  expect(await exportCsv("Xuất tổng quan CSV")).toContain(
+    "Week 6 browser course",
+  );
 });

@@ -39,6 +39,7 @@ import { renderForum } from "../features/forum-chat/pages/forum";
 import { renderAudit } from "../features/audit-security/pages/audit";
 import { renderSecurity, renderAttemptReview } from "../features/audit-security/pages/security";
 import { observeAttempt } from "../features/quizzes-exams/services/telemetry";
+import { renderCourseReports } from "../features/reports-exports/pages/reports";
 import {
   courseSettings,
   moduleEditor,
@@ -1901,6 +1902,7 @@ async function coursePage(
   await renderExams(body, current, cid);
   await renderGrades(body, current, cid);
   if (manager) await renderAttemptReview(body, cid, pageActions);
+  if (manager) await renderCourseReports(body, cid, pageActions);
   await renderForum(body, cid, pageActions);
 
   if (manager) {
