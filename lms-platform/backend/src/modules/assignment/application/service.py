@@ -35,14 +35,14 @@ class AssignmentService(CourseService):
 
         if write and course["status"] == "ARCHIVED":
             raise HTTPException(
-            409,
-            "Archived course cannot be edited",
-        )
+                409,
+                "Archived course cannot be edited",
+            )
 
         assignment = await self.assignments.assignment(
-        course_id,
-        assignment_id,
-        lock=write,
+            course_id,
+            assignment_id,
+            lock=write,
         )
 
         if assignment is None:
@@ -124,7 +124,14 @@ class AssignmentService(CourseService):
             resource="assignment_submission",
             resource_id=str(submission_id),
             trace_id=self.trace_id,
-            details={"assignment_id": str(assignment_id), "version": version, "status": status},
+            details={
+                "course_id": str(course_id),
+                "assignment_id": str(assignment_id),
+                "enrollment_id": str(enrollment["id"]),
+                "version": version,
+                "status": status,
+                "submission_type": "FILE" if file is not None else "TEXT",
+            },
         )
         await NotificationEvents(self.connection).assignment_submitted(
             course_id,

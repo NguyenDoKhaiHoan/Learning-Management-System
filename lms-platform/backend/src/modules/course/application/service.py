@@ -87,6 +87,11 @@ class CourseService:
             ):
                 raise HTTPException(409, "Each module needs lessons with non-empty content")
         await self.repo.change_status(course_id, expected=course["status"], new=target)
-        await self.audit("course." + target.lower(), "course", course_id)
+        await self.audit(
+            "course." + target.lower(),
+            "course",
+            course_id,
+            details={"previous_status": course["status"], "status": target},
+        )
         await self.connection.commit()
         return await self.repo.get(course_id)

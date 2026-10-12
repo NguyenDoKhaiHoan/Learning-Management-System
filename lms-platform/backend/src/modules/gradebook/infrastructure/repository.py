@@ -38,7 +38,16 @@ class GradeRepository(SqlRepository):
             resource="grade",
             resource_id=str(id),
             trace_id=trace_id,
-            details={"version": row["version"], "reason": reason},
+            details={
+                "version": row["version"],
+                "reason": reason,
+                "status": row["status"],
+                "score": str(row["score"]),
+                "max_score": str(row["max_score"]),
+                "enrollment_id": str(row["enrollment_id"]),
+                "assessment_type": row["assessment_type"],
+                "assessment_id": str(row["assessment_id"]),
+            },
         )
         return row
 

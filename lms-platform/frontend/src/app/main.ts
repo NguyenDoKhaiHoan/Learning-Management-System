@@ -36,6 +36,7 @@ import type { ExamAttemptView, ExamSummary, GradeView, Notification } from "../.
 import { renderUsers, renderReports } from "../portals/admin/pages/dashboard";
 import { renderInstructorSummary } from "../portals/instructor/pages/dashboard";
 import { renderForum } from "../features/forum-chat/pages/forum";
+import { renderAudit } from "../features/audit-security/pages/audit";
 import {
   courseSettings,
   moduleEditor,
@@ -1166,6 +1167,7 @@ function shell(title: string, subtitle: string, showNotice = true) {
       ["ADMIN", "/admin", "Quản lý khóa học"],
       ["ADMIN", "/admin/users", "Tài khoản & vai trò"],
       ["ADMIN", "/admin/reports", "Báo cáo tổng quan"],
+      ["ADMIN", "/admin/audit", "Nhật ký kiểm toán"],
 
       ["INSTRUCTOR", "/instructor", "Lớp tôi giảng dạy"],
 
@@ -2080,6 +2082,9 @@ async function render() {
     } else if (path === "/admin/reports") {
       document.querySelector("h1")!.textContent = "Báo cáo tổng quan";
       await renderReports(target, query, actions);
+    } else if (path === "/admin/audit") {
+      document.querySelector("h1")!.textContent = "Nhật ký kiểm toán";
+      await renderAudit(target, query, actions);
     } else if (path === "/notifications") {
       document.querySelector("h1")!.textContent = "Thông báo";
       await renderNotifications(target);

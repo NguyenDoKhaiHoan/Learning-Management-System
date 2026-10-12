@@ -520,6 +520,15 @@
       "progress": 1,
       "evidence": "Playwright responsive/accessibility acceptance at 390px for Admin, Instructor and Student: no horizontal overflow, heading/nav landmarks, accessible names for controls and logout. Shell includes skip link, aria-busy/live region, focus-visible and reduced-motion; desktop/mobile smoke suite passes. See docs/api/week-5.md.",
       "verified_at": "2026-10-09"
+    },
+    {
+      "wbs": "6.1",
+      "title": "Ghi audit trail cho publish, đổi quyền/điểm, submission",
+      "sheet_titles": ["Ghi audit trail cho publish, đổi quyền/điểm, submission"],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Transactional audit for course/assignment/exam publish, roles/permissions, grade changes and assignment/exam submissions. Admin-only filtered/paginated immutable API and UI. 25 MySQL audit/assignment/grading/portal tests and audit browser acceptance passed; build/lint/contracts passed. See week-6-review.md.",
+      "verified_at": "2026-10-12"
     }
   ]
 }
