@@ -73,3 +73,31 @@ Checkpoint 12/10 chỉ cập nhật WBS 6.1–6.3; các mục tiếp theo đư�
 - Sheet preview chỉ thay F/G của WBS 6.4; apply và đọc lại xác nhận **6.4 = 100%**.
 
 WBS 6.5–6.8 chưa đánh dấu tại checkpoint này.
+
+## WBS 6.5 — hoàn thành, checkpoint 14/10/2026
+
+- **7 security cases mới đạt** trên MySQL thật: 15 AuthN rejections và claims role
+  không vượt DB grants; 51 request AuthZ bị từ chối, không phát sinh thay đổi nghiệp vụ.
+- Hai Student cùng enrollment ACTIVE kiểm chứng attempt read/save/submit/events,
+  submission metadata/file ID swap, grade visibility và notification recipient isolation.
+- Lesson/file parent mismatch, MIME/empty/size và cleanup, path containment, suspension,
+  course Draft/account lock và quyền tải lại; export chỉ requester, Admin không vượt
+  ownership, thu hồi permission/course_staff chặn kết quả đã READY.
+- Test phát hiện lesson/submission downloads thiếu chống cache/MIME sniffing;
+  bổ sung `Cache-Control: no-store` và `X-Content-Type-Options: nosniff` cho cả hai route.
+  CSV đã có header tương ứng. Chi tiết `docs/testing/week-6-security.md`.
+
+## Kiểm chứng WBS 6.4–6.5 — 14/10/2026
+
+- **119 backend tests passed**, không skip, full suite trên MySQL thật (401 giây).
+  Bao gồm migration/canonical schema round-trip, regression các tuần trước và 11 case mới.
+- **12/12 browser E2E passed** trong một lượt full sau khi bổ sung case assignment/
+  autosave/resume/submit/grade UI; **11 frontend unit tests passed** và build đạt.
+- Ruff toàn src/tests/scripts/migrations, contracts drift và **5 progress sync tests đạt**.
+  `--require-mysql` trả lỗi trước collection khi thiếu MYSQL_TEST_ADMIN_URL.
+- Sheet đồng bộ riêng từng WBS qua preview/apply/readback: **6.4, 6.5 = 100%**.
+  Chỉ F/G hai task thay đổi; không thay owner/deadline/tên/công thức/layout/task khác.
+- Không cần migration mới; database chính vẫn `0012_export_jobs`. Kiểm thử dùng database
+  `lms_test_<uuid>`/storage tạm và browser `lms_demo_e2e`.
+
+WBS 6.6–6.8 chưa thực hiện trong phạm vi này.

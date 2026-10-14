@@ -1,5 +1,5 @@
 {
-  "description": "Checkpoint 14/10/2026: hoàn thành WBS 6.4 acceptance checklist/business rules, giữ các task đã xác minh trước. 4 MySQL acceptance cases mới, full backend regression không skip, 12 browser E2E, 11 frontend unit, build/Ruff/contracts và progress sync tests đạt. Xem week-6-review.md và docs/testing/week-6-acceptance.md.",
+  "description": "Checkpoint 14/10/2026: hoàn thành WBS 6.4 acceptance checklist/business rules và 6.5 AuthN/AuthZ/IDOR/file security. 119 backend tests trên MySQL thật không skip, 12 browser E2E, 11 frontend unit, build/Ruff/contracts và 5 progress sync tests đạt. Sheet 6.4–6.5 đồng bộ riêng theo preview/apply/readback. Giữ WBS 6.6–6.8. Xem week-6-review.md và docs/testing/week-6-acceptance.md, week-6-security.md.",
   "tasks": [
     {
       "wbs": "1.1",
@@ -555,6 +555,15 @@
       "status": "Đã hoàn thành",
       "progress": 1,
       "evidence": "Business-rule checklist maps MVP criteria to regression tests. 4 new real-MySQL acceptance cases cover enrollment/learning/submission versions/exam/grade publication/completion/forum/notifications/report/CSV/audit and late policy. Browser covers text/PDF versions, autosave/resume/submit and published grade feedback; catalog search race fixed. Full backend passed without skips, 12 browser E2E and 11 frontend unit passed; build/lint/contracts passed. CI requires MySQL. See week-6-review.md and docs/testing/week-6-acceptance.md.",
+      "verified_at": "2026-10-14"
+    },
+    {
+      "wbs": "6.5",
+      "title": "Security tests AuthN/AuthZ, IDOR và file access",
+      "sheet_titles": ["Security tests AuthN/AuthZ, IDOR và file access"],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "7 real-MySQL security cases: 15 AuthN rejections, untrusted role claims, 51 denied AuthZ requests with no business side effects, same-course active-peer IDOR across attempts/submissions/files/grades/notifications, file parent/path containment/upload cleanup, live enrollment/account/permission/staff revocation and export requester isolation. Added no-store/nosniff to lesson/submission downloads after test exposed missing headers. Full 119 backend tests without skips, 12 browser E2E, 11 frontend unit, build/lint/contracts and 5 sync tests passed. See week-6-review.md and docs/testing/week-6-security.md.",
       "verified_at": "2026-10-14"
     }
   ]

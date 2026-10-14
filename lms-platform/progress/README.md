@@ -1,11 +1,11 @@
 # Tiến độ LMS ↔ Google Sheet
 
-Checkpoint **14/10/2026**: hoàn thành WBS **6.1–6.4**: audit/security events,
-exam telemetry/review, report/CSV và acceptance checklist theo business rules.
-51 task đang theo dõi đã hoàn thành; giữ nguyên WBS 6.5–6.8.
+Checkpoint **14/10/2026**: hoàn thành WBS **6.1–6.5**: audit/security events,
+exam telemetry/review, report/CSV, acceptance checklist và AuthN/AuthZ/IDOR/file tests.
+52 task đang theo dõi đã hoàn thành; giữ nguyên WBS 6.6–6.8.
 Database chính **lms** ở head **0012_export_jobs**.
 Xem [review tuần 6](week-6-review.md) và [API tuần 6](../docs/api/week-6.md).
-Google Sheet đã đồng bộ và đọc lại xác nhận 6.4 = 100% ngày 14/10/2026.
+Google Sheet đã đồng bộ và đọc lại xác nhận 6.4–6.5 = 100% ngày 14/10/2026.
 
 
 Checkpoint trước **02/10/2026**: WBS 4.5–4.6 hoàn thành submit/worker/auto-grading

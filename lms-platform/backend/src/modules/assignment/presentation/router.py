@@ -451,4 +451,9 @@ async def download_submission_file(
     path = (root / row["location"]).resolve()
     if root not in path.parents or not path.is_file():
         raise HTTPException(404)
-    return FileResponse(path, media_type=row["mime_type"], filename=row["title"])
+    return FileResponse(
+        path,
+        media_type=row["mime_type"],
+        filename=row["title"],
+        headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
+    )

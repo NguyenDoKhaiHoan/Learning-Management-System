@@ -1,4 +1,4 @@
-# Tuần 6 — WBS 6.1–6.4
+# Tuần 6 — WBS 6.1–6.5
 
 ## 6.1 Audit trail
 
@@ -97,6 +97,20 @@ Chạy full backend với `python -m pytest -q --strict-markers --require-mysql`
 Thiếu MYSQL_TEST_ADMIN_URL thì dừng trước collection; CI sử dụng cùng cờ để tránh
 integration skip khi nghiệm thu. Test dùng MySQL/storage riêng, không thay database `lms`.
 
+## 6.5 Security tests AuthN/AuthZ, IDOR và file access
+
+Suite `test_week6_access_security.py` có 7 case trên MySQL thật: 15 trường hợp AuthN
+bị từ chối, claims quyền không vượt DB grants, matrix 17 thao tác × 3 actor, hai Student
+ACTIVE cùng course kiểm IDOR attempt/submission/file/grade/notification, parent scope,
+upload cleanup/path containment, account/enrollment/permission/staff revocation và
+export requester isolation. Request bị từ chối không thay đổi dữ liệu nghiệp vụ.
+Chi tiết [security checklist](../testing/week-6-security.md); chạy riêng bằng
+`python -m pytest -q --strict-markers --require-mysql -m security`.
+
+Lesson/submission downloads bổ sung `Cache-Control: no-store` và
+`X-Content-Type-Options: nosniff`, thống nhất với private CSV. Giữ backend authorization
+trước khi đọc file, kiểm containment tại private storage và không trả location trong metadata.
+
 ## Chạy và kiểm chứng
 
 ```powershell
@@ -112,8 +126,9 @@ npm run test:e2e
 ```
 
 Backend acceptance tuần 6: `tests/integration/test_week6_audit.py`,
-`test_week6_security.py`, `test_week6_reports.py`; cần MYSQL_TEST_ADMIN_URL cho MySQL
+`test_week6_security.py`, `test_week6_reports.py`, `test_week6_acceptance.py` và
+`test_week6_access_security.py`; cần MYSQL_TEST_ADMIN_URL cho MySQL
 disposable test DB. CSV safety: `tests/unit/test_csv_export.py`. Browser acceptance:
 `tests/e2e/week6.spec.ts`. Chạy full pytest/Ruff/contracts/sync tests theo hướng dẫn backend.
 Database ứng dụng chính `lms` ở head `0012_export_jobs`; migrate bằng upgrade, không import
-canonical SQL vào DB đang có dữ liệu. WBS 6.5–6.8 chưa đánh dấu hoàn thành.
+canonical SQL vào DB đang có dữ liệu. WBS 6.6–6.8 chưa đánh dấu hoàn thành.

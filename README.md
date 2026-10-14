@@ -1,8 +1,9 @@
 # Learning Management System (LMS)
 
-Checkpoint **14/10/2026**: hoàn thành **6.1–6.4**: audit trail, security events,
-exam event/review flag, report/private CSV và acceptance checklist theo business rules.
-WBS 6.4 bổ sung luồng API xuyên module, deadline cases và browser assignment/exam/grades.
+Checkpoint **14/10/2026**: hoàn thành **6.1–6.5**: audit trail, security events,
+exam event/review flag, report/private CSV, acceptance checklist và security tests.
+WBS 6.4–6.5 bổ sung luồng API/browser xuyên module, AuthN/AuthZ/IDOR/file access và
+header bảo vệ file private. **119 backend tests, 12 browser E2E, 11 frontend unit tests đạt**.
 Database chính `lms` ở migration **0012_export_jobs**; tuần 5 đã hoàn thành.
 Xem [API tuần 6](lms-platform/docs/api/week-6.md) và
 [review tuần 6](lms-platform/progress/week-6-review.md) để xem phạm vi và bằng chứng.
