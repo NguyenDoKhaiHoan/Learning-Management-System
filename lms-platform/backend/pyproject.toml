@@ -23,7 +23,11 @@ include = ["src*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
-markers = ["integration: requires a disposable MySQL database"]
+markers = [
+  "integration: requires a disposable MySQL database",
+  "acceptance: MVP checklist and business-rule acceptance",
+  "security: authentication, authorization, IDOR and private-file security",
+]
 
 [tool.ruff]
 target-version = "py311"

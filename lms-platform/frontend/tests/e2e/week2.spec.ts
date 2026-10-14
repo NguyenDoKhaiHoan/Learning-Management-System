@@ -108,6 +108,8 @@ test("direct links and role guards; desktop and mobile views", async ({
     path: "test-results/week2-student.png",
     fullPage: true,
   });
+  // The page heading renders before the catalog request finishes.
+  await expect(page.locator(".course-card:visible").first()).toBeVisible();
   const visibleCourses = await page.locator(".course-card:visible").count();
   await page
     .getByLabel("Tìm khóa học", { exact: true })

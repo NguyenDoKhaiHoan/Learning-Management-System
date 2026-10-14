@@ -12,7 +12,7 @@ from tests.integration.test_week2_mysql import new_content, new_course
 pytestmark = pytest.mark.integration
 
 
-async def setup_exam(api, *, resume=True, blueprint=False):
+async def setup_exam(api, *, resume=True, blueprint=False, enroll=True):
     call, engine, users, _, _ = api
     course = await new_course(call)
     cid = course["id"]
@@ -55,12 +55,13 @@ async def setup_exam(api, *, resume=True, blueprint=False):
     exam = await call("POST", f"/courses/{cid}/exams", expected=201, json=body)
     eid = exam["id"]
     await call("POST", f"/courses/{cid}/status", json={"status": "PUBLISHED"})
-    async with engine.begin() as conn:
-        await conn.execute(
-            text("""INSERT INTO enrollments(student_id,course_id,status)
-            VALUES (:student,:course,'ACTIVE')"""),
-            {"student": users["student"], "course": cid},
-        )
+    if enroll:
+        async with engine.begin() as conn:
+            await conn.execute(
+                text("""INSERT INTO enrollments(student_id,course_id,status)
+                VALUES (:student,:course,'ACTIVE')"""),
+                {"student": users["student"], "course": cid},
+            )
     return call, engine, cid, bid, q, eid, body
 
 

@@ -1,5 +1,5 @@
 {
-  "description": "Checkpoint 02/10/2026: hoàn thành 4.5–4.6, rà soát WBS tuần 1–3/4.1–4.4 và bổ sung tracking 3.4–3.8. 87 backend full-suite passed + 2 case concurrency bổ sung (89 test khác nhau), 18 scenario tuần 4; 11 frontend unit, 3 browser E2E, build, Ruff, contracts và 5 sync tests đạt. MySQL kiểm thử riêng; lms port 3306 cần migration 0007 khi MySQL80 được bật. Xem week-4-grading-review.md.",
+  "description": "Checkpoint 14/10/2026: hoàn thành WBS 6.4 acceptance checklist/business rules, giữ các task đã xác minh trước. 4 MySQL acceptance cases mới, full backend regression không skip, 12 browser E2E, 11 frontend unit, build/Ruff/contracts và progress sync tests đạt. Xem week-6-review.md và docs/testing/week-6-acceptance.md.",
   "tasks": [
     {
       "wbs": "1.1",
@@ -547,6 +547,15 @@
       "progress": 1,
       "evidence": "Manager-scoped learner/gradebook reports with filters, pagination and global filtered aggregates. Durable bounded CSV jobs, private downloads with live scope checks, audit, formula protection and nonblocking/cancellation-safe serialization. 107 backend full regression tests, final 6 report/export tests, CSV safety, 11 frontend unit and 11 browser E2E passed; lint/build/contracts/sync tests passed. See week-6-review.md.",
       "verified_at": "2026-10-12"
+    },
+    {
+      "wbs": "6.4",
+      "title": "Acceptance tests theo checklist và business rules",
+      "sheet_titles": ["Acceptance tests theo checklist và business rules"],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Business-rule checklist maps MVP criteria to regression tests. 4 new real-MySQL acceptance cases cover enrollment/learning/submission versions/exam/grade publication/completion/forum/notifications/report/CSV/audit and late policy. Browser covers text/PDF versions, autosave/resume/submit and published grade feedback; catalog search race fixed. Full backend passed without skips, 12 browser E2E and 11 frontend unit passed; build/lint/contracts passed. CI requires MySQL. See week-6-review.md and docs/testing/week-6-acceptance.md.",
+      "verified_at": "2026-10-14"
     }
   ]
 }

@@ -31,7 +31,7 @@ jobs:
       - run: python -m pip install -r lms-platform/backend/requirements.lock.txt
       - run: python -m pip install --no-deps -e lms-platform/backend
       - run: ruff check lms-platform/backend/src lms-platform/backend/tests lms-platform/backend/scripts lms-platform/database/migrations
-      - run: pytest -q
+      - run: pytest -q --strict-markers --require-mysql
         working-directory: lms-platform/backend
       - run: python lms-platform/backend/scripts/export_contracts.py --check
       - run: python -m unittest discover -s lms-platform/progress/tests -v

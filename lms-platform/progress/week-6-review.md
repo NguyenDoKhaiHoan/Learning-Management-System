@@ -53,4 +53,23 @@
   Chỉ F/G của ba task được ghi; giữ nguyên công thức/layout/owner/deadline và task khác.
 
 Chi tiết contract: [docs/api/week-6.md](../docs/api/week-6.md).
-Chỉ cập nhật WBS 6.1–6.3 khi có bằng chứng cho từng mục; không đánh dấu 6.4–6.8.
+Checkpoint 12/10 chỉ cập nhật WBS 6.1–6.3; các mục tiếp theo được xác minh riêng bên dưới.
+
+## WBS 6.4 — hoàn thành, checkpoint 14/10/2026
+
+- Checklist tại `docs/testing/week-6-acceptance.md` đối chiếu business rules với kết
+  quả quan sát và các test regression; không suy hoàn thành từ sự hiện diện của file.
+- **4 MySQL acceptance cases mới đạt**: luồng ghi danh/học/submission versions/exam/
+  grade publication/completion/forum/notifications/report/CSV/audit và ba late policy cases.
+  Luồng ghi danh đi qua API; lesson hoàn thành không vượt các assessment gate.
+- Browser bổ sung nộp text/PDF thành hai phiên bản, autosave/resume giữ đáp án và timer,
+  submit, Draft ẩn và Published hiển thị đúng điểm/feedback. Sửa race trong test tìm kiếm
+  tuần 2 bằng cách chờ catalog render trước khi lấy số card.
+- **12/12 browser E2E đạt trong một lần chạy full**, **11 frontend unit tests đạt**,
+  frontend build, Ruff và contract drift đạt. Full backend MySQL regression đạt,
+  không skip; guard `--require-mysql` được kiểm chứng từ chối chạy khi thiếu URL.
+- CI chạy strict markers + required MySQL. Database kiểm thử `lms_test_<uuid>` và
+  storage tạm; browser dùng `lms_demo_e2e`; không sửa schema/database chính.
+- Sheet preview chỉ thay F/G của WBS 6.4; apply và đọc lại xác nhận **6.4 = 100%**.
+
+WBS 6.5–6.8 chưa đánh dấu tại checkpoint này.

@@ -261,3 +261,75 @@ test("Instructor filters course reports and downloads a gradebook; Admin exports
     "Week 6 browser course",
   );
 });
+
+test("Student submits assignment versions, resumes saved exam answers and sees only published grades", async ({
+  page,
+  request,
+}) => {
+  const { cid, call, examId, studentCall } = await examFixture(request);
+  const assignment = await call(`/courses/${cid}/assignments`, "POST", {
+    title: "Acceptance assignment",
+    description: "Submit text and PDF versions",
+    opens_at: new Date(Date.now() - 60000).toISOString(),
+    due_at: new Date(Date.now() + 3600000).toISOString(),
+    max_attempts: 2,
+    max_file_bytes: 1024,
+    allowed_mime_types: ["application/pdf"],
+    max_score: 100,
+  });
+  const assignmentPath = `/courses/${cid}/assignments/${assignment.id}`;
+  await call(assignmentPath + "/status", "POST", { status: "PUBLISHED" });
+  await login(page, "student");
+  await page.goto(`/#/courses/${cid}`);
+  await page.getByLabel("Câu trả lời", { exact: true }).fill("Bài làm nghiệm thu");
+  await page.getByRole("button", { name: "Nộp bài dạng text", exact: true }).click();
+  await expect(page.getByText(/Version 1 · Đã nộp/)).toBeVisible();
+  await page.getByLabel("Bài làm PDF", { exact: true }).setInputFiles({
+    name: "acceptance.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("%PDF-1.7\nAcceptance submission"),
+  });
+  await page.getByRole("button", { name: "Nộp tệp", exact: true }).click();
+  await expect(page.getByText(/Version 2 · Đã nộp/)).toBeVisible();
+  await expect(page.getByText(/Version 1 · Đã nộp/)).toBeVisible();
+  await page.getByRole("button", { name: "Bắt đầu bài thi", exact: true }).click();
+  const saved = page.waitForResponse((response) =>
+    response.url().includes("/answers/") && response.request().method() === "PUT",
+  );
+  await page.getByRole("radio", { name: "4", exact: true }).check();
+  expect((await saved).status()).toBe(200);
+  const eligibility = await studentCall(`/exams/${examId}/eligibility`);
+  const attemptPath = `/attempts/${eligibility.active_attempt_id}`;
+  const before = await studentCall(attemptPath);
+  await page.goto("/#/student");
+  await expect(page.getByRole("heading", { name: "Khóa học của tôi" })).toBeVisible();
+  await page.goto(`/#/courses/${cid}`);
+  await page.getByRole("button", { name: "Tiếp tục bài thi", exact: true }).click();
+  await expect(page.getByRole("radio", { name: "4", exact: true })).toBeChecked();
+  expect((await studentCall(attemptPath)).expires_at).toBe(before.expires_at);
+  await page.getByRole("button", { name: "Nộp bài thi", exact: true }).click();
+  await expect(page.getByText("Đã nộp bài thi.", { exact: true })).toBeVisible();
+  await expect(page.locator(".student-grades")).toContainText("Chưa có điểm được công bố.");
+  const submissions = await studentCall(assignmentPath + "/submissions/mine");
+  expect(submissions.map((submission: { version: number }) => submission.version)).toEqual([1, 2]);
+  await call(`/courses/${cid}/grades`, "POST", {
+    enrollment_id: submissions[1].enrollment_id,
+    assessment_type: "ASSIGNMENT",
+    assessment_id: assignment.id,
+    source_id: submissions[1].id,
+    feedback: "Đạt yêu cầu nghiệm thu",
+    items: [{ item_key: "overall", label: "Essay", score: 85, max_score: 100 }],
+  });
+  const grades = await call(`/courses/${cid}/grades`);
+  expect(grades).toHaveLength(2);
+  for (const grade of grades) {
+    await call(`/grades/${grade.id}/publish`, "POST", { expected_version: grade.version });
+  }
+  await page.goto("/#/student");
+  await expect(page.getByRole("heading", { name: "Khóa học của tôi" })).toBeVisible();
+  await page.goto(`/#/courses/${cid}`);
+  await expect(page.locator(".student-grades .grade-card")).toHaveCount(2);
+  await expect(page.locator(".student-grades")).toContainText("85.00/100.00 (85%)");
+  await expect(page.locator(".student-grades")).toContainText("10.00/10.00 (100%)");
+  await expect(page.locator(".student-grades")).toContainText("Nhận xét: Đạt yêu cầu nghiệm thu");
+});

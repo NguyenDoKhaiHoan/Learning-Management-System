@@ -1,4 +1,4 @@
-# Tuần 6 — WBS 6.1–6.3
+# Tuần 6 — WBS 6.1–6.4
 
 ## 6.1 Audit trail
 
@@ -84,6 +84,19 @@ UI Admin reports có export tổng quan; UI course manager có bảng tiến đ�
 bộ lọc, phân trang và export theo bộ lọc. Lịch sử job tự cập nhật khi đang xử lý và có
 nút tải CSV, lỗi/empty/loading states. Chỉ chủ job truy cập kết quả, kể cả Admin.
 
+## 6.4 Acceptance checklist và business rules
+
+Checklist [nghiệm thu MVP](../testing/week-6-acceptance.md) ánh xạ business rules sang
+test và điều kiện quan sát. `test_week6_acceptance.py` có luồng HTTP xuyên module:
+ghi danh → học → submission versions → autosave/resume/submit → công bố điểm →
+completion → forum/notifications → report/CSV/audit, cùng ba trường hợp late policy.
+Browser tuần 6 kiểm tra nộp text/PDF, autosave/resume, submit và grade visibility/feedback.
+Test tìm kiếm tuần 2 chờ catalog tải xong trước khi kiểm số card.
+
+Chạy full backend với `python -m pytest -q --strict-markers --require-mysql`.
+Thiếu MYSQL_TEST_ADMIN_URL thì dừng trước collection; CI sử dụng cùng cờ để tránh
+integration skip khi nghiệm thu. Test dùng MySQL/storage riêng, không thay database `lms`.
+
 ## Chạy và kiểm chứng
 
 ```powershell
@@ -103,4 +116,4 @@ Backend acceptance tuần 6: `tests/integration/test_week6_audit.py`,
 disposable test DB. CSV safety: `tests/unit/test_csv_export.py`. Browser acceptance:
 `tests/e2e/week6.spec.ts`. Chạy full pytest/Ruff/contracts/sync tests theo hướng dẫn backend.
 Database ứng dụng chính `lms` ở head `0012_export_jobs`; migrate bằng upgrade, không import
-canonical SQL vào DB đang có dữ liệu. WBS 6.4–6.8 chưa đánh dấu hoàn thành.
+canonical SQL vào DB đang có dữ liệu. WBS 6.5–6.8 chưa đánh dấu hoàn thành.
