@@ -69,7 +69,11 @@ async def prepare(settings, database):
 
 if __name__ == "__main__":
     config = asyncio.run(prepare(Settings(), os.getenv("LMS_DEMO_DATABASE", "lms")))
-    print("Demo ready: demo_admin / demo_instructor / demo_student. See docs/api/week-2-demo.md.")
+    print(
+        "Demo ready: demo_admin / demo_instructor / demo_student with a published "
+        "assignment and exam. See docs/api/week-2-demo.md and "
+        "docs/testing/week-6-release.md."
+    )
     uvicorn.run(
         create_app(config),
         host="127.0.0.1",
