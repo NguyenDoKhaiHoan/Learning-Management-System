@@ -153,6 +153,19 @@ async def test_demo_seed_idempotent_login_and_preserves_progress(api):
     async with engine.begin() as conn:
         second = await seed_demo(conn)
     assert first == second
+    assert first["assignment_id"] and first["exam_id"]
+    async with engine.connect() as conn:
+        assert await conn.scalar(
+            text("SELECT status FROM assignments WHERE id=:id"),
+            {"id": first["assignment_id"]},
+        ) == "PUBLISHED"
+        assert await conn.scalar(
+            text("SELECT status FROM exams WHERE id=:id"), {"id": first["exam_id"]}
+        ) == "PUBLISHED"
+        assert await conn.scalar(
+            text("SELECT COUNT(*) FROM exam_questions WHERE exam_id=:id"),
+            {"id": first["exam_id"]},
+        ) == 1
     for name in ("admin", "instructor", "student"):
         login = await client.post(
             "/api/v1/auth/login", json={"login": "demo_" + name, "password": DEMO_PASSWORD}
