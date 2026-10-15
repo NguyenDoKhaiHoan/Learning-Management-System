@@ -1,5 +1,7 @@
 # Learning Management System (LMS)
 
+Checkpoint **15/10/2026**: hoàn thành WBS **6.1–6.8**. Demo có ba role, assignment và exam; release candidate gate yêu cầu MySQL thật, không skip integration. Runbook: [MVP release](lms-platform/docs/testing/week-6-release.md).
+
 Checkpoint **14/10/2026**: hoàn thành **6.1–6.5**: audit trail, security events,
 exam event/review flag, report/private CSV, acceptance checklist và security tests.
 WBS 6.4–6.5 bổ sung luồng API/browser xuyên module, AuthN/AuthZ/IDOR/file access và

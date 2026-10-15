@@ -97,3 +97,10 @@ Các mutation ghi audit cùng transaction; lỗi audit rollback mutation.
 Chạy tự động từ frontend: `npm run test:e2e` (sau `npx playwright install chromium`).
 Playwright mở API 8013/front 5174, MySQL demo riêng; không dùng API/mock response giả.
 Đây là bằng chứng kiểm thử local, không phải biên bản UAT hay xác nhận GitHub Actions đã chạy.
+
+## Fixture assignment và exam
+
+Seed hiện tạo thêm `DEMO_WEEK2` assignment **Bài thực hành LMS** (nộp text/PDF, ba lần thử)
+và exam **Kiểm tra tổng kết LMS** (một câu hỏi, 30 phút, hai lần thử). Student có thể mở
+assignment/exam ngay sau khi đăng nhập; Instructor quản lý submission/gradebook và Admin xem audit.
+Runbook nghiệm thu đầy đủ nằm tại [MVP release](../testing/week-6-release.md).

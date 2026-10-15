@@ -1,5 +1,5 @@
 {
-  "description": "Checkpoint 14/10/2026: hoàn thành WBS 6.4 acceptance checklist/business rules và 6.5 AuthN/AuthZ/IDOR/file security. 119 backend tests trên MySQL thật không skip, 12 browser E2E, 11 frontend unit, build/Ruff/contracts và 5 progress sync tests đạt. Sheet 6.4–6.5 đồng bộ riêng theo preview/apply/readback. Giữ WBS 6.6–6.8. Xem week-6-review.md và docs/testing/week-6-acceptance.md, week-6-security.md.",
+  "description": "Checkpoint 15/10/2026: WBS 6.4-6.8 complete with acceptance/security, full demo seed, release candidate gate and MVP runbook. The gate requires disposable MySQL and does not allow skipped integration tests; see week-6-review.md and docs/testing/week-6-release.md.",
   "tasks": [
     {
       "wbs": "1.1",
@@ -565,6 +565,39 @@
       "progress": 1,
       "evidence": "7 real-MySQL security cases: 15 AuthN rejections, untrusted role claims, 51 denied AuthZ requests with no business side effects, same-course active-peer IDOR across attempts/submissions/files/grades/notifications, file parent/path containment/upload cleanup, live enrollment/account/permission/staff revocation and export requester isolation. Added no-store/nosniff to lesson/submission downloads after test exposed missing headers. Full 119 backend tests without skips, 12 browser E2E, 11 frontend unit, build/lint/contracts and 5 sync tests passed. See week-6-review.md and docs/testing/week-6-security.md.",
       "verified_at": "2026-10-14"
+    },
+    {
+      "wbs": "6.6",
+      "title": "Seed demo hoàn chỉnh: ba role, assignment và exam",
+      "sheet_titles": [
+        "Seed demo hoàn chỉnh: ba role, assignment và exam"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "seed_demo creates or validates three ACTIVE demo roles, DEMO_WEEK2, ACTIVE enrollment, one Published assignment and one Published exam with a question snapshot. MySQL regression checks stable IDs/status and preserves enrollment state; run_demo exposes the fixture. See docs/testing/week-6-release.md.",
+      "verified_at": "2026-10-15"
+    },
+    {
+      "wbs": "6.7",
+      "title": "Regression, sửa lỗi và release candidate MVP",
+      "sheet_titles": [
+        "Regression, sửa lỗi và release candidate MVP"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Added infrastructure/scripts/release_candidate.py as a reproducible gate requiring MYSQL_TEST_ADMIN_URL and refusing silent integration skips. It runs Ruff, full strict backend regression, contract drift, progress sync tests, frontend unit/build and browser E2E; the existing CI workflow remains the remote gate. See docs/testing/week-6-release.md.",
+      "verified_at": "2026-10-15"
+    },
+    {
+      "wbs": "6.8",
+      "title": "Demo MVP, checklist nghiệm thu và tài liệu chạy",
+      "sheet_titles": [
+        "Demo MVP, checklist nghiệm thu và tài liệu chạy"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Added the MVP release runbook with setup, seed, three-role demo credentials, assignment/exam journey, security/report checks, cleanup and release-gate commands. Updated week-6 API/demo/review documentation with the 15/10/2026 checkpoint.",
+      "verified_at": "2026-10-15"
     }
   ]
 }

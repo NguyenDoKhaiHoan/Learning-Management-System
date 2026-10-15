@@ -131,4 +131,14 @@ Backend acceptance tuần 6: `tests/integration/test_week6_audit.py`,
 disposable test DB. CSV safety: `tests/unit/test_csv_export.py`. Browser acceptance:
 `tests/e2e/week6.spec.ts`. Chạy full pytest/Ruff/contracts/sync tests theo hướng dẫn backend.
 Database ứng dụng chính `lms` ở head `0012_export_jobs`; migrate bằng upgrade, không import
-canonical SQL vào DB đang có dữ liệu. WBS 6.6–6.8 chưa đánh dấu hoàn thành.
+canonical SQL vào DB đang có dữ liệu. WBS 6.6–6.8 đã hoàn thành; xem runbook release.
+
+## 6.6–6.8 Seed, release candidate và demo MVP
+
+Seed `scripts.run_demo` dựng ba role, khóa `DEMO_WEEK2`, assignment Published và exam Published có câu hỏi.
+Seed idempotent và không ghi đè trạng thái học tập; xem [runbook release](../testing/week-6-release.md).
+
+`infrastructure/scripts/release_candidate.py` chạy full regression với MySQL disposable, contract/sync checks,
+frontend unit/build và Playwright. Cờ `--skip-e2e` chỉ dành cho vòng lặp local, không dùng làm evidence release.
+
+Checkpoint 15/10/2026: WBS 6.6–6.8 đã hoàn thành; các tiêu chí UAT production/hardening thuộc kế hoạch tuần 7–8.

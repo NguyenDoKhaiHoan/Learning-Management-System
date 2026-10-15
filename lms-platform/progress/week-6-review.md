@@ -101,3 +101,19 @@ WBS 6.5–6.8 chưa đánh dấu tại checkpoint này.
   `lms_test_<uuid>`/storage tạm và browser `lms_demo_e2e`.
 
 WBS 6.6–6.8 chưa thực hiện trong phạm vi này.
+
+
+## WBS 6.6 — hoàn thành, checkpoint 15/10/2026
+
+- `seed_demo` tạo hoặc kiểm tra lại ba account ACTIVE (ADMIN/INSTRUCTOR/STUDENT), khóa `DEMO_WEEK2`, enrollment ACTIVE, assignment Published và exam Published có câu hỏi/đáp án.
+- Seed giữ nguyên password, enrollment, progress, submission và attempt hiện có; dữ liệu fixture bị xung đột thì dừng thay vì ghi đè. Regression kiểm tra idempotency, ID ổn định, trạng thái Published và question snapshot.
+
+## WBS 6.7 — hoàn thành, checkpoint 15/10/2026
+
+- Bổ sung `infrastructure/scripts/release_candidate.py`, bắt buộc `MYSQL_TEST_ADMIN_URL` và `--require-mysql` để không báo xanh khi integration bị skip. Gate chạy Ruff, full backend regression, contracts, progress sync, frontend unit/build và browser E2E.
+- `run_demo.py` hiển thị rõ fixture assignment/exam và liên kết runbook; workflow GitHub Actions tiếp tục chạy strict backend/frontend gate trên push/PR.
+
+## WBS 6.8 — hoàn thành, checkpoint 15/10/2026
+
+- Runbook [MVP release](../docs/testing/week-6-release.md) mô tả setup, seed, credentials demo, journey assignment/exam, checklist ba role, security/report và cleanup database disposable.
+- Đây là checkpoint triển khai MVP có thể dựng lại; UAT production, observability và hardening hạ tầng vẫn thuộc kế hoạch tuần 7–8.
