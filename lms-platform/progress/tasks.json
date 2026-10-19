@@ -524,7 +524,9 @@
     {
       "wbs": "6.1",
       "title": "Ghi audit trail cho publish, đổi quyền/điểm, submission",
-      "sheet_titles": ["Ghi audit trail cho publish, đổi quyền/điểm, submission"],
+      "sheet_titles": [
+        "Ghi audit trail cho publish, đổi quyền/điểm, submission"
+      ],
       "status": "Đã hoàn thành",
       "progress": 1,
       "evidence": "Transactional audit for course/assignment/exam publish, roles/permissions, grade changes and assignment/exam submissions. Admin-only filtered/paginated immutable API and UI. 25 MySQL audit/assignment/grading/portal tests and audit browser acceptance passed; build/lint/contracts passed. See week-6-review.md.",
@@ -533,7 +535,9 @@
     {
       "wbs": "6.2",
       "title": "Security events và anti-cheating event/review flag",
-      "sheet_titles": ["Security events và anti-cheating event/review flag"],
+      "sheet_titles": [
+        "Security events và anti-cheating event/review flag"
+      ],
       "status": "Đã hoàn thành",
       "progress": 1,
       "evidence": "Persisted login/denial/account/token security events with Admin filtered UI. Migration 0011 adds bounded, idempotent attempt telemetry and scoped optimistic human review with transactional audit. Real MySQL concurrency/ownership/review/rollback/cap/no-penalty tests, auth/unit regression, schema round-trip, 2 browser acceptance tests, build/lint/contracts passed. See week-6-review.md.",
@@ -542,7 +546,9 @@
     {
       "wbs": "6.3",
       "title": "Report/dashboard và gradebook export cơ bản",
-      "sheet_titles": ["Report/dashboard và gradebook export cơ bản"],
+      "sheet_titles": [
+        "Report/dashboard và gradebook export cơ bản"
+      ],
       "status": "Đã hoàn thành",
       "progress": 1,
       "evidence": "Manager-scoped learner/gradebook reports with filters, pagination and global filtered aggregates. Durable bounded CSV jobs, private downloads with live scope checks, audit, formula protection and nonblocking/cancellation-safe serialization. 107 backend full regression tests, final 6 report/export tests, CSV safety, 11 frontend unit and 11 browser E2E passed; lint/build/contracts/sync tests passed. See week-6-review.md.",
@@ -551,7 +557,9 @@
     {
       "wbs": "6.4",
       "title": "Acceptance tests theo checklist và business rules",
-      "sheet_titles": ["Acceptance tests theo checklist và business rules"],
+      "sheet_titles": [
+        "Acceptance tests theo checklist và business rules"
+      ],
       "status": "Đã hoàn thành",
       "progress": 1,
       "evidence": "Business-rule checklist maps MVP criteria to regression tests. 4 new real-MySQL acceptance cases cover enrollment/learning/submission versions/exam/grade publication/completion/forum/notifications/report/CSV/audit and late policy. Browser covers text/PDF versions, autosave/resume/submit and published grade feedback; catalog search race fixed. Full backend passed without skips, 12 browser E2E and 11 frontend unit passed; build/lint/contracts passed. CI requires MySQL. See week-6-review.md and docs/testing/week-6-acceptance.md.",
@@ -560,7 +568,9 @@
     {
       "wbs": "6.5",
       "title": "Security tests AuthN/AuthZ, IDOR và file access",
-      "sheet_titles": ["Security tests AuthN/AuthZ, IDOR và file access"],
+      "sheet_titles": [
+        "Security tests AuthN/AuthZ, IDOR và file access"
+      ],
       "status": "Đã hoàn thành",
       "progress": 1,
       "evidence": "7 real-MySQL security cases: 15 AuthN rejections, untrusted role claims, 51 denied AuthZ requests with no business side effects, same-course active-peer IDOR across attempts/submissions/files/grades/notifications, file parent/path containment/upload cleanup, live enrollment/account/permission/staff revocation and export requester isolation. Added no-store/nosniff to lesson/submission downloads after test exposed missing headers. Full 119 backend tests without skips, 12 browser E2E, 11 frontend unit, build/lint/contracts and 5 sync tests passed. See week-6-review.md and docs/testing/week-6-security.md.",
@@ -598,6 +608,17 @@
       "progress": 1,
       "evidence": "Added the MVP release runbook with setup, seed, three-role demo credentials, assignment/exam journey, security/report checks, cleanup and release-gate commands. Updated week-6 API/demo/review documentation with the 15/10/2026 checkpoint.",
       "verified_at": "2026-10-15"
+    },
+    {
+      "wbs": "7.1",
+      "title": "Performance baseline endpoint/job chính",
+      "sheet_titles": [
+        "Performance baseline endpoint/job chính"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Reproducible disposable-MySQL baseline: 12 courses, 201 learners, 40 samples per endpoint at concurrency 4, 10 private CSV jobs; p50/p95/max/throughput/SQL counts and budgets saved. All 6 operations passed. See docs/testing/week-7-performance.md and week-7-baseline.json.",
+      "verified_at": "2026-10-19"
     }
   ]
 }

@@ -1,0 +1,86 @@
+{
+  "recorded_at": "2026-10-19T02:05:17.474254+00:00",
+  "environment": {
+    "python": "3.11.9",
+    "os": "Windows",
+    "transport": "in-process HTTPX ASGI + real MySQL + private disk",
+    "mysql": "8.0.45"
+  },
+  "dataset": {
+    "courses": 12,
+    "learners_in_course": 201,
+    "lessons": 12
+  },
+  "concurrency": 4,
+  "samples_per_endpoint": 40,
+  "warmup_per_endpoint": 3,
+  "results": [
+    {
+      "operation": "course_catalog",
+      "samples": 40,
+      "errors": 0,
+      "p50_ms": 19.39,
+      "p95_ms": 24.28,
+      "max_ms": 25.21,
+      "operations_per_second": 200.69,
+      "sql_per_operation": 4.0,
+      "p95_budget_ms": 1000
+    },
+    {
+      "operation": "student_progress",
+      "samples": 40,
+      "errors": 0,
+      "p50_ms": 36.14,
+      "p95_ms": 79.52,
+      "max_ms": 81.33,
+      "operations_per_second": 97.71,
+      "sql_per_operation": 13.0,
+      "p95_budget_ms": 1000
+    },
+    {
+      "operation": "learner_report",
+      "samples": 40,
+      "errors": 0,
+      "p50_ms": 33.14,
+      "p95_ms": 35.49,
+      "max_ms": 45.81,
+      "operations_per_second": 116.83,
+      "sql_per_operation": 7.0,
+      "p95_budget_ms": 1000
+    },
+    {
+      "operation": "gradebook_report",
+      "samples": 40,
+      "errors": 0,
+      "p50_ms": 28.37,
+      "p95_ms": 32.85,
+      "max_ms": 37.22,
+      "operations_per_second": 135.37,
+      "sql_per_operation": 7.0,
+      "p95_budget_ms": 1000
+    },
+    {
+      "operation": "admin_overview",
+      "samples": 40,
+      "errors": 0,
+      "p50_ms": 19.34,
+      "p95_ms": 23.24,
+      "max_ms": 23.74,
+      "operations_per_second": 198.76,
+      "sql_per_operation": 4.0,
+      "p95_budget_ms": 1000
+    },
+    {
+      "operation": "learner_export_201_rows",
+      "samples": 10,
+      "errors": 0,
+      "p50_ms": 41.0,
+      "p95_ms": 45.33,
+      "max_ms": 45.33,
+      "operations_per_second": 24.03,
+      "sql_per_operation": 32.0,
+      "p95_budget_ms": 2000
+    }
+  ],
+  "passed": true
+}
