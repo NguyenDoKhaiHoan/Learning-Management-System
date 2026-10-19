@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     db_pool_timeout: int = Field(default=30, ge=1)
     private_storage_root: Path = BACKEND_DIR.parent / "storage" / "private"
     max_upload_bytes: int = Field(default=25 * 1024 * 1024, ge=1, le=1024 * 1024 * 1024)
+    export_max_attempts: int = Field(default=3, ge=1, le=10)
+    export_retry_base_seconds: int = Field(default=2, ge=1, le=300)
+    export_timeout_seconds: int = Field(default=120, ge=1, le=3600)
 
     @field_validator("database_url")
     @classmethod

@@ -780,3 +780,12 @@ CREATE TABLE export_jobs (
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 UPDATE alembic_version SET version_num='0012_export_jobs' WHERE alembic_version.version_num = '0011_attempt_events';
+
+-- Running upgrade 0012_export_jobs -> 0013_export_retries
+
+ALTER TABLE export_jobs
+        ADD COLUMN attempt_count INT UNSIGNED NOT NULL DEFAULT 0,
+        ADD COLUMN available_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        ADD INDEX ix_export_jobs_due (status,available_at,id);
+
+UPDATE alembic_version SET version_num='0013_export_retries' WHERE alembic_version.version_num = '0012_export_jobs';

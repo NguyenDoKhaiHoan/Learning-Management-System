@@ -25,6 +25,8 @@ def public_job(row):
             "created_at",
             "completed_at",
             "trace_id",
+            "attempt_count",
+            "available_at",
         )
     }
 

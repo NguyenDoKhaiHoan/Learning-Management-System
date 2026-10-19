@@ -619,6 +619,17 @@
       "progress": 1,
       "evidence": "Reproducible disposable-MySQL baseline: 12 courses, 201 learners, 40 samples per endpoint at concurrency 4, 10 private CSV jobs; p50/p95/max/throughput/SQL counts and budgets saved. All 6 operations passed. See docs/testing/week-7-performance.md and week-7-baseline.json.",
       "verified_at": "2026-10-19"
+    },
+    {
+      "wbs": "7.2",
+      "title": "Background jobs/queues, retry và idempotency",
+      "sheet_titles": [
+        "Background jobs/queues, retry và idempotency"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Migration 0013 persists attempts/due time; bounded exponential retries for I/O, SQL and timeout; permanent denials fail immediately. Existing idempotency and transactional worker locks retained. Three new real-MySQL scenarios plus eight report/schema regressions passed, including partial file cleanup, restart, concurrent enqueue/workers, exhaustion, timeout and revoked permissions. See docs/testing/week-7-jobs.md.",
+      "verified_at": "2026-10-19"
     }
   ]
 }
