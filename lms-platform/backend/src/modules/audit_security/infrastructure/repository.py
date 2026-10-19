@@ -19,7 +19,7 @@ class AuditRepository(SqlRepository):
         ip_address: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> int:
-        return await self.insert(
+        log_id = await self.insert(
             """INSERT INTO audit_logs
                (actor_id, action, resource, resource_id, ip_address, trace_id, details)
                VALUES (:actor_id, :action, :resource, :resource_id,
@@ -36,6 +36,10 @@ class AuditRepository(SqlRepository):
                 else None,
             },
         )
+        # Same transaction as the business mutation and its audit: rollback leaves
+        # both data and cache version unchanged. InnoDB serializes concurrent bumps.
+        await self.execute("UPDATE cache_versions SET version=version+1 WHERE id=1", {})
+        return log_id
 
     async def append_security_event(
         self,

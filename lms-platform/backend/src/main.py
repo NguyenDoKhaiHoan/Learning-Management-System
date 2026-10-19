@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager, suppress
 from fastapi import FastAPI
 
 from src.config.config import Settings, get_settings
+from src.core.cache import ScopedCache
 from src.core.database.database import build_engine
 from src.core.database.health import router as health_router
 from src.core.errors.handlers import register_handlers
@@ -62,6 +63,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url="/openapi.json" if settings.app_env in {"development", "test"} else None,
     )
     app.state.settings = settings
+    app.state.dashboard_cache = ScopedCache(
+        ttl=settings.dashboard_cache_ttl_seconds,
+        max_entries=settings.dashboard_cache_max_entries,
+    )
     app.add_middleware(TraceMiddleware)
     register_handlers(app)
     app.include_router(health_router)

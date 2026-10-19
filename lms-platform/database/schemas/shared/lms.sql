@@ -789,3 +789,16 @@ ALTER TABLE export_jobs
         ADD INDEX ix_export_jobs_due (status,available_at,id);
 
 UPDATE alembic_version SET version_num='0013_export_retries' WHERE alembic_version.version_num = '0012_export_jobs';
+
+-- Running upgrade 0013_export_retries -> 0014_dashboard_cache
+
+CREATE TABLE cache_versions (
+        id TINYINT UNSIGNED NOT NULL,
+        version BIGINT UNSIGNED NOT NULL DEFAULT 0,
+        PRIMARY KEY (id),
+        CONSTRAINT ck_cache_versions_singleton CHECK (id=1)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO cache_versions(id,version) VALUES (1,0);
+
+UPDATE alembic_version SET version_num='0014_dashboard_cache' WHERE alembic_version.version_num = '0013_export_retries';

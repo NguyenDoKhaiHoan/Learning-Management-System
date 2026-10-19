@@ -47,6 +47,7 @@ TABLES = {
     "messages",
     "attempt_events",
     "export_jobs",
+    "cache_versions",
 }
 
 

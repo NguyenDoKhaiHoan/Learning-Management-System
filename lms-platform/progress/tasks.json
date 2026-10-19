@@ -630,6 +630,17 @@
       "progress": 1,
       "evidence": "Migration 0013 persists attempts/due time; bounded exponential retries for I/O, SQL and timeout; permanent denials fail immediately. Existing idempotency and transactional worker locks retained. Three new real-MySQL scenarios plus eight report/schema regressions passed, including partial file cleanup, restart, concurrent enqueue/workers, exhaustion, timeout and revoked permissions. See docs/testing/week-7-jobs.md.",
       "verified_at": "2026-10-19"
+    },
+    {
+      "wbs": "7.3",
+      "title": "Caching theo scope và invalidation",
+      "sheet_titles": [
+        "Caching theo scope và invalidation"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Migration 0014 adds transactional cache versioning shared across API processes; bounded TTL/LRU aggregate caches keyed by actor/roles/data version; live authorization remains mandatory. Two MySQL cache scenarios, two cache unit tests, four portal regressions, schema tests and six-operation baseline passed. Admin overview reduced from 4 to 3 SQL/op. See docs/testing/week-7-cache.md.",
+      "verified_at": "2026-10-19"
     }
   ]
 }

@@ -9,7 +9,7 @@ from src.core.contracts import ERROR_RESPONSES, SuccessResponse
 from src.core.database.database import ConnectionDependency
 from src.core.security.dependencies import CurrentUserDependency, require_roles
 from src.modules.course.presentation.router import Read
-from src.modules.reporting_export.application.service import DashboardReports
+from src.modules.reporting_export.application.cached_dashboard import dashboard
 
 router = APIRouter(prefix="/api/v1", tags=["Dashboards"], responses=ERROR_RESPONSES)
 
@@ -46,7 +46,7 @@ async def overview(
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     offset: Annotated[int, Query(ge=0)] = 0,
 ):
-    data = await DashboardReports(connection).overview(actor)
+    data = await dashboard(request, connection, actor, admin=True)
     courses = data["courses"]
     for course in courses:
         course["id"] = str(course["id"])
@@ -71,7 +71,7 @@ async def instructor(
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     offset: Annotated[int, Query(ge=0)] = 0,
 ):
-    courses = await DashboardReports(connection).courses(actor)
+    courses = (await dashboard(request, connection, actor))["courses"]
     totals = {
         "total_courses": len(courses),
         "active_enrollments": sum(c["active_enrollments"] for c in courses),

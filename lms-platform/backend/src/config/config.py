@@ -40,6 +40,8 @@ class Settings(BaseSettings):
     export_max_attempts: int = Field(default=3, ge=1, le=10)
     export_retry_base_seconds: int = Field(default=2, ge=1, le=300)
     export_timeout_seconds: int = Field(default=120, ge=1, le=3600)
+    dashboard_cache_ttl_seconds: int = Field(default=15, ge=0, le=300)
+    dashboard_cache_max_entries: int = Field(default=256, ge=1, le=4096)
 
     @field_validator("database_url")
     @classmethod
