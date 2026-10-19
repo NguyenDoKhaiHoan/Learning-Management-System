@@ -80,7 +80,8 @@ class ContentRepository(SqlRepository):
     async def list_resources(self, lesson_id: int) -> list[SqlRow]:
         return await self.fetch_all(
             """SELECT r.id, r.lesson_id, r.title, r.resource_type, r.location,
-                      r.mime_type, r.size_bytes, r.sha256, r.uploaded_by, r.created_at
+                      r.mime_type, r.size_bytes, r.sha256, r.uploaded_by, r.created_at,
+                      r.scan_status, r.scan_engine, r.scanned_at
                FROM lesson_resources r JOIN lessons l ON l.id = r.lesson_id
                JOIN modules m ON m.id = l.module_id JOIN courses c ON c.id = m.course_id
                WHERE r.lesson_id = :id AND r.deleted_at IS NULL
@@ -92,7 +93,8 @@ class ContentRepository(SqlRepository):
     async def get_resource(self, resource_id: int, *, for_update: bool = False) -> SqlRow | None:
         return await self.fetch_one(
             """SELECT r.id, r.lesson_id, r.title, r.resource_type, r.location,
-                      r.mime_type, r.size_bytes, r.sha256, r.uploaded_by, r.created_at
+                      r.mime_type, r.size_bytes, r.sha256, r.uploaded_by, r.created_at,
+                      r.scan_status, r.scan_engine, r.scanned_at
                FROM lesson_resources r JOIN lessons l ON l.id = r.lesson_id
                JOIN modules m ON m.id = l.module_id JOIN courses c ON c.id = m.course_id
                WHERE r.id=:id AND r.deleted_at IS NULL AND l.deleted_at IS NULL

@@ -1,5 +1,6 @@
 """Assignment management and immutable submission versions."""
 
+import asyncio
 import hashlib
 from datetime import datetime
 from pathlib import Path
@@ -22,6 +23,8 @@ from src.modules.file_management.domain.policy import (
     safe_display_name,
     validate_file_content,
 )
+from src.modules.file_management.infrastructure.integrity import verified_private_path
+from src.modules.file_management.infrastructure.scanner import scan_file
 
 router = APIRouter(
     prefix="/api/v1/courses/{course_id}/assignments",
@@ -323,6 +326,7 @@ async def submit_file(
         if size == 0:
             raise HTTPException(422, "File must not be empty")
         validate_file_content(temporary, mime)
+        scan_engine = await scan_file(temporary, request.app.state.settings)
         temporary.replace(final_path)
         submission = await service.submit(
             course_id,
@@ -333,10 +337,11 @@ async def submit_file(
                 "mime_type": mime,
                 "size_bytes": size,
                 "sha256": digest.hexdigest(),
+                "scan_engine": scan_engine,
             },
         )
         return result(request, submission)
-    except Exception:
+    except BaseException:
         temporary.unlink(missing_ok=True)
         final_path.unlink(missing_ok=True)
         raise
@@ -441,16 +446,21 @@ async def download_submission_file(
         course_id, assignment_id, submission_id, request, connection, user
     )
     row = await service.assignments.fetch_one(
-        """SELECT id,title,location,mime_type FROM submission_files
-           WHERE id=:file AND submission_id=:submission""",
+        """SELECT id,title,location,mime_type,size_bytes,sha256,scan_status
+           FROM submission_files WHERE id=:file AND submission_id=:submission""",
         {"file": file_id, "submission": submission_id},
     )
     if row is None:
         raise HTTPException(404)
-    root = request.app.state.settings.private_storage_root.resolve()
-    path = (root / row["location"]).resolve()
-    if root not in path.parents or not path.is_file():
-        raise HTTPException(404)
+    if row["scan_status"] != "CLEAN":
+        raise HTTPException(409, "File has not passed security scanning")
+    path = await asyncio.to_thread(
+        verified_private_path,
+        request.app.state.settings.private_storage_root,
+        row["location"],
+        row["size_bytes"],
+        row["sha256"],
+    )
     return FileResponse(
         path,
         media_type=row["mime_type"],

@@ -1,5 +1,9 @@
 # Learning Management System (LMS)
 
+Checkpoint **19/10/2026**: hoàn thành WBS **7.1–7.4** với performance baseline,
+durable retry/idempotency, scoped dashboard cache và file scanning/storage hardening.
+Database head **0015_file_scanning**. Xem [review tuần 7](lms-platform/progress/week-7-review.md).
+
 Checkpoint **15/10/2026**: hoàn thành WBS **6.1–6.8**. Demo có ba role, assignment và exam; release candidate gate yêu cầu MySQL thật, không skip integration. Runbook: [MVP release](lms-platform/docs/testing/week-6-release.md).
 
 Checkpoint **14/10/2026**: hoàn thành **6.1–6.5**: audit trail, security events,

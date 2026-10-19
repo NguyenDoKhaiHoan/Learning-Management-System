@@ -1,5 +1,10 @@
 # Tiến độ LMS ↔ Google Sheet
 
+Checkpoint **19/10/2026**: hoàn thành WBS **7.1–7.4**: baseline hiệu năng,
+queue/retry/idempotency, cache dashboard theo scope và file scanning/storage hardening.
+59 task đang theo dõi đã hoàn thành; database head **0015_file_scanning**.
+Xem [review tuần 7](week-7-review.md). Google Sheet sẽ được đồng bộ F/G cho 7.1–7.4.
+
 Checkpoint **15/10/2026**: hoàn thành WBS **6.1–6.8**. Bổ sung seed demo đầy đủ ba role/assignment/exam, release candidate gate và runbook nghiệm thu MVP. 55 task đang theo dõi đã hoàn thành; Google Sheet sẽ được đồng bộ riêng F/G cho 6.6–6.8.
 
 Checkpoint **14/10/2026**: hoàn thành WBS **6.1–6.5**: audit/security events,

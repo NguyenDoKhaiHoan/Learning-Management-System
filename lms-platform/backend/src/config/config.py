@@ -4,7 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import URL, make_url
 
@@ -42,6 +42,20 @@ class Settings(BaseSettings):
     export_timeout_seconds: int = Field(default=120, ge=1, le=3600)
     dashboard_cache_ttl_seconds: int = Field(default=15, ge=0, le=300)
     dashboard_cache_max_entries: int = Field(default=256, ge=1, le=4096)
+    file_scan_backend: Literal["clamd", "development"] | None = None
+    file_scan_host: str = "127.0.0.1"
+    file_scan_port: int = Field(default=3310, ge=1, le=65535)
+    file_scan_timeout_seconds: int = Field(default=30, ge=1, le=300)
+
+    @model_validator(mode="after")
+    def validate_scanner(self):
+        if self.file_scan_backend is None:
+            self.file_scan_backend = (
+                "clamd" if self.app_env in {"staging", "production"} else "development"
+            )
+        if self.app_env in {"staging", "production"} and self.file_scan_backend != "clamd":
+            raise ValueError("Staging/production requires the clamd file scanner")
+        return self
 
     @field_validator("database_url")
     @classmethod

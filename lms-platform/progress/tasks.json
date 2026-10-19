@@ -641,6 +641,17 @@
       "progress": 1,
       "evidence": "Migration 0014 adds transactional cache versioning shared across API processes; bounded TTL/LRU aggregate caches keyed by actor/roles/data version; live authorization remains mandatory. Two MySQL cache scenarios, two cache unit tests, four portal regressions, schema tests and six-operation baseline passed. Admin overview reduced from 4 to 3 SQL/op. See docs/testing/week-7-cache.md.",
       "verified_at": "2026-10-19"
+    },
+    {
+      "wbs": "7.4",
+      "title": "File scanning và tăng cường bảo vệ storage",
+      "sheet_titles": [
+        "File scanning và tăng cường bảo vệ storage"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Migration 0015 quarantines legacy files; lesson/submission uploads use fail-closed clamd INSTREAM before publication, with production enforcement, bounded streaming and cleanup including cancellation. Backfill verifies containment/size/SHA-256, scans pending files and audits CLEAN/REJECTED. Downloads recheck live scope, status, containment and digest. Full 133-test backend regression passed on real MySQL without skips. See docs/testing/week-7-storage.md and week-7-review.md.",
+      "verified_at": "2026-10-19"
     }
   ]
 }

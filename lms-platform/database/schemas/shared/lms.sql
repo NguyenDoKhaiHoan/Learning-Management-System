@@ -802,3 +802,17 @@ CREATE TABLE cache_versions (
 INSERT INTO cache_versions(id,version) VALUES (1,0);
 
 UPDATE alembic_version SET version_num='0014_dashboard_cache' WHERE alembic_version.version_num = '0013_export_retries';
+
+-- Running upgrade 0014_dashboard_cache -> 0015_file_scanning
+
+ALTER TABLE lesson_resources
+            ADD COLUMN scan_status ENUM('PENDING','CLEAN','REJECTED') NOT NULL DEFAULT 'PENDING',
+            ADD COLUMN scan_engine VARCHAR(32) NULL,
+            ADD COLUMN scanned_at DATETIME(6) NULL;
+
+ALTER TABLE submission_files
+            ADD COLUMN scan_status ENUM('PENDING','CLEAN','REJECTED') NOT NULL DEFAULT 'PENDING',
+            ADD COLUMN scan_engine VARCHAR(32) NULL,
+            ADD COLUMN scanned_at DATETIME(6) NULL;
+
+UPDATE alembic_version SET version_num='0015_file_scanning' WHERE alembic_version.version_num = '0014_dashboard_cache';

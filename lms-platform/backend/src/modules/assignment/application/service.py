@@ -111,8 +111,10 @@ class AssignmentService(CourseService):
         if file is not None:
             await self.assignments.execute(
                 """INSERT INTO submission_files
-                   (submission_id, title, location, mime_type, size_bytes, sha256)
-                   VALUES (:submission, :title, :location, :mime_type, :size_bytes, :sha256)""",
+                   (submission_id, title, location, mime_type, size_bytes, sha256,
+                    scan_status, scan_engine, scanned_at)
+                   VALUES (:submission, :title, :location, :mime_type, :size_bytes, :sha256,
+                           'CLEAN', :scan_engine, UTC_TIMESTAMP(6))""",
                 {**file, "submission": submission_id},
             )
         await ProgressService(self.connection, self.user, self.trace_id).refresh_course(

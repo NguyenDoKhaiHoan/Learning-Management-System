@@ -48,3 +48,9 @@ def test_docker_host_override_preserves_credentials() -> None:
     assert config.sqlalchemy_url.host == "host.docker.internal"
     assert config.sqlalchemy_url.database == "lms"
     assert config.sqlalchemy_url.password == "p@ss%word"
+
+
+def test_production_requires_real_file_scanner() -> None:
+    assert settings(app_env="production").file_scan_backend == "clamd"
+    with pytest.raises(ValidationError):
+        settings(app_env="staging", file_scan_backend="development")

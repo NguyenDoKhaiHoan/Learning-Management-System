@@ -28,7 +28,8 @@ class AssignmentRepository(SqlRepository):
 
     async def submission_files(self, submission_id):
         return await self.fetch_all(
-            """SELECT id, submission_id, title, mime_type, size_bytes, sha256, created_at
-               FROM submission_files WHERE submission_id=:submission ORDER BY id""",
+            """SELECT id,submission_id,title,mime_type,size_bytes,sha256,created_at
+               FROM submission_files WHERE submission_id=:submission
+               AND scan_status='CLEAN' ORDER BY id""",
             {"submission": submission_id},
         )

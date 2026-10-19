@@ -1,5 +1,6 @@
 """Private lesson resources: link metadata and streamed file upload/download."""
 
+import asyncio
 import hashlib
 from pathlib import Path
 from typing import Annotated
@@ -21,6 +22,8 @@ from src.modules.file_management.domain.policy import (
     safe_display_name,
     validate_file_content,
 )
+from src.modules.file_management.infrastructure.integrity import verified_private_path
+from src.modules.file_management.infrastructure.scanner import scan_file
 from src.modules.learning_content.application.service import ContentService
 from src.modules.learning_content.domain.enums import ResourceType
 from src.modules.learning_content.infrastructure.repository import ContentRepository
@@ -81,6 +84,11 @@ async def list_resources(
 ):
     await context(course_id, module_id, lesson_id, request, connection, user)
     rows = await ContentRepository(connection).list_resources(lesson_id)
+    rows = [
+        row
+        for row in rows
+        if row["resource_type"] == ResourceType.LINK or row["scan_status"] == "CLEAN"
+    ]
     for row in rows:
         location = row.pop(
         "location",
@@ -178,6 +186,7 @@ async def upload_file(
         if size == 0:
             raise HTTPException(422, "File must not be empty")
         validate_file_content(temporary_path, mime_type)
+        scan_engine = await scan_file(temporary_path, settings)
         temporary_path.replace(final_path)
         repo = ContentRepository(connection)
         resource_id = await repo.add_resource(
@@ -189,6 +198,11 @@ async def upload_file(
             size_bytes=size,
             sha256=digest.hexdigest(),
             uploaded_by=int(user.id),
+        )
+        await repo.execute(
+            """UPDATE lesson_resources SET scan_status='CLEAN',scan_engine=:engine,
+               scanned_at=UTC_TIMESTAMP(6) WHERE id=:id""",
+            {"engine": scan_engine, "id": resource_id},
         )
         await service.finish("lesson_resource.upload", "lesson_resource", resource_id)
         return result(
@@ -204,7 +218,7 @@ async def upload_file(
                 "uploaded_by": int(user.id),
             },
         )
-    except Exception:
+    except BaseException:
         temporary_path.unlink(missing_ok=True)
         final_path.unlink(missing_ok=True)
         raise
@@ -226,10 +240,15 @@ async def download_file(
         raise HTTPException(404)
     if row["resource_type"] != ResourceType.FILE:
         raise HTTPException(409, "Resource is not a stored file")
-    root = request.app.state.settings.private_storage_root.resolve()
-    path = (root / row["location"]).resolve()
-    if root not in path.parents or not path.is_file():
-        raise HTTPException(404)
+    if row["scan_status"] != "CLEAN":
+        raise HTTPException(409, "File has not passed security scanning")
+    path = await asyncio.to_thread(
+        verified_private_path,
+        request.app.state.settings.private_storage_root,
+        row["location"],
+        row["size_bytes"],
+        row["sha256"],
+    )
     return FileResponse(
         path,
         media_type=row["mime_type"],
