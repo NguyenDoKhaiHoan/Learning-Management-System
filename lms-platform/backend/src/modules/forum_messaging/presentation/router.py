@@ -356,7 +356,14 @@ async def request_membership(
     user: CurrentUserDependency,
 ):
     service = ForumService(connection, user, request.state.trace_id)
-    await service.authorize_forum(course_id)
+    course = await service.repo.fetch_one(
+        "SELECT id,status FROM courses WHERE id=:id AND deleted_at IS NULL",
+        {"id": course_id},
+    )
+    if course is None:
+        raise HTTPException(404)
+    if course["status"] != "PUBLISHED":
+        raise HTTPException(409, "Forum membership is available only for published courses")
     request_id = await service.repo.insert(
         """INSERT INTO forum_membership_requests(course_id,user_id,reason)
            VALUES (:course,:user,:reason)
