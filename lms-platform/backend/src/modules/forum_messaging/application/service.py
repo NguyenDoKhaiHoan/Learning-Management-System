@@ -6,8 +6,29 @@ from src.modules.course.application.service import CourseService
 
 
 class ForumService(CourseService):
+    async def authorize_forum(self, course_id: int, *, write=False):
+        """Authorize a forum through enrollment or an approved forum request."""
+        try:
+            return await super().authorize(course_id, write=write)
+        except HTTPException as error:
+            if error.status_code != 403 or write:
+                raise
+            course = await self.repo.fetch_one(
+                """SELECT id, code, title, description, status, created_by, created_at, updated_at
+                   FROM courses WHERE id=:id AND deleted_at IS NULL""",
+                {"id": course_id},
+            )
+            approved = await self.repo.fetch_one(
+                """SELECT id FROM forum_membership_requests
+                   WHERE course_id=:course AND user_id=:user AND status='APPROVED'""",
+                {"course": course_id, "user": int(self.user.id)},
+            )
+            if course and course["status"] == "PUBLISHED" and approved:
+                return course
+            raise
+
     async def forum(self, course_id: int, *, create: bool = False):
-        await self.authorize(course_id, write=False)
+        await self.authorize_forum(course_id, write=False)
         forum = await self.repo.fetch_one(
             "SELECT id, course_id, title, description, created_by, created_at, updated_at "
             "FROM forums WHERE course_id=:course",
@@ -32,7 +53,7 @@ class ForumService(CourseService):
         return forum
 
     async def get_thread(self, course_id: int, thread_id: int):
-        await self.authorize(course_id)
+        await self.authorize_forum(course_id)
         return await self.repo.fetch_one(
             """SELECT t.id, t.forum_id, f.course_id, t.author_id, u.username AS author_username,
                       t.title, t.body, t.status, t.created_at, t.updated_at

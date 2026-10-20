@@ -1,7 +1,7 @@
 """Basic course-scoped discussion forum API."""
 
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
@@ -74,6 +74,23 @@ class Page(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+class ModerationInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    action: Literal["OPEN", "LOCKED", "ARCHIVED", "HIDE", "RESTORE"]
+    reason: str | None = Field(default=None, max_length=500)
+
+
+class MembershipRequestInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    reason: str | None = Field(default=None, max_length=500)
+
+
+class MembershipReviewInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    status: Literal["APPROVED", "REJECTED"]
+    reason: str | None = Field(default=None, max_length=500)
 
 
 def result(request: Request, data):
@@ -208,3 +225,217 @@ async def create_reply(
         {"id": message_id},
     )
     return result(request, message)
+
+
+@router.post(
+    "/threads/{thread_id}/moderate",
+    response_model=SuccessResponse[ThreadOutput],
+)
+async def moderate_thread(
+    course_id: Id,
+    thread_id: Id,
+    body: ModerationInput,
+    request: Request,
+    connection: ConnectionDependency,
+    user: CurrentUserDependency,
+):
+    service = ForumService(connection, user, request.state.trace_id)
+    await service.authorize(course_id, write=True)
+    thread = await service.get_thread(course_id, thread_id)
+    if thread is None:
+        raise HTTPException(404)
+    if body.action in {"HIDE", "RESTORE"}:
+        raise HTTPException(422, "Thread moderation action must be OPEN, LOCKED or ARCHIVED")
+    await service.repo.execute(
+        """UPDATE threads SET status=:status,moderation_reason=:reason,
+           moderated_by=:actor,moderated_at=UTC_TIMESTAMP(6) WHERE id=:id""",
+        {
+            "status": body.action,
+            "reason": body.reason,
+            "actor": int(user.id),
+            "id": thread_id,
+        },
+    )
+    await service.audit(
+        "forum.thread.moderate",
+        "thread",
+        thread_id,
+        details={"action": body.action, "reason": body.reason},
+    )
+    await connection.commit()
+    return result(request, await service.get_thread(course_id, thread_id))
+
+
+@router.post(
+    "/threads/{thread_id}/messages/{message_id}/moderate",
+    response_model=SuccessResponse[MessageOutput],
+)
+async def moderate_message(
+    course_id: Id,
+    thread_id: Id,
+    message_id: Id,
+    body: ModerationInput,
+    request: Request,
+    connection: ConnectionDependency,
+    user: CurrentUserDependency,
+):
+    service = ForumService(connection, user, request.state.trace_id)
+    await service.authorize(course_id, write=True)
+    message = await service.repo.fetch_one(
+        """SELECT m.id,m.thread_id,m.author_id,u.username AS author_username,m.body,
+                  m.created_at,m.updated_at FROM messages m
+           JOIN users u ON u.id=m.author_id JOIN threads t ON t.id=m.thread_id
+           JOIN forums f ON f.id=t.forum_id
+           WHERE m.id=:message AND m.thread_id=:thread AND f.course_id=:course""",
+        {"message": message_id, "thread": thread_id, "course": course_id},
+    )
+    if message is None:
+        raise HTTPException(404)
+    if body.action not in {"HIDE", "RESTORE"}:
+        raise HTTPException(422, "Message moderation action must be HIDE or RESTORE")
+    await service.repo.execute(
+        """UPDATE messages SET deleted_at=IF(:hide=1,UTC_TIMESTAMP(6),NULL),
+           moderation_reason=:reason,
+           moderated_by=:actor,moderated_at=UTC_TIMESTAMP(6) WHERE id=:id""",
+        {
+            "hide": body.action == "HIDE",
+            "reason": body.reason,
+            "actor": int(user.id),
+            "id": message_id,
+        },
+    )
+    await service.audit(
+        "forum.message.moderate",
+        "message",
+        message_id,
+        details={"action": body.action, "reason": body.reason},
+    )
+    await connection.commit()
+    return result(request, message)
+
+
+@router.get("/moderation/queue", response_model=SuccessResponse[Page])
+async def moderation_queue(
+    course_id: Id,
+    request: Request,
+    connection: ConnectionDependency,
+    user: CurrentUserDependency,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    offset: Annotated[int, Query(ge=0)] = 0,
+):
+    service = ForumService(connection, user, request.state.trace_id)
+    await service.authorize(course_id, write=True)
+    forum_row = await service.repo.fetch_one(
+        "SELECT id FROM forums WHERE course_id=:course", {"course": course_id}
+    )
+    if forum_row is None:
+        return result(request, Page(items=[], total=0, limit=limit, offset=offset))
+    rows = await service.repo.fetch_all(
+        """SELECT t.id,t.forum_id,:course AS course_id,t.author_id,u.username AS author_username,
+                  t.title,t.body,t.status,0 AS reply_count,t.created_at,t.updated_at
+           FROM threads t JOIN users u ON u.id=t.author_id
+           WHERE t.forum_id=:forum AND t.status<>'OPEN'
+           ORDER BY t.moderated_at DESC,t.id DESC LIMIT :limit OFFSET :offset""",
+        {"course": course_id, "forum": forum_row["id"], "limit": limit, "offset": offset},
+    )
+    total = await service.repo.fetch_one(
+        "SELECT COUNT(*) AS total FROM threads WHERE forum_id=:forum AND status<>'OPEN'",
+        {"forum": forum_row["id"]},
+    )
+    return result(request, Page(items=rows, total=int(total["total"]), limit=limit, offset=offset))
+
+
+@router.post(
+    "/membership-requests", status_code=201, response_model=SuccessResponse[dict]
+)
+async def request_membership(
+    course_id: Id,
+    body: MembershipRequestInput,
+    request: Request,
+    connection: ConnectionDependency,
+    user: CurrentUserDependency,
+):
+    service = ForumService(connection, user, request.state.trace_id)
+    await service.authorize_forum(course_id)
+    request_id = await service.repo.insert(
+        """INSERT INTO forum_membership_requests(course_id,user_id,reason)
+           VALUES (:course,:user,:reason)
+           ON DUPLICATE KEY UPDATE status='PENDING',reason=:reason,reviewed_by=NULL,
+             reviewed_at=NULL,id=LAST_INSERT_ID(id)""",
+        {"course": course_id, "user": int(user.id), "reason": body.reason},
+    )
+    await service.audit(
+        "forum.membership.request",
+        "forum_membership_request",
+        request_id,
+        details={"course_id": course_id},
+    )
+    await connection.commit()
+    row = await service.repo.fetch_one(
+        """SELECT id,course_id,user_id,status,reason,reviewed_by,reviewed_at,created_at,updated_at
+           FROM forum_membership_requests WHERE id=:id""",
+        {"id": request_id},
+    )
+    return result(request, row)
+
+
+@router.get("/membership-requests", response_model=SuccessResponse[list[dict]])
+async def list_membership_requests(
+    course_id: Id,
+    request: Request,
+    connection: ConnectionDependency,
+    user: CurrentUserDependency,
+    status: Literal["PENDING", "APPROVED", "REJECTED"] | None = None,
+):
+    service = ForumService(connection, user, request.state.trace_id)
+    await service.authorize(course_id, write=True)
+    rows = await service.repo.fetch_all(
+        """SELECT r.id,r.course_id,r.user_id,u.username,r.status,r.reason,r.reviewed_by,
+                  r.reviewed_at,r.created_at,r.updated_at FROM forum_membership_requests r
+           JOIN users u ON u.id=r.user_id WHERE r.course_id=:course
+             AND (:status IS NULL OR r.status=:status) ORDER BY r.created_at,r.id""",
+        {"course": course_id, "status": status},
+    )
+    return result(request, rows)
+
+
+@router.patch(
+    "/membership-requests/{request_user_id}", response_model=SuccessResponse[dict]
+)
+async def review_membership_request(
+    course_id: Id,
+    request_user_id: Id,
+    body: MembershipReviewInput,
+    request: Request,
+    connection: ConnectionDependency,
+    user: CurrentUserDependency,
+):
+    service = ForumService(connection, user, request.state.trace_id)
+    await service.authorize(course_id, write=True)
+    changed = await service.repo.execute(
+        """UPDATE forum_membership_requests SET status=:status,reason=:reason,
+           reviewed_by=:reviewer,reviewed_at=UTC_TIMESTAMP(6)
+           WHERE course_id=:course AND user_id=:member""",
+        {
+            "status": body.status,
+            "reason": body.reason,
+            "reviewer": int(user.id),
+            "course": course_id,
+            "member": request_user_id,
+        },
+    )
+    if not changed:
+        raise HTTPException(404)
+    await service.audit(
+        "forum.membership.review",
+        "forum_membership_request",
+        request_user_id,
+        details={"course_id": course_id, "status": body.status},
+    )
+    await connection.commit()
+    row = await service.repo.fetch_one(
+        """SELECT id,course_id,user_id,status,reason,reviewed_by,reviewed_at,created_at,updated_at
+           FROM forum_membership_requests WHERE course_id=:course AND user_id=:member""",
+        {"course": course_id, "member": request_user_id},
+    )
+    return result(request, row)
