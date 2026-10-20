@@ -1,0 +1,182 @@
+[
+  {
+    "course": "Lập trình Python nền tảng",
+    "url": "https://docs.python.org/3/tutorial/",
+    "resolved_url": "https://docs.python.org/3/tutorial/",
+    "status": 200,
+    "page_title": "The Python Tutorial &#8212; Python 3.15.0 documentation",
+    "sha256": "f4e06d62af7b8186625b065ad2181bedb24404b07bb5f3bf0a0e6256d56ff706",
+    "verified_at": "2026-10-20T04:23:28.035735+00:00"
+  },
+  {
+    "course": "SQL và thiết kế cơ sở dữ liệu",
+    "url": "https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/tutorial.html",
+    "resolved_url": "https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/tutorial.html",
+    "status": 200,
+    "page_title": "ChapterÂ 5Â Tutorial",
+    "sha256": "c4a81d2c8e99039efed0825ed7b1a316cffa22fb17589080dedefb11915d43e2",
+    "verified_at": "2026-10-20T04:23:28.194114+00:00"
+  },
+  {
+    "course": "Phát triển Web hiện đại",
+    "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development",
+    "resolved_url": "https://developer.mozilla.org/en-US/docs/Learn_web_development",
+    "status": 200,
+    "page_title": "Learn web development | MDN",
+    "sha256": "de02437138d6c92b6e7de1c8370bf0aa11264d5bd27d4f953139bc75153fb9de",
+    "verified_at": "2026-10-20T04:23:28.019726+00:00"
+  },
+  {
+    "course": "Git và quy trình phát triển nhóm",
+    "url": "https://git-scm.com/docs/gittutorial",
+    "resolved_url": "https://git-scm.com/docs/gittutorial",
+    "status": 200,
+    "page_title": "Git - gittutorial Documentation",
+    "sha256": "dcfe65f0cdcf471e39bc2f6580078a6aec5f4de94e0cb9851196011ddaaf72ff",
+    "verified_at": "2026-10-20T04:23:27.841067+00:00"
+  },
+  {
+    "course": "Docker và môi trường reproducible",
+    "url": "https://docs.docker.com/get-started/",
+    "resolved_url": "https://docs.docker.com/get-started/",
+    "status": 200,
+    "page_title": "Get started | Docker Docs",
+    "sha256": "a0431ce3878017a9940a5803df6d95a18539bac2470f23470fde52fc25216826",
+    "verified_at": "2026-10-20T04:23:27.931944+00:00"
+  },
+  {
+    "course": "Thiết kế API HTTP",
+    "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+    "resolved_url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+    "status": 200,
+    "page_title": "RFC 9110: HTTP Semantics",
+    "sha256": "d431760660ea44e130f6e919dab216df2d0b3a490567a98089267523368fe1e5",
+    "verified_at": "2026-10-20T04:23:28.213156+00:00"
+  },
+  {
+    "course": "Kiểm thử phần mềm với pytest",
+    "url": "https://docs.pytest.org/en/stable/how-to/assert.html",
+    "resolved_url": "https://docs.pytest.org/en/stable/how-to/assert.html",
+    "status": 200,
+    "page_title": "How to write and report assertions in tests - pytest documentation",
+    "sha256": "fbff5c287e514c3334a0f8ad1a7f784082dde4d10842f19504a88c1d5926c4f3",
+    "verified_at": "2026-10-20T04:23:28.359634+00:00"
+  },
+  {
+    "course": "An toàn ứng dụng Web",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html",
+    "resolved_url": "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html",
+    "status": 200,
+    "page_title": "Authorization - OWASP Cheat Sheet Series",
+    "sha256": "ef90d31f45bc6018ed7d859d341c1339499f036128c85f0fd5eccd08850537b9",
+    "verified_at": "2026-10-20T04:23:28.610072+00:00"
+  },
+  {
+    "course": "Cấu trúc dữ liệu",
+    "url": "https://docs.python.org/3/tutorial/datastructures.html",
+    "resolved_url": "https://docs.python.org/3/tutorial/datastructures.html",
+    "status": 200,
+    "page_title": "5. Data Structures &#8212; Python 3.15.0 documentation",
+    "sha256": "7b11a687dace6503078f2264a10649447f22651d297e14699a7d3f250492f494",
+    "verified_at": "2026-10-20T04:23:28.905898+00:00"
+  },
+  {
+    "course": "Giải thuật và độ phức tạp",
+    "url": "https://docs.python.org/3/library/bisect.html",
+    "resolved_url": "https://docs.python.org/3/library/bisect.html",
+    "status": 200,
+    "page_title": "bisect â Array bisection algorithm &#8212; Python 3.15.0 documentation",
+    "sha256": "155274b766b4827882e5da69dc0e13563b1f3382070b7e8758bdf6f8ad2a4e83",
+    "verified_at": "2026-10-20T04:23:28.861257+00:00"
+  },
+  {
+    "course": "Phân tích dữ liệu với pandas",
+    "url": "https://pandas.pydata.org/docs/getting_started/intro_tutorials/",
+    "resolved_url": "https://pandas.pydata.org/docs/getting_started/intro_tutorials/",
+    "status": 200,
+    "page_title": "Getting started tutorials &#8212; pandas 3.0.6 documentation",
+    "sha256": "b8eaccbd71279e25219cb2dfeb76437cd6c8b606703d940ceac9d1e49640e368",
+    "verified_at": "2026-10-20T04:23:28.912691+00:00"
+  },
+  {
+    "course": "Nhập môn học máy",
+    "url": "https://scikit-learn.org/stable/common_pitfalls.html",
+    "resolved_url": "https://scikit-learn.org/stable/common_pitfalls.html",
+    "status": 200,
+    "page_title": "12. Common pitfalls and recommended practices &#8212; scikit-learn 1.9.1 documentation",
+    "sha256": "21fac11c181ab35624dcf8673f0475d403d4f6ecf0f9bead01a573d7642b515c",
+    "verified_at": "2026-10-20T04:23:28.982923+00:00"
+  },
+  {
+    "course": "Điện toán đám mây căn bản",
+    "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+    "resolved_url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html",
+    "status": 200,
+    "page_title": "Security best practices in IAM - AWS Identity and Access Management",
+    "sha256": "8b97534d790da8647c2b58e497060630ce5f2b01ce46e2d2deac2070ada0f338",
+    "verified_at": "2026-10-20T04:23:28.859741+00:00"
+  },
+  {
+    "course": "DevOps và CI/CD",
+    "url": "https://docs.github.com/en/actions/get-started/understand-github-actions",
+    "resolved_url": "https://docs.github.com/en/actions/get-started/understand-github-actions",
+    "status": 200,
+    "page_title": "Understanding GitHub Actions - GitHub Docs",
+    "sha256": "6f77fc439284d2bc00e6c96b69ff1b239e4cccbb16e10a29dbd809ad6464aaac",
+    "verified_at": "2026-10-20T04:23:29.195632+00:00"
+  },
+  {
+    "course": "Scrum và quản lý sản phẩm",
+    "url": "https://scrumguides.org/scrum-guide.html",
+    "resolved_url": "https://scrumguides.org/scrum-guide.html",
+    "status": 200,
+    "page_title": "Scrum Guide | Scrum Guides",
+    "sha256": "64aade688c3f2bceb1051268310e1cdcf503ac424e052a07414f60cabea8bcc0",
+    "verified_at": "2026-10-20T04:23:29.569986+00:00"
+  },
+  {
+    "course": "Thiết kế trải nghiệm Web dễ tiếp cận",
+    "url": "https://www.w3.org/WAI/tips/designing/",
+    "resolved_url": "https://www.w3.org/WAI/tips/designing/",
+    "status": 200,
+    "page_title": "Designing for Web Accessibility – Tips for Getting Started | Web Accessibility Initiative (WAI) | W3C",
+    "sha256": "b31f34bb0f137d4b7d8dc6d5800bba1c67332a113f49ef040c363d7b4a2aba5e",
+    "verified_at": "2026-10-20T04:23:29.409661+00:00"
+  },
+  {
+    "course": "Quản lý công việc và dự án phần mềm",
+    "url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects",
+    "resolved_url": "https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects",
+    "status": 200,
+    "page_title": "About Projects - GitHub Docs",
+    "sha256": "e5cf4109e076de95a187df189ec980aa9301d068296b6b83bc94f109ee83388b",
+    "verified_at": "2026-10-20T04:23:29.940479+00:00"
+  },
+  {
+    "course": "Tiếng Anh kỹ thuật",
+    "url": "https://developers.google.com/style/highlights",
+    "resolved_url": "https://developers.google.com/style/highlights",
+    "status": 200,
+    "page_title": "Highlights &nbsp;|&nbsp; Google developer documentation style guide &nbsp;|&nbsp; Google for Developers",
+    "sha256": "7f8bc9390b2e13f0ce72b8e30f3f5478064a71658127d104f37a86d36516999a",
+    "verified_at": "2026-10-20T04:23:29.863558+00:00"
+  },
+  {
+    "course": "Bảo vệ dữ liệu và bí mật ứng dụng",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+    "resolved_url": "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+    "status": 200,
+    "page_title": "Cryptographic Storage - OWASP Cheat Sheet Series",
+    "sha256": "930a688e4b1351e918059639fed3c22c0790ed2499a713b2f7a20d52855f1d0e",
+    "verified_at": "2026-10-20T04:23:29.643039+00:00"
+  },
+  {
+    "course": "Trực quan hóa dữ liệu",
+    "url": "https://matplotlib.org/stable/plot_types/index.html",
+    "resolved_url": "https://matplotlib.org/stable/plot_types/index.html",
+    "status": 200,
+    "page_title": "Plot types &#8212; Matplotlib 3.11.2 documentation",
+    "sha256": "759e0c5734167bcd931f034ddab6f18b047a15bcbf59351d8041426083e36781",
+    "verified_at": "2026-10-20T04:23:29.876454+00:00"
+  }
+]

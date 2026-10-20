@@ -1,0 +1,351 @@
+{
+  "database": "lms",
+  "verified_at": "2026-10-20T04:31:44.513911+00:00",
+  "tables": {
+    "alembic_version": {
+      "rows": 1,
+      "minimum": null,
+      "exception": "Migration head; exactly one current revision."
+    },
+    "assignment_submissions": {
+      "rows": 23,
+      "minimum": 20
+    },
+    "assignments": {
+      "rows": 36,
+      "minimum": 20
+    },
+    "attempt_events": {
+      "rows": 20,
+      "minimum": 20
+    },
+    "audit_logs": {
+      "rows": 183,
+      "minimum": 20
+    },
+    "cache_versions": {
+      "rows": 1,
+      "minimum": null,
+      "exception": "Singleton invalidation counter; CHECK(id=1)."
+    },
+    "completion_rules": {
+      "rows": 29,
+      "minimum": 20
+    },
+    "course_progress": {
+      "rows": 24,
+      "minimum": 20
+    },
+    "course_staff": {
+      "rows": 21,
+      "minimum": 20
+    },
+    "courses": {
+      "rows": 30,
+      "minimum": 20
+    },
+    "enrollments": {
+      "rows": 27,
+      "minimum": 20
+    },
+    "exam_answers": {
+      "rows": 61,
+      "minimum": 20
+    },
+    "exam_attempts": {
+      "rows": 21,
+      "minimum": 20
+    },
+    "exam_blueprints": {
+      "rows": 20,
+      "minimum": 20
+    },
+    "exam_questions": {
+      "rows": 61,
+      "minimum": 20
+    },
+    "exams": {
+      "rows": 21,
+      "minimum": 20
+    },
+    "export_jobs": {
+      "rows": 20,
+      "minimum": 20
+    },
+    "forum_membership_requests": {
+      "rows": 20,
+      "minimum": 20
+    },
+    "forums": {
+      "rows": 20,
+      "minimum": 20
+    },
+    "grade_history": {
+      "rows": 42,
+      "minimum": 20
+    },
+    "grade_items": {
+      "rows": 121,
+      "minimum": 20
+    },
+    "gradebook_entries": {
+      "rows": 41,
+      "minimum": 20
+    },
+    "lesson_progress": {
+      "rows": 87,
+      "minimum": 20
+    },
+    "lesson_resources": {
+      "rows": 80,
+      "minimum": 20
+    },
+    "lessons": {
+      "rows": 130,
+      "minimum": 20
+    },
+    "messages": {
+      "rows": 20,
+      "minimum": 20
+    },
+    "modules": {
+      "rows": 66,
+      "minimum": 20
+    },
+    "notification_deliveries": {
+      "rows": 20,
+      "minimum": 20
+    },
+    "notification_preferences": {
+      "rows": 20,
+      "minimum": 20
+    },
+    "notifications": {
+      "rows": 20,
+      "minimum": 20
+    },
+    "permissions": {
+      "rows": 3,
+      "minimum": null,
+      "exception": "Application supports course.read/write/publish."
+    },
+    "question_banks": {
+      "rows": 21,
+      "minimum": 20
+    },
+    "question_categories": {
+      "rows": 20,
+      "minimum": 20
+    },
+    "question_options": {
+      "rows": 182,
+      "minimum": 20
+    },
+    "questions": {
+      "rows": 61,
+      "minimum": 20
+    },
+    "refresh_tokens": {
+      "rows": 28,
+      "minimum": 20
+    },
+    "role_permissions": {
+      "rows": 7,
+      "minimum": null,
+      "exception": "Only meaningful grants for the supported role/permission catalog."
+    },
+    "roles": {
+      "rows": 3,
+      "minimum": null,
+      "exception": "Application supports ADMIN, INSTRUCTOR, STUDENT."
+    },
+    "security_events": {
+      "rows": 42,
+      "minimum": 20
+    },
+    "submission_files": {
+      "rows": 20,
+      "minimum": 20
+    },
+    "threads": {
+      "rows": 20,
+      "minimum": 20
+    },
+    "user_roles": {
+      "rows": 25,
+      "minimum": 20
+    },
+    "users": {
+      "rows": 25,
+      "minimum": 20
+    }
+  },
+  "foreign_keys_checked": 71,
+  "courses": [
+    {
+      "code": "CATALOG20_01",
+      "title": "Lập trình Python nền tảng",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_02",
+      "title": "SQL và thiết kế cơ sở dữ liệu",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_03",
+      "title": "Phát triển Web hiện đại",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_04",
+      "title": "Git và quy trình phát triển nhóm",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_05",
+      "title": "Docker và môi trường reproducible",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_06",
+      "title": "Thiết kế API HTTP",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_07",
+      "title": "Kiểm thử phần mềm với pytest",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_08",
+      "title": "An toàn ứng dụng Web",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_09",
+      "title": "Cấu trúc dữ liệu",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_10",
+      "title": "Giải thuật và độ phức tạp",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_11",
+      "title": "Phân tích dữ liệu với pandas",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_12",
+      "title": "Nhập môn học máy",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_13",
+      "title": "Điện toán đám mây căn bản",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_14",
+      "title": "DevOps và CI/CD",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_15",
+      "title": "Scrum và quản lý sản phẩm",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_16",
+      "title": "Thiết kế trải nghiệm Web dễ tiếp cận",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_17",
+      "title": "Quản lý công việc và dự án phần mềm",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_18",
+      "title": "Tiếng Anh kỹ thuật",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_19",
+      "title": "Bảo vệ dữ liệu và bí mật ứng dụng",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    },
+    {
+      "code": "CATALOG20_20",
+      "title": "Trực quan hóa dữ liệu",
+      "lessons": 4,
+      "exam_questions": 3,
+      "exam_max_score": 30,
+      "pass_score": 18
+    }
+  ],
+  "questions": 60,
+  "exam_options": 180,
+  "private_submission_files_verified": 20,
+  "export_files_verified": 20,
+  "data_classification": "Internal teaching content with primary references; simulated learner activity."
+}

@@ -1,5 +1,10 @@
 # Learning Management System (LMS)
 
+Dữ liệu local **20/10/2026**: bổ sung 20 khóa học nội bộ có nguồn chính thức,
+80 bài học, 20 bài kiểm tra và 60 câu hỏi có đáp án/giải thích. Cả 38 bảng nghiệp
+vụ có ít nhất 20 bản ghi; thông tin người học và hoạt động là dữ liệu mô phỏng.
+Xem [bộ dữ liệu và cách chạy seed](lms-platform/docs/data/catalog20.md).
+
 Checkpoint **19/10/2026**: hoàn thành WBS **7.1–7.4** với performance baseline,
 durable retry/idempotency, scoped dashboard cache và file scanning/storage hardening.
 Database head **0015_file_scanning**. Xem [review tuần 7](lms-platform/progress/week-7-review.md).
