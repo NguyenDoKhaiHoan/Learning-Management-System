@@ -48,6 +48,20 @@ def _client_env(url: URL) -> dict[str, str]:
     return env
 
 
+def _binary(name: str) -> str:
+    found = shutil.which(name)
+    if found:
+        return found
+    candidates = [
+        Path(os.getenv("MYSQL_BIN", "")) / f"{name}.exe",
+        Path("C:/Program Files/MySQL/MySQL Server 8.0/bin") / f"{name}.exe",
+    ]
+    for candidate in candidates:
+        if candidate.is_file():
+            return str(candidate)
+    raise RuntimeError(f"{name} client is required; add MySQL bin to PATH or set MYSQL_BIN")
+
+
 def _mysql_args(url: URL, database: str) -> list[str]:
     args = ["-h", url.host or "127.0.0.1", "-P", str(url.port or 3306), "-u", url.username or ""]
     if database:
@@ -57,12 +71,11 @@ def _mysql_args(url: URL, database: str) -> list[str]:
 
 def create_backup(raw_url: str, output: Path) -> Path:
     url = parse_database_url(raw_url)
-    if shutil.which("mysqldump") is None:
-        raise RuntimeError("mysqldump is required for backup")
+    mysqldump = _binary("mysqldump")
     output = output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     command = [
-        "mysqldump",
+        mysqldump,
         *_mysql_args(url, url.database or ""),
         "--single-transaction",
         "--routines",
@@ -106,10 +119,9 @@ def restore_backup(raw_url: str, backup: Path, target_database: str) -> None:
         raise ValueError("Restore target must start with lms_restore_")
     if not re.fullmatch(r"[A-Za-z0-9_]+", target_database):
         raise ValueError("Restore target contains unsupported characters")
-    if shutil.which("mysql") is None:
-        raise RuntimeError("mysql client is required for restore")
+    mysql = _binary("mysql")
     create = subprocess.run(
-        ["mysql", *_mysql_args(url, "")],
+        [mysql, *_mysql_args(url, "")],
         input=(
             f"CREATE DATABASE IF NOT EXISTS `{target_database}` "
             "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\n"
@@ -120,7 +132,7 @@ def restore_backup(raw_url: str, backup: Path, target_database: str) -> None:
     )
     if create.returncode:
         raise RuntimeError("mysql could not create the disposable restore database")
-    command = ["mysql", *_mysql_args(url, target_database)]
+    command = [mysql, *_mysql_args(url, target_database)]
     with backup.open("rb") as stream:
         result = subprocess.run(command, stdin=stream, stderr=subprocess.PIPE,
                                 env=_client_env(url), check=False)
