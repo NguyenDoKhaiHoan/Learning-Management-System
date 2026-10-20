@@ -20,11 +20,11 @@ Chi tiết và lệnh tái lập:
 - [Cache](../docs/testing/week-7-cache.md)
 - [Storage](../docs/testing/week-7-storage.md)
 
-Database head là **0016_week7_hardening**. Migration phải chạy trước app. Khi nâng
+Database head là **0017_forum_moderation**. Migration phải chạy trước app. Khi nâng
 database có file upload cũ, chạy backfill scanner theo batch trước khi mở lại quyền
 tải; file cũ bị quarantine mặc định.
 
-Xác minh cuối: **133 backend tests** đạt trên MySQL 8.0 thật, `--require-mysql`,
+Xác minh cuối: **135 backend tests** đạt trên MySQL 8.0 thật, `--require-mysql`,
 không skip integration. Ruff, shared-contract drift, progress sync tests, frontend
 unit tests và production build đạt. Baseline sau cache đạt toàn bộ budget đã đặt.
 

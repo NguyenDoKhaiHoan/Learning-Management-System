@@ -3,7 +3,7 @@
 Checkpoint **20/10/2026**: hoàn thành WBS **7.1–7.8**: baseline hiệu năng,
 queue/retry/idempotency, cache dashboard theo scope và file scanning/storage hardening.
 Notification email outbox, forum moderation/membership review, backup/restore rehearsal
-và observability hardening đã bổ sung; database head **0016_week7_hardening**.
+và observability hardening đã bổ sung; database head **0017_forum_moderation**.
 Xem [review tuần 7](week-7-review.md) và các runbook trong `docs/testing/`.
 
 Checkpoint **15/10/2026**: hoàn thành WBS **6.1–6.8**. Bổ sung seed demo đầy đủ ba role/assignment/exam, release candidate gate và runbook nghiệm thu MVP. 55 task đang theo dõi đã hoàn thành; Google Sheet sẽ được đồng bộ riêng F/G cho 6.6–6.8.
