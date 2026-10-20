@@ -66,6 +66,13 @@ class MessageOutput(BaseModel):
     updated_at: datetime
 
 
+class MessagePage(BaseModel):
+    items: list[MessageOutput]
+    total: int
+    limit: int
+    offset: int
+
+
 class ThreadDetail(ThreadOutput):
     messages: list[MessageOutput] = Field(default_factory=list)
 
@@ -192,6 +199,66 @@ async def read_thread(
         {"thread": thread_id, "course": course_id},
     )
     return result(request, ThreadDetail(messages=messages, **thread))
+
+
+@router.get("/moderation/threads/{thread_id}", dependencies=Write,
+            response_model=SuccessResponse[ThreadDetail])
+async def review_thread(
+    course_id: Id, thread_id: Id, request: Request,
+    connection: ConnectionDependency, user: CurrentUserDependency,
+):
+    service = ForumService(connection, user, request.state.trace_id)
+    await service.authorize(course_id, write=True)
+    thread = await service.get_thread(course_id, thread_id, write=True)
+    if thread is None:
+        raise HTTPException(404)
+    messages = await service.repo.fetch_all(
+        """SELECT m.id,m.thread_id,m.author_id,u.username AS author_username,m.body,
+                  m.deleted_at IS NOT NULL AS hidden,m.created_at,m.updated_at
+           FROM messages m JOIN users u ON u.id=m.author_id
+           WHERE m.thread_id=:thread ORDER BY m.created_at,m.id LIMIT 100""",
+        {"thread": thread_id},
+    )
+    return result(request, ThreadDetail(messages=messages, **thread))
+
+
+@router.get("/moderation/messages", dependencies=Write,
+            response_model=SuccessResponse[MessagePage])
+async def hidden_messages(
+    course_id: Id, request: Request, connection: ConnectionDependency, user: CurrentUserDependency,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    offset: Annotated[int, Query(ge=0)] = 0,
+):
+    service = ForumService(connection, user, request.state.trace_id)
+    await service.authorize(course_id, write=True)
+    where = """FROM messages m JOIN threads t ON t.id=m.thread_id
+               JOIN forums f ON f.id=t.forum_id JOIN users u ON u.id=m.author_id
+               WHERE f.course_id=:course AND m.deleted_at IS NOT NULL"""
+    params = {"course": course_id, "limit": limit, "offset": offset}
+    rows = await service.repo.fetch_all(
+        """SELECT m.id,m.thread_id,m.author_id,u.username AS author_username,m.body,
+                  TRUE AS hidden,m.created_at,m.updated_at """ + where
+        + " ORDER BY m.moderated_at DESC,m.id DESC LIMIT :limit OFFSET :offset", params,
+    )
+    total = await service.repo.fetch_one("SELECT COUNT(*) AS total " + where, params)
+    return result(request, MessagePage(
+        items=rows, total=total["total"], limit=limit, offset=offset,
+    ))
+
+
+@router.get("/membership/me", dependencies=Read, response_model=SuccessResponse[dict | None])
+async def my_membership(
+    course_id: Id,
+    request: Request,
+    connection: ConnectionDependency,
+    user: CurrentUserDependency,
+):
+    row = await ForumService(connection, user, request.state.trace_id).repo.fetch_one(
+        """SELECT status,reason,reviewed_at FROM forum_membership_requests
+           WHERE course_id=:course AND user_id=:user""",
+        {"course": course_id, "user": int(user.id)},
+    )
+    return result(request, row)
 
 
 @router.post(

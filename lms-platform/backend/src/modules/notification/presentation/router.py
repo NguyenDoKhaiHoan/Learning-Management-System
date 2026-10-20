@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Query, Request
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from src.core.contracts import ERROR_RESPONSES, SuccessResponse
 from src.core.database.database import ConnectionDependency
@@ -28,8 +28,11 @@ class NotificationPage(BaseModel):
 
 
 class NotificationPreferences(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     email_enabled: bool = False
-    event_types: list[str] | None = Field(default=None, max_length=50)
+    event_types: list[
+        Annotated[str, StringConstraints(pattern=r"^[A-Z][A-Z0-9_]{0,63}$")]
+    ] | None = Field(default=None, max_length=50)
 
 
 class NotificationPreferencesOutput(NotificationPreferences):
@@ -104,7 +107,9 @@ async def update_preferences(
     connection: ConnectionDependency,
     user: CurrentUserDependency,
 ):
-    event_types = json.dumps(body.event_types, ensure_ascii=False) if body.event_types else None
+    event_types = (
+        json.dumps(body.event_types, ensure_ascii=False) if body.event_types is not None else None
+    )
     repo = NotificationRepository(connection)
     await repo.execute(
         """INSERT INTO notification_preferences(user_id,email_enabled,event_types)

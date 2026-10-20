@@ -35,14 +35,16 @@ class ForumService(CourseService):
                    WHERE course_id=:course AND user_id=:user""" + lock,
                 {"course": course_id, "user": int(self.user.id)},
             )
-            if course["status"] == "PUBLISHED" and review and review["status"] == "APPROVED":
-                return course
             enrollment = await self.repo.fetch_one(
-                """SELECT id FROM enrollments WHERE course_id=:course
-                   AND student_id=:user AND status='ACTIVE'""" + lock,
+                """SELECT id,status FROM enrollments WHERE course_id=:course
+                   AND student_id=:user""" + lock,
                 {"course": course_id, "user": int(self.user.id)},
             )
-            if course["status"] != "PUBLISHED" or not enrollment:
+            if course["status"] != "PUBLISHED":
+                raise HTTPException(403)
+            if enrollment and enrollment["status"] != "ACTIVE":
+                raise HTTPException(403)
+            if not enrollment and (not review or review["status"] != "APPROVED"):
                 raise HTTPException(403)
             if review and review["status"] == "REJECTED":
                 raise HTTPException(403)
@@ -52,7 +54,7 @@ class ForumService(CourseService):
         await self.authorize_forum(course_id, write=create)
         forum = await self.repo.fetch_one(
             "SELECT id, course_id, title, description, created_by, created_at, updated_at "
-            "FROM forums WHERE course_id=:course",
+            "FROM forums WHERE course_id=:course" + (" FOR UPDATE" if create else ""),
             {"course": course_id},
         )
         if forum is None and create:
