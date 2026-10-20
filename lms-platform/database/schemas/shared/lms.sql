@@ -816,3 +816,78 @@ ALTER TABLE submission_files
             ADD COLUMN scanned_at DATETIME(6) NULL;
 
 UPDATE alembic_version SET version_num='0015_file_scanning' WHERE alembic_version.version_num = '0014_dashboard_cache';
+
+-- Running upgrade 0015_file_scanning -> 0016_week7_hardening
+
+CREATE TABLE notification_preferences (
+        user_id BIGINT UNSIGNED NOT NULL,
+        email_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+        event_types JSON NULL,
+        updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+            ON UPDATE CURRENT_TIMESTAMP(6),
+        PRIMARY KEY (user_id),
+        CONSTRAINT fk_notification_preferences_user FOREIGN KEY (user_id)
+            REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE notification_deliveries (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        notification_id BIGINT UNSIGNED NOT NULL,
+        recipient_id BIGINT UNSIGNED NOT NULL,
+        channel ENUM('EMAIL') NOT NULL DEFAULT 'EMAIL',
+        status ENUM('PENDING','PROCESSING','SENT','FAILED') NOT NULL DEFAULT 'PENDING',
+        attempt_count TINYINT UNSIGNED NOT NULL DEFAULT 0,
+        available_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        last_error VARCHAR(500) NULL,
+        sent_at DATETIME(6) NULL,
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        PRIMARY KEY (id),
+        CONSTRAINT uq_notification_delivery UNIQUE (notification_id, channel),
+        CONSTRAINT fk_notification_deliveries_notification FOREIGN KEY (notification_id)
+            REFERENCES notifications(id) ON DELETE CASCADE,
+        CONSTRAINT fk_notification_deliveries_recipient FOREIGN KEY (recipient_id)
+            REFERENCES users(id) ON DELETE CASCADE,
+        INDEX ix_notification_deliveries_due (status, available_at, id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+UPDATE alembic_version SET version_num='0016_week7_hardening' WHERE alembic_version.version_num = '0015_file_scanning';
+
+-- Running upgrade 0016_week7_hardening -> 0017_forum_moderation
+
+ALTER TABLE threads
+        ADD COLUMN moderation_reason VARCHAR(500) NULL,
+        ADD COLUMN moderated_by BIGINT UNSIGNED NULL,
+        ADD COLUMN moderated_at DATETIME(6) NULL,
+        ADD CONSTRAINT fk_threads_moderator FOREIGN KEY (moderated_by) REFERENCES users(id)
+            ON DELETE SET NULL;
+
+ALTER TABLE messages
+        ADD COLUMN moderation_reason VARCHAR(500) NULL,
+        ADD COLUMN moderated_by BIGINT UNSIGNED NULL,
+        ADD COLUMN moderated_at DATETIME(6) NULL,
+        ADD CONSTRAINT fk_messages_moderator FOREIGN KEY (moderated_by) REFERENCES users(id)
+            ON DELETE SET NULL;
+
+CREATE TABLE forum_membership_requests (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        course_id BIGINT UNSIGNED NOT NULL,
+        user_id BIGINT UNSIGNED NOT NULL,
+        status ENUM('PENDING','APPROVED','REJECTED') NOT NULL DEFAULT 'PENDING',
+        reason VARCHAR(500) NULL,
+        reviewed_by BIGINT UNSIGNED NULL,
+        reviewed_at DATETIME(6) NULL,
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+            ON UPDATE CURRENT_TIMESTAMP(6),
+        PRIMARY KEY (id),
+        CONSTRAINT uq_forum_membership_request UNIQUE (course_id, user_id),
+        CONSTRAINT fk_forum_membership_course FOREIGN KEY (course_id) REFERENCES courses(id)
+            ON DELETE CASCADE,
+        CONSTRAINT fk_forum_membership_user FOREIGN KEY (user_id) REFERENCES users(id)
+            ON DELETE CASCADE,
+        CONSTRAINT fk_forum_membership_reviewer FOREIGN KEY (reviewed_by) REFERENCES users(id)
+            ON DELETE SET NULL,
+        INDEX ix_forum_membership_review (course_id, status, created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+UPDATE alembic_version SET version_num='0017_forum_moderation' WHERE alembic_version.version_num = '0016_week7_hardening';

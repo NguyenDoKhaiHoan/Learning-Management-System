@@ -1,13 +1,16 @@
 """Read and acknowledge per-user in-app notifications."""
 
+import json
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Query, Request
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.core.contracts import ERROR_RESPONSES, SuccessResponse
 from src.core.database.database import ConnectionDependency
 from src.core.security.dependencies import CurrentUserDependency
+from src.modules.audit_security.infrastructure.repository import AuditRepository
 from src.modules.notification.infrastructure.repository import NotificationRepository
 
 router = APIRouter(
@@ -22,6 +25,15 @@ class NotificationPage(BaseModel):
     unread: int
     limit: int
     offset: int
+
+
+class NotificationPreferences(BaseModel):
+    email_enabled: bool = False
+    event_types: list[str] | None = Field(default=None, max_length=50)
+
+
+class NotificationPreferencesOutput(NotificationPreferences):
+    updated_at: datetime | None = None
 
 
 def result(request: Request, data):
@@ -67,6 +79,49 @@ async def list_notifications(
             offset=offset,
         ).model_dump(),
     )
+
+
+@router.get("/preferences", response_model=SuccessResponse[NotificationPreferencesOutput])
+async def get_preferences(
+    request: Request, connection: ConnectionDependency, user: CurrentUserDependency
+):
+    row = await NotificationRepository(connection).fetch_one(
+        """SELECT email_enabled,event_types,updated_at
+           FROM notification_preferences WHERE user_id=:user""",
+        {"user": int(user.id)},
+    )
+    if row is None:
+        row = {"email_enabled": False, "event_types": None, "updated_at": None}
+    elif isinstance(row["event_types"], str):
+        row["event_types"] = json.loads(row["event_types"])
+    return result(request, NotificationPreferencesOutput(**row).model_dump())
+
+
+@router.put("/preferences", response_model=SuccessResponse[NotificationPreferencesOutput])
+async def update_preferences(
+    body: NotificationPreferences,
+    request: Request,
+    connection: ConnectionDependency,
+    user: CurrentUserDependency,
+):
+    event_types = json.dumps(body.event_types, ensure_ascii=False) if body.event_types else None
+    repo = NotificationRepository(connection)
+    await repo.execute(
+        """INSERT INTO notification_preferences(user_id,email_enabled,event_types)
+           VALUES (:user,:enabled,:events)
+           ON DUPLICATE KEY UPDATE email_enabled=:enabled,event_types=:events""",
+        {"user": int(user.id), "enabled": body.email_enabled, "events": event_types},
+    )
+    await AuditRepository(connection).append_log(
+        actor_id=int(user.id),
+        action="notification.preferences.update",
+        resource="notification_preferences",
+        resource_id=str(user.id),
+        trace_id=request.state.trace_id,
+        details={"email_enabled": body.email_enabled, "event_types": body.event_types},
+    )
+    await connection.commit()
+    return result(request, NotificationPreferencesOutput(**body.model_dump()).model_dump())
 
 
 @router.patch("/{notification_id}/read", response_model=SuccessResponse[dict])

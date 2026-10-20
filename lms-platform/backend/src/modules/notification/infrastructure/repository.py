@@ -13,7 +13,7 @@ class NotificationRepository(SqlRepository):
         resource_type: str | None = None,
         resource_id: int | str | None = None,
     ) -> int:
-        return await self.insert(
+        notification_id = await self.insert(
             """INSERT INTO notifications
                (recipient_id,course_id,type,title,body,resource_type,resource_id)
                VALUES (:recipient,:course,:type,:title,:body,:resource_type,:resource_id)""",
@@ -27,6 +27,16 @@ class NotificationRepository(SqlRepository):
                 "resource_id": resource_id,
             },
         )
+        await self.execute(
+            """INSERT INTO notification_deliveries
+               (notification_id,recipient_id,channel)
+               SELECT :notification,:recipient,'EMAIL' FROM notification_preferences p
+               WHERE p.user_id=:recipient AND p.email_enabled=1
+                 AND (p.event_types IS NULL OR JSON_CONTAINS(p.event_types, JSON_QUOTE(:type)))
+               ON DUPLICATE KEY UPDATE notification_id=notification_id""",
+            {"notification": notification_id, "recipient": recipient_id, "type": type},
+        )
+        return notification_id
 
     async def unread_count(self, recipient_id: int) -> int:
         row = await self.fetch_one(

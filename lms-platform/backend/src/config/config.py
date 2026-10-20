@@ -46,6 +46,16 @@ class Settings(BaseSettings):
     file_scan_host: str = "127.0.0.1"
     file_scan_port: int = Field(default=3310, ge=1, le=65535)
     file_scan_timeout_seconds: int = Field(default=30, ge=1, le=300)
+    email_delivery_enabled: bool = False
+    email_worker_interval_seconds: int = Field(default=5, ge=1, le=300)
+    email_max_attempts: int = Field(default=3, ge=1, le=10)
+    email_retry_base_seconds: int = Field(default=30, ge=1, le=3600)
+    smtp_host: str = "127.0.0.1"
+    smtp_port: int = Field(default=25, ge=1, le=65535)
+    smtp_username: str | None = None
+    smtp_password: SecretStr | None = None
+    email_from: str = "no-reply@lms.local"
+    metrics_enabled: bool = True
 
     @model_validator(mode="after")
     def validate_scanner(self):

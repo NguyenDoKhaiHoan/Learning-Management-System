@@ -12,8 +12,10 @@ from src.core.database.database import build_engine
 from src.core.database.health import router as health_router
 from src.core.errors.handlers import register_handlers
 from src.core.middleware.trace import TraceMiddleware, configure_logging
+from src.core.observability import Metrics
 from src.jobs.processors.exam_expiry import run_expiry_worker
 from src.jobs.processors.exports import run_export_worker
+from src.jobs.processors.notifications import run_notification_email_worker
 from src.modules.anti_cheating.presentation.router import router as attempt_events_router
 from src.modules.assignment.presentation.router import router as assignment_router
 from src.modules.audit_security.presentation.router import router as audit_router
@@ -44,15 +46,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.db_engine = engine
         worker = asyncio.create_task(run_expiry_worker(engine))
         export_worker = asyncio.create_task(run_export_worker(engine, settings))
+        notification_worker = asyncio.create_task(run_notification_email_worker(engine, settings))
         try:
             yield
         finally:
             worker.cancel()
             export_worker.cancel()
+            notification_worker.cancel()
             with suppress(asyncio.CancelledError):
                 await worker
             with suppress(asyncio.CancelledError):
                 await export_worker
+            with suppress(asyncio.CancelledError):
+                await notification_worker
             await engine.dispose()
 
     app = FastAPI(
@@ -63,11 +69,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url="/openapi.json" if settings.app_env in {"development", "test"} else None,
     )
     app.state.settings = settings
+    app.state.metrics = Metrics()
     app.state.dashboard_cache = ScopedCache(
         ttl=settings.dashboard_cache_ttl_seconds,
         max_entries=settings.dashboard_cache_max_entries,
     )
-    app.add_middleware(TraceMiddleware)
+    app.add_middleware(TraceMiddleware, metrics=app.state.metrics)
     register_handlers(app)
     app.include_router(health_router)
     app.include_router(identity_router)
