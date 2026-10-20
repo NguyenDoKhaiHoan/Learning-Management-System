@@ -2,6 +2,7 @@
 
 import asyncio
 import smtplib
+import ssl
 from dataclasses import dataclass
 from email.message import EmailMessage
 
@@ -13,6 +14,7 @@ class OutboundEmail:
     recipient: str
     subject: str
     body: str
+    message_id: str
 
 
 class SmtpEmailAdapter:
@@ -24,10 +26,16 @@ class SmtpEmailAdapter:
         email["From"] = self.settings.email_from
         email["To"] = message.recipient
         email["Subject"] = message.subject
+        email["Message-ID"] = message.message_id
         email.set_content(message.body)
-        with smtplib.SMTP(self.settings.smtp_host, self.settings.smtp_port, timeout=10) as smtp:
+        with smtplib.SMTP(
+            self.settings.smtp_host,
+            self.settings.smtp_port,
+            timeout=self.settings.smtp_timeout_seconds,
+        ) as smtp:
+            if self.settings.smtp_starttls:
+                smtp.starttls(context=ssl.create_default_context())
             if self.settings.smtp_username:
-                smtp.starttls()
                 smtp.login(
                     self.settings.smtp_username,
                     self.settings.smtp_password.get_secret_value()
@@ -37,7 +45,14 @@ class SmtpEmailAdapter:
             smtp.send_message(email)
 
     async def send(self, message: OutboundEmail) -> None:
-        await asyncio.to_thread(self._send_sync, message)
+        sending = asyncio.create_task(asyncio.to_thread(self._send_sync, message))
+        try:
+            await asyncio.shield(sending)
+        except asyncio.CancelledError:
+            # smtplib cannot be interrupted. Keep the transaction lock until the
+            # thread closes its socket; another worker must not send concurrently.
+            await sending
+            raise
 
 
 class MemoryEmailAdapter:

@@ -54,8 +54,21 @@ class Settings(BaseSettings):
     smtp_port: int = Field(default=25, ge=1, le=65535)
     smtp_username: str | None = None
     smtp_password: SecretStr | None = None
+    smtp_starttls: bool = True
+    smtp_timeout_seconds: int = Field(default=10, ge=1, le=60)
     email_from: str = "no-reply@lms.local"
     metrics_enabled: bool = True
+
+    @model_validator(mode="after")
+    def validate_email(self):
+        if self.smtp_username and not self.smtp_starttls:
+            raise ValueError("SMTP authentication requires STARTTLS")
+        if self.email_delivery_enabled and self.app_env in {"staging", "production"}:
+            if not self.smtp_starttls:
+                raise ValueError("Staging/production email requires STARTTLS")
+        if "\r" in self.email_from or "\n" in self.email_from or "@" not in self.email_from:
+            raise ValueError("EMAIL_FROM must be a single email address")
+        return self
 
     @model_validator(mode="after")
     def validate_scanner(self):

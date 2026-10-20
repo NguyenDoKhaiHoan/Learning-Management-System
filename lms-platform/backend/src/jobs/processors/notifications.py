@@ -54,6 +54,7 @@ async def process_notification_emails(
                     recipient=candidate["email"],
                     subject=candidate["title"],
                     body=candidate["body"],
+                    message_id=f"<lms-notification-{candidate['id']}@lms.local>",
                 )
             )
         except asyncio.CancelledError:
