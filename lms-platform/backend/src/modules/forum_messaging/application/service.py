@@ -7,28 +7,49 @@ from src.modules.course.application.service import CourseService
 
 class ForumService(CourseService):
     async def authorize_forum(self, course_id: int, *, write=False):
-        """Authorize a forum through enrollment or an approved forum request."""
-        try:
-            return await super().authorize(course_id, write=write)
-        except HTTPException as error:
-            if error.status_code != 403 or write:
-                raise
-            course = await self.repo.fetch_one(
-                """SELECT id, code, title, description, status, created_by, created_at, updated_at
-                   FROM courses WHERE id=:id AND deleted_at IS NULL""",
-                {"id": course_id},
-            )
-            approved = await self.repo.fetch_one(
-                """SELECT id FROM forum_membership_requests
-                   WHERE course_id=:course AND user_id=:user AND status='APPROVED'""",
+        """Use live course enrollment or an approved forum membership review.
+
+        All forum writes take the course lock first, also used by enrollment,
+        staff and moderation writes. Locking reads see the latest committed rows
+        after waiting, even when authentication established an earlier snapshot.
+        """
+        lock = " FOR UPDATE" if write else ""
+        course = await self.repo.fetch_one(
+            """SELECT id,code,title,description,status,created_by,created_at,updated_at
+               FROM courses WHERE id=:id AND deleted_at IS NULL""" + lock,
+            {"id": course_id},
+        )
+        if course is None:
+            raise HTTPException(404)
+        manager = "ADMIN" in self.user.roles
+        if "INSTRUCTOR" in self.user.roles:
+            staff = await self.repo.fetch_one(
+                """SELECT id FROM course_staff WHERE course_id=:course AND user_id=:user
+                   AND role='INSTRUCTOR'""" + lock,
                 {"course": course_id, "user": int(self.user.id)},
             )
-            if course and course["status"] == "PUBLISHED" and approved:
+            manager = manager or course["created_by"] == int(self.user.id) or staff is not None
+        if not manager:
+            review = await self.repo.fetch_one(
+                """SELECT status FROM forum_membership_requests
+                   WHERE course_id=:course AND user_id=:user""" + lock,
+                {"course": course_id, "user": int(self.user.id)},
+            )
+            if course["status"] == "PUBLISHED" and review and review["status"] == "APPROVED":
                 return course
-            raise
+            enrollment = await self.repo.fetch_one(
+                """SELECT id FROM enrollments WHERE course_id=:course
+                   AND student_id=:user AND status='ACTIVE'""" + lock,
+                {"course": course_id, "user": int(self.user.id)},
+            )
+            if course["status"] != "PUBLISHED" or not enrollment:
+                raise HTTPException(403)
+            if review and review["status"] == "REJECTED":
+                raise HTTPException(403)
+        return course
 
     async def forum(self, course_id: int, *, create: bool = False):
-        await self.authorize_forum(course_id, write=False)
+        await self.authorize_forum(course_id, write=create)
         forum = await self.repo.fetch_one(
             "SELECT id, course_id, title, description, created_by, created_at, updated_at "
             "FROM forums WHERE course_id=:course",
@@ -52,14 +73,14 @@ class ForumService(CourseService):
             )
         return forum
 
-    async def get_thread(self, course_id: int, thread_id: int):
-        await self.authorize_forum(course_id)
+    async def get_thread(self, course_id: int, thread_id: int, *, write=False):
+        await self.authorize_forum(course_id, write=write)
         return await self.repo.fetch_one(
             """SELECT t.id, t.forum_id, f.course_id, t.author_id, u.username AS author_username,
                       t.title, t.body, t.status, t.created_at, t.updated_at
                FROM threads t JOIN forums f ON f.id=t.forum_id
                JOIN users u ON u.id=t.author_id
-               WHERE f.course_id=:course AND t.id=:thread""",
+               WHERE f.course_id=:course AND t.id=:thread""" + (" FOR UPDATE" if write else ""),
             {"course": course_id, "thread": thread_id},
         )
 

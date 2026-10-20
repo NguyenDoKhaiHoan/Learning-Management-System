@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from src.core.contracts import ERROR_RESPONSES, SuccessResponse
 from src.core.database.database import ConnectionDependency
 from src.core.security.dependencies import CurrentUserDependency
-from src.modules.course.presentation.router import Id, Read
+from src.modules.course.presentation.router import Id, Read, Write
 from src.modules.forum_messaging.application.service import ForumService
 
 router = APIRouter(
@@ -61,6 +61,7 @@ class MessageOutput(BaseModel):
     author_id: str
     author_username: str
     body: str
+    hidden: bool = False
     created_at: datetime
     updated_at: datetime
 
@@ -148,7 +149,8 @@ async def list_threads(
     return result(request, Page(items=rows, total=total["total"], limit=limit, offset=offset))
 
 
-@router.post("/threads", status_code=201, response_model=SuccessResponse[ThreadOutput])
+@router.post("/threads", dependencies=Read, status_code=201,
+             response_model=SuccessResponse[ThreadOutput])
 async def create_thread(
     course_id: Id,
     body: ThreadInput,
@@ -194,6 +196,7 @@ async def read_thread(
 
 @router.post(
     "/threads/{thread_id}/messages",
+    dependencies=Read,
     status_code=201,
     response_model=SuccessResponse[MessageOutput],
 )
@@ -206,7 +209,7 @@ async def create_reply(
     user: CurrentUserDependency,
 ):
     service = ForumService(connection, user, request.state.trace_id)
-    thread = await service.get_thread(course_id, thread_id)
+    thread = await service.get_thread(course_id, thread_id, write=True)
     if thread is None or thread["status"] == "ARCHIVED":
         raise HTTPException(404)
     if thread["status"] == "LOCKED":
@@ -229,6 +232,7 @@ async def create_reply(
 
 @router.post(
     "/threads/{thread_id}/moderate",
+    dependencies=Write,
     response_model=SuccessResponse[ThreadOutput],
 )
 async def moderate_thread(
@@ -241,7 +245,7 @@ async def moderate_thread(
 ):
     service = ForumService(connection, user, request.state.trace_id)
     await service.authorize(course_id, write=True)
-    thread = await service.get_thread(course_id, thread_id)
+    thread = await service.get_thread(course_id, thread_id, write=True)
     if thread is None:
         raise HTTPException(404)
     if body.action in {"HIDE", "RESTORE"}:
@@ -268,6 +272,7 @@ async def moderate_thread(
 
 @router.post(
     "/threads/{thread_id}/messages/{message_id}/moderate",
+    dependencies=Write,
     response_model=SuccessResponse[MessageOutput],
 )
 async def moderate_message(
@@ -311,10 +316,11 @@ async def moderate_message(
         details={"action": body.action, "reason": body.reason},
     )
     await connection.commit()
+    message["hidden"] = body.action == "HIDE"
     return result(request, message)
 
 
-@router.get("/moderation/queue", response_model=SuccessResponse[Page])
+@router.get("/moderation/queue", dependencies=Write, response_model=SuccessResponse[Page])
 async def moderation_queue(
     course_id: Id,
     request: Request,
@@ -346,7 +352,8 @@ async def moderation_queue(
 
 
 @router.post(
-    "/membership-requests", status_code=201, response_model=SuccessResponse[dict]
+    "/membership-requests", dependencies=Read, status_code=201,
+    response_model=SuccessResponse[dict]
 )
 async def request_membership(
     course_id: Id,
@@ -364,11 +371,21 @@ async def request_membership(
         raise HTTPException(404)
     if course["status"] != "PUBLISHED":
         raise HTTPException(409, "Forum membership is available only for published courses")
+    await service.repo.fetch_one(
+        "SELECT id FROM courses WHERE id=:id FOR UPDATE", {"id": course_id}
+    )
+    previous = await service.repo.fetch_one(
+        """SELECT id,status FROM forum_membership_requests
+           WHERE course_id=:course AND user_id=:user FOR UPDATE""",
+        {"course": course_id, "user": int(user.id)},
+    )
+    if previous:
+        # Only a manager can change a rejection/approval. Resubmission must not
+        # bypass a moderator decision by resetting it to PENDING.
+        raise HTTPException(409)
     request_id = await service.repo.insert(
         """INSERT INTO forum_membership_requests(course_id,user_id,reason)
-           VALUES (:course,:user,:reason)
-           ON DUPLICATE KEY UPDATE status='PENDING',reason=:reason,reviewed_by=NULL,
-             reviewed_at=NULL,id=LAST_INSERT_ID(id)""",
+           VALUES (:course,:user,:reason)""",
         {"course": course_id, "user": int(user.id), "reason": body.reason},
     )
     await service.audit(
@@ -386,13 +403,16 @@ async def request_membership(
     return result(request, row)
 
 
-@router.get("/membership-requests", response_model=SuccessResponse[list[dict]])
+@router.get("/membership-requests", dependencies=Write,
+            response_model=SuccessResponse[list[dict]])
 async def list_membership_requests(
     course_id: Id,
     request: Request,
     connection: ConnectionDependency,
     user: CurrentUserDependency,
     status: Literal["PENDING", "APPROVED", "REJECTED"] | None = None,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    offset: Annotated[int, Query(ge=0)] = 0,
 ):
     service = ForumService(connection, user, request.state.trace_id)
     await service.authorize(course_id, write=True)
@@ -400,14 +420,16 @@ async def list_membership_requests(
         """SELECT r.id,r.course_id,r.user_id,u.username,r.status,r.reason,r.reviewed_by,
                   r.reviewed_at,r.created_at,r.updated_at FROM forum_membership_requests r
            JOIN users u ON u.id=r.user_id WHERE r.course_id=:course
-             AND (:status IS NULL OR r.status=:status) ORDER BY r.created_at,r.id""",
-        {"course": course_id, "status": status},
+             AND (:status IS NULL OR r.status=:status) ORDER BY r.created_at,r.id
+           LIMIT :limit OFFSET :offset""",
+        {"course": course_id, "status": status, "limit": limit, "offset": offset},
     )
     return result(request, rows)
 
 
 @router.patch(
-    "/membership-requests/{request_user_id}", response_model=SuccessResponse[dict]
+    "/membership-requests/{request_user_id}", dependencies=Write,
+    response_model=SuccessResponse[dict]
 )
 async def review_membership_request(
     course_id: Id,
