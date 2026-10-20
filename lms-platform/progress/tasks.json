@@ -1,5 +1,5 @@
 {
-  "description": "Checkpoint 15/10/2026: WBS 6.4-6.8 complete with acceptance/security, full demo seed, release candidate gate and MVP runbook. The gate requires disposable MySQL and does not allow skipped integration tests; see week-6-review.md and docs/testing/week-6-release.md.",
+  "description": "Checkpoint 20/10/2026: WBS 7.1-7.8 complete with performance, jobs, cache, file scanning, notifications, moderation, backup/restore and observability hardening.",
   "tasks": [
     {
       "wbs": "1.1",
@@ -652,6 +652,50 @@
       "progress": 1,
       "evidence": "Migration 0015 quarantines legacy files; lesson/submission uploads use fail-closed clamd INSTREAM before publication, with production enforcement, bounded streaming and cleanup including cancellation. Backfill verifies containment/size/SHA-256, scans pending files and audits CLEAN/REJECTED. Downloads recheck live scope, status, containment and digest. Full 133-test backend regression passed on real MySQL without skips. See docs/testing/week-7-storage.md and week-7-review.md.",
       "verified_at": "2026-10-19"
+    },
+    {
+      "wbs": "7.5",
+      "title": "Notification nâng cao và adapter email",
+      "sheet_titles": [
+        "Notification nâng cao và adapter email"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Notification preferences API, durable notification_deliveries outbox with unique notification/channel key, SMTP adapter and bounded retry worker; see docs/testing/week-7-notifications.md.",
+      "verified_at": "2026-10-20"
+    },
+    {
+      "wbs": "7.6",
+      "title": "Forum moderation và membership review",
+      "sheet_titles": [
+        "Forum moderation và membership review"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Course-scoped moderation queue, audited thread/message hide-lock-archive-restore actions, and forum membership request/review endpoints; see docs/testing/week-7-moderation.md.",
+      "verified_at": "2026-10-20"
+    },
+    {
+      "wbs": "7.7",
+      "title": "Backup/restore thử nghiệm",
+      "sheet_titles": [
+        "Backup/restore thử nghiệm"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Logical MySQL backup/restore rehearsal script with SHA-256 manifest, password-safe subprocess handling and lms_restore_* target guard; see docs/testing/week-7-backup.md.",
+      "verified_at": "2026-10-20"
+    },
+    {
+      "wbs": "7.8",
+      "title": "Review rủi ro, observability và checkpoint hardening",
+      "sheet_titles": [
+        "Review rủi ro, observability và checkpoint hardening"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Low-cardinality Prometheus metrics, X-Trace-ID structured logs, hardening evidence checklist and week-7 checkpoint review; see docs/testing/week-7-hardening.md.",
+      "verified_at": "2026-10-20"
     }
   ]
 }

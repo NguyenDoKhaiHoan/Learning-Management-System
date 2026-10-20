@@ -3,7 +3,7 @@
 import asyncio
 
 from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -31,4 +31,14 @@ async def healthz(request: Request) -> JSONResponse:
         SuccessResponse(
             data={"status": "ok", "database": "ok"}, trace_id=request.state.trace_id
         ).model_dump()
+    )
+
+
+@router.get("/metrics", include_in_schema=False)
+async def metrics(request: Request) -> PlainTextResponse:
+    if not request.app.state.settings.metrics_enabled:
+        return PlainTextResponse("metrics disabled\n", status_code=404)
+    return PlainTextResponse(
+        request.app.state.metrics.prometheus(),
+        media_type="text/plain; version=0.0.4",
     )

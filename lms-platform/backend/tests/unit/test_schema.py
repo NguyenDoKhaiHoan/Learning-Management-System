@@ -48,6 +48,9 @@ TABLES = {
     "attempt_events",
     "export_jobs",
     "cache_versions",
+    "notification_preferences",
+    "notification_deliveries",
+    "forum_membership_requests",
 }
 
 
@@ -59,7 +62,7 @@ def test_offline_upgrade_and_downgrade() -> None:
     for name in TABLES:
         assert f"CREATE TABLE {name} (" in sql
     assert sql.count("ENGINE=InnoDB") == len(TABLES)
-    assert sql.count("ON UPDATE CURRENT_TIMESTAMP(6)") == 29
+    assert sql.count("ON UPDATE CURRENT_TIMESTAMP(6)") == 31
     assert sql.count("CHARSET=utf8mb4") == len(TABLES)
     output.truncate(0)
     output.seek(0)

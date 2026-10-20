@@ -41,8 +41,9 @@ def configure_logging() -> None:
 
 
 class TraceMiddleware:
-    def __init__(self, app: ASGIApp) -> None:
+    def __init__(self, app: ASGIApp, metrics=None) -> None:
         self.app = app
+        self.metrics = metrics
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
@@ -76,4 +77,6 @@ class TraceMiddleware:
                     "duration_ms": round((perf_counter() - started) * 1000, 2),
                 },
             )
+            if self.metrics is not None:
+                self.metrics.observe_http(route, status, (perf_counter() - started) * 1000)
             trace_context.reset(context_token)
