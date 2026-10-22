@@ -1,5 +1,5 @@
 {
-  "description": "Checkpoint 20/10/2026: WBS 7.1-7.8 complete with performance, jobs, cache, file scanning, notifications, moderation, backup/restore and observability hardening.",
+  "description": "Checkpoint 22/10/2026: WBS 8.1-8.4 complete with three-role UAT, architecture/API/business-rule/workflow docs, disposable deployment rehearsal, and pre-release security review.",
   "tasks": [
     {
       "wbs": "1.1",
@@ -696,6 +696,50 @@
       "progress": 1,
       "evidence": "Low-cardinality Prometheus metrics, X-Trace-ID structured logs, hardening evidence checklist and week-7 checkpoint review; see docs/testing/week-7-hardening.md.",
       "verified_at": "2026-10-20"
+    },
+    {
+      "wbs": "8.1",
+      "title": "UAT ba vai trò theo checklist nghiệp vụ",
+      "sheet_titles": [
+        "UAT ba vai trò theo checklist nghiệp vụ"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Biên bản docs/testing/week-8-uat.md; MySQL acceptance/security subset 11 passed, frontend unit 11 passed, production build thành công và 12 browser UAT tests passed ngày 22/10/2026.",
+      "verified_at": "2026-10-22"
+    },
+    {
+      "wbs": "8.2",
+      "title": "Hoàn thiện docs kiến trúc/API/business rules/workflow",
+      "sheet_titles": [
+        "Hoàn thiện docs kiến trúc/API/business rules/workflow"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "Đã bổ sung docs/architecture/system-overview.md, docs/api/current.md, docs/business-rules/roles-and-permissions/access-matrix.md và docs/workflows/user-journeys/mvp.md; nội dung khớp runtime/router/contract hiện hành.",
+      "verified_at": "2026-10-22"
+    },
+    {
+      "wbs": "8.3",
+      "title": "Deployment rehearsal và kiểm tra migration/seed",
+      "sheet_titles": [
+        "Deployment rehearsal và kiểm tra migration/seed"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "infrastructure/scripts/deployment_rehearsal.py tạo database lms_test_rehearsal disposable, upgrade head 0017_forum_moderation, seed đủ 3 users/roles, enrollment, assignment/exam rồi drop; rehearsal MySQL local đạt ngày 22/10/2026.",
+      "verified_at": "2026-10-22"
+    },
+    {
+      "wbs": "8.4",
+      "title": "Security review trước phát hành",
+      "sheet_titles": [
+        "Security review trước phát hành"
+      ],
+      "status": "Đã hoàn thành",
+      "progress": 1,
+      "evidence": "docs/testing/week-8-security-review.md và infrastructure/scripts/security_review.py; policy checks đạt, security marker 7 passed, acceptance/security subset 11 passed và không có secret-like file được Git track.",
+      "verified_at": "2026-10-22"
     }
   ]
 }
