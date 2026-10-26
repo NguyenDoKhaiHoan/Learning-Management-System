@@ -1,25 +1,4 @@
 # Learning Management System (LMS)
-
-Dữ liệu local **20/10/2026**: bổ sung 20 khóa học nội bộ có nguồn chính thức,
-80 bài học, 20 bài kiểm tra và 60 câu hỏi có đáp án/giải thích. Cả 38 bảng nghiệp
-vụ có ít nhất 20 bản ghi; thông tin người học và hoạt động là dữ liệu mô phỏng.
-Xem [bộ dữ liệu và cách chạy seed](lms-platform/docs/data/catalog20.md).
-
-Checkpoint **19/10/2026**: hoàn thành WBS **7.1–7.4** với performance baseline,
-durable retry/idempotency, scoped dashboard cache và file scanning/storage hardening.
-Database head **0015_file_scanning**. Xem [review tuần 7](lms-platform/progress/week-7-review.md).
-
-Checkpoint **15/10/2026**: hoàn thành WBS **6.1–6.8**. Demo có ba role, assignment và exam; release candidate gate yêu cầu MySQL thật, không skip integration. Runbook: [MVP release](lms-platform/docs/testing/week-6-release.md).
-
-Checkpoint **14/10/2026**: hoàn thành **6.1–6.5**: audit trail, security events,
-exam event/review flag, report/private CSV, acceptance checklist và security tests.
-WBS 6.4–6.5 bổ sung luồng API/browser xuyên module, AuthN/AuthZ/IDOR/file access và
-header bảo vệ file private. **119 backend tests, 12 browser E2E, 11 frontend unit tests đạt**.
-Database chính `lms` ở migration **0012_export_jobs**; tuần 5 đã hoàn thành.
-Xem [API tuần 6](lms-platform/docs/api/week-6.md) và
-[review tuần 6](lms-platform/progress/week-6-review.md) để xem phạm vi và bằng chứng.
-
-
 ## 1. Mục đích hệ thống
 
 Learning Management System là nền tảng quản lý hoạt động dạy và học trực tuyến. Hệ thống hỗ trợ quản trị người dùng, tổ chức khóa học, phân phối nội dung, giao và nộp bài, kiểm tra trực tuyến, chấm điểm, trao đổi và báo cáo tiến độ học tập.
